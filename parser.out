@@ -1,0 +1,4526 @@
+Created by PLY version 3.11 (http://www.dabeaz.com/ply)
+
+Grammar
+
+Rule 0     S' -> PROGRAM
+Rule 1     PROGRAM -> program id semicolon PROGRAM_A start BLOCK
+Rule 2     PROGRAM_A -> VARS PROGRAM_A
+Rule 3     PROGRAM_A -> METHOD PROGRAM_A
+Rule 4     PROGRAM_A -> empty
+Rule 5     VARS -> var TYPE colon VARS_A semicolon
+Rule 6     VARS_A -> SIMPLE
+Rule 7     VARS_A -> LIST
+Rule 8     SIMPLE -> id SIMPLE_A
+Rule 9     SIMPLE_A -> comma SIMPLE
+Rule 10    SIMPLE_A -> empty
+Rule 11    LIST -> id lSqrBracket NUMCONST rSqrBracket LIST_A
+Rule 12    LIST_A -> LIST
+Rule 13    LIST_A -> empty
+Rule 14    NUMCONST -> id
+Rule 15    NUMCONST -> cte_i
+Rule 16    NUMCONST -> cte_f
+Rule 17    EXPLOG -> EXPRESSION EXPLOG_A
+Rule 18    EXPLOG -> not EXPRESSION EXPLOG_A
+Rule 19    EXPLOG_A -> and EXPLOG
+Rule 20    EXPLOG_A -> or EXPLOG
+Rule 21    EXPLOG_A -> empty
+Rule 22    EXPRESSION -> EXP EXPRESSION_A EXP
+Rule 23    EXPRESSION_A -> greater
+Rule 24    EXPRESSION_A -> lessThan
+Rule 25    EXPRESSION_A -> greaterEquals
+Rule 26    EXPRESSION_A -> lessThanEquals
+Rule 27    EXPRESSION_A -> equals
+Rule 28    EXPRESSION_A -> notEquals
+Rule 29    EXP -> TERM EXP_A
+Rule 30    EXP_A -> plus EXP
+Rule 31    EXP_A -> minus EXP
+Rule 32    EXP_A -> empty
+Rule 33    TERM -> FACTOR TERM_A
+Rule 34    TERM_A -> times TERM
+Rule 35    TERM_A -> divide TERM
+Rule 36    TERM_A -> empty
+Rule 37    FACTOR -> lParenthesis EXPLOG rParenthesis
+Rule 38    FACTOR -> VARCONSTAUX
+Rule 39    VARCONSTAUX -> id ISLIST
+Rule 40    VARCONSTAUX -> cte_i
+Rule 41    VARCONSTAUX -> cte_f
+Rule 42    TYPE -> int
+Rule 43    TYPE -> float
+Rule 44    TYPE -> string
+Rule 45    TYPE -> bool
+Rule 46    BLOCK -> lCurlyBracket BLOCK_A rCurlyBracket
+Rule 47    BLOCK_A -> STATEMENT
+Rule 48    BLOCK_A -> empty
+Rule 49    STATEMENT -> ASSIGNMENT
+Rule 50    STATEMENT -> CONDITION
+Rule 51    STATEMENT -> WRITE
+Rule 52    STATEMENT -> LOOP
+Rule 53    STATEMENT -> METHODCALL
+Rule 54    STATEMENT -> READ
+Rule 55    STATEMENT -> STATMETHODS
+Rule 56    STATEMENT -> RETURN
+Rule 57    ASSIGNMENT -> id ISLIST equals EXPRESSION semicolon
+Rule 58    READ -> scan lParenthesis VARCTE READ_A rParenthesis
+Rule 59    READ_A -> comma
+Rule 60    READ_A -> empty
+Rule 61    ISLIST -> lSqrBracket EXP rSqrBracket
+Rule 62    ISLIST -> empty
+Rule 63    TYPEMETHOD -> TYPE
+Rule 64    TYPEMETHOD -> void
+Rule 65    CONDITION -> if lParenthesis EXPLOG rParenthesis BLOCK CONDITION_A semicolon
+Rule 66    CONDITION_A -> else BLOCK
+Rule 67    CONDITION_A -> empty
+Rule 68    WRITE -> print lParenthesis EXPRESSION WRITE_A rParenthesis semicolon
+Rule 69    WRITE_A -> comma EXPRESSION WRITE_A
+Rule 70    WRITE_A -> empty
+Rule 71    VARCTE -> id ISLIST
+Rule 72    VARCTE -> cte_i
+Rule 73    VARCTE -> cte_f
+Rule 74    VARCTE -> cte_str
+Rule 75    VARCTE -> BOOLEAN
+Rule 76    METHOD -> func TYPEMETHOD id lParenthesis PARAMS rParenthesis BLOCK semicolon
+Rule 77    PARAMS -> EXP PARAMS_A
+Rule 78    PARAMS_A -> comma EXP PARAMS_A
+Rule 79    PARAMS_A -> empty
+Rule 80    LOOP -> while lParenthesis EXPLOG rParenthesis BLOCK
+Rule 81    METHODCALL -> id lParenthesis EXP METHODCALL_A rParenthesis semicolon
+Rule 82    METHODCALL_A -> comma EXP
+Rule 83    METHODCALL_A -> empty
+Rule 84    RETURN -> return EXPLOG semicolon
+Rule 85    BOOLEAN -> FALSE
+Rule 86    BOOLEAN -> TRUE
+Rule 87    STATMETHODS -> ORDINARY_LEAST_SQUARES
+Rule 88    STATMETHODS -> LASSO
+Rule 89    STATMETHODS -> RIDGE
+Rule 90    STATMETHODS -> K_MEANS
+Rule 91    STATMETHODS -> MINI_BATCH_MEANS
+Rule 92    STATMETHODS -> TIME_SERIES_SPLIT
+Rule 93    STATMETHODS -> MEAN_ABSOLUTE_ERROR
+Rule 94    STATMETHODS -> MEAN_SQUARED_ERROR
+Rule 95    STATMETHODS -> MEDIAN_ABSOLUTE_ERROR
+Rule 96    STATMETHODS -> MEAN
+Rule 97    STATMETHODS -> MODE
+Rule 98    STATMETHODS -> MEDIAN
+Rule 99    STATMETHODS -> PROBABILITY
+Rule 100   STATMETHODS -> FREQUENCY
+Rule 101   STATMETHODS -> VARIANCE
+Rule 102   STATMETHODS -> STANDARD_DEVIATION
+Rule 103   STATMETHODS -> SKEWNESS
+Rule 104   STATMETHODS -> KURTOSI
+Rule 105   ORDINARY_LEAST_SQUARES -> ols lParenthesis id comma id comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma BOOLEAN rParenthesis semicolon
+Rule 106   LASSO -> las lParenthesis id comma id comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma string comma float comma BOOLEAN rParenthesis semicolon
+Rule 107   RIDGE -> rid lParenthesis id comma id comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma VARCONSTAUX comma string comma VARCONSTAUX rParenthesis semicolon
+Rule 108   K_MEANS -> kmeans lParenthesis VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma VARCONSTAUX comma string rParenthesis semicolon
+Rule 109   MINI_BATCH_MEANS -> mbm lParenthesis VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX rParenthesis semicolon
+Rule 110   TIME_SERIES_SPLIT -> tseries lParenthesis VARCONSTAUX comma VARCONSTAUX rParenthesis semicolon
+Rule 111   MEAN_ABSOLUTE_ERROR -> mean_abs_err lParenthesis id comma id rParenthesis semicolon
+Rule 112   MEAN_SQUARED_ERROR -> mean_sqr_err lParenthesis id comma id rParenthesis semicolon
+Rule 113   MEDIAN_ABSOLUTE_ERROR -> median_abs_err lParenthesis id comma id rParenthesis semicolon
+Rule 114   MEAN -> mean lParenthesis id MEAN_A rParenthesis semicolon
+Rule 115   MEAN_A -> comma id MEAN_A
+Rule 116   MEAN_A -> empty
+Rule 117   MODE -> mode lParenthesis id MODE_A rParenthesis semicolon
+Rule 118   MODE_A -> comma id MODE_A
+Rule 119   MODE_A -> empty
+Rule 120   MEDIAN -> median lParenthesis id MEDIAN_A rParenthesis semicolon
+Rule 121   MEDIAN_A -> comma id MEDIAN_A
+Rule 122   MEDIAN_A -> empty
+Rule 123   PROBABILITY -> prob lParenthesis id PROBABILITY_A rParenthesis semicolon
+Rule 124   PROBABILITY_A -> comma id PROBABILITY_A
+Rule 125   PROBABILITY_A -> empty
+Rule 126   FREQUENCY -> freq lParenthesis id FREQUENCY_A rParenthesis semicolon
+Rule 127   FREQUENCY_A -> comma id FREQUENCY_A
+Rule 128   FREQUENCY_A -> empty
+Rule 129   VARIANCE -> variance lParenthesis id VARIANCE_A rParenthesis semicolon
+Rule 130   VARIANCE_A -> comma id VARIANCE_A
+Rule 131   VARIANCE_A -> empty
+Rule 132   STANDARD_DEVIATION -> stddev lParenthesis id STANDARD_DEVIATION_A rParenthesis semicolon
+Rule 133   STANDARD_DEVIATION_A -> comma id STANDARD_DEVIATION_A
+Rule 134   STANDARD_DEVIATION_A -> empty
+Rule 135   SKEWNESS -> skew lParenthesis id SKEWNESS_A rParenthesis semicolon
+Rule 136   SKEWNESS_A -> comma id SKEWNESS_A
+Rule 137   SKEWNESS_A -> empty
+Rule 138   KURTOSI -> kurt lParenthesis id KURTOSI_A rParenthesis semicolon
+Rule 139   KURTOSI_A -> comma id KURTOSI_A
+Rule 140   KURTOSI_A -> empty
+Rule 141   empty -> <empty>
+
+Terminals, with rules where they appear
+
+FALSE                : 85
+TRUE                 : 86
+and                  : 19
+bool                 : 45
+colon                : 5
+comma                : 9 59 69 78 82 105 105 105 105 105 106 106 106 106 106 106 106 106 106 106 106 106 107 107 107 107 107 107 107 107 107 108 108 108 108 108 108 108 108 108 108 109 109 109 109 109 109 109 109 109 109 109 110 111 112 113 115 118 121 124 127 130 133 136 139
+cte_f                : 16 41 73
+cte_i                : 15 40 72
+cte_str              : 74
+divide               : 35
+else                 : 66
+equals               : 27 57
+error                : 
+float                : 43 106
+freq                 : 126
+func                 : 76
+greater              : 23
+greaterEquals        : 25
+id                   : 1 8 11 14 39 57 71 76 81 105 105 106 106 107 107 111 111 112 112 113 113 114 115 117 118 120 121 123 124 126 127 129 130 132 133 135 136 138 139
+if                   : 65
+int                  : 42
+kmeans               : 108
+kurt                 : 138
+lCurlyBracket        : 46
+lParenthesis         : 37 58 65 68 76 80 81 105 106 107 108 109 110 111 112 113 114 117 120 123 126 129 132 135 138
+lSqrBracket          : 11 61
+las                  : 106
+lessThan             : 24
+lessThanEquals       : 26
+mbm                  : 109
+mean                 : 114
+mean_abs_err         : 111
+mean_sqr_err         : 112
+median               : 120
+median_abs_err       : 113
+minus                : 31
+mode                 : 117
+not                  : 18
+notEquals            : 28
+ols                  : 105
+or                   : 20
+plus                 : 30
+print                : 68
+prob                 : 123
+program              : 1
+rCurlyBracket        : 46
+rParenthesis         : 37 58 65 68 76 80 81 105 106 107 108 109 110 111 112 113 114 117 120 123 126 129 132 135 138
+rSqrBracket          : 11 61
+return               : 84
+rid                  : 107
+scan                 : 58
+semicolon            : 1 5 57 65 68 76 81 84 105 106 107 108 109 110 111 112 113 114 117 120 123 126 129 132 135 138
+skew                 : 135
+start                : 1
+stddev               : 132
+string               : 44 106 107 108 108 108 109
+times                : 34
+tseries              : 110
+var                  : 5
+variance             : 129
+void                 : 64
+while                : 80
+
+Nonterminals, with rules where they appear
+
+ASSIGNMENT           : 49
+BLOCK                : 1 65 66 76 80
+BLOCK_A              : 46
+BOOLEAN              : 75 105 105 105 106 106 106 106 106 106 107 107 107 108 109 109
+CONDITION            : 50
+CONDITION_A          : 65
+EXP                  : 22 22 30 31 61 77 78 81 82
+EXPLOG               : 19 20 37 65 80 84
+EXPLOG_A             : 17 18
+EXPRESSION           : 17 18 57 68 69
+EXPRESSION_A         : 22
+EXP_A                : 29
+FACTOR               : 33
+FREQUENCY            : 100
+FREQUENCY_A          : 126 127
+ISLIST               : 39 57 71
+KURTOSI              : 104
+KURTOSI_A            : 138 139
+K_MEANS              : 90
+LASSO                : 88
+LIST                 : 7 12
+LIST_A               : 11
+LOOP                 : 52
+MEAN                 : 96
+MEAN_A               : 114 115
+MEAN_ABSOLUTE_ERROR  : 93
+MEAN_SQUARED_ERROR   : 94
+MEDIAN               : 98
+MEDIAN_A             : 120 121
+MEDIAN_ABSOLUTE_ERROR : 95
+METHOD               : 3
+METHODCALL           : 53
+METHODCALL_A         : 81
+MINI_BATCH_MEANS     : 91
+MODE                 : 97
+MODE_A               : 117 118
+NUMCONST             : 11
+ORDINARY_LEAST_SQUARES : 87
+PARAMS               : 76
+PARAMS_A             : 77 78
+PROBABILITY          : 99
+PROBABILITY_A        : 123 124
+PROGRAM              : 0
+PROGRAM_A            : 1 2 3
+READ                 : 54
+READ_A               : 58
+RETURN               : 56
+RIDGE                : 89
+SIMPLE               : 6 9
+SIMPLE_A             : 8
+SKEWNESS             : 103
+SKEWNESS_A           : 135 136
+STANDARD_DEVIATION   : 102
+STANDARD_DEVIATION_A : 132 133
+STATEMENT            : 47
+STATMETHODS          : 55
+TERM                 : 29 34 35
+TERM_A               : 33
+TIME_SERIES_SPLIT    : 92
+TYPE                 : 5 63
+TYPEMETHOD           : 76
+VARCONSTAUX          : 38 105 106 106 106 107 107 107 107 108 108 108 108 108 108 108 109 109 109 109 109 109 109 109 109 110 110
+VARCTE               : 58
+VARIANCE             : 101
+VARIANCE_A           : 129 130
+VARS                 : 2
+VARS_A               : 5
+WRITE                : 51
+WRITE_A              : 68 69
+empty                : 4 10 13 21 32 36 48 60 62 67 70 79 83 116 119 122 125 128 131 134 137 140
+
+Parsing method: LALR
+
+state 0
+
+    (0) S' -> . PROGRAM
+    (1) PROGRAM -> . program id semicolon PROGRAM_A start BLOCK
+
+    program         shift and go to state 2
+
+    PROGRAM                        shift and go to state 1
+
+state 1
+
+    (0) S' -> PROGRAM .
+
+
+
+state 2
+
+    (1) PROGRAM -> program . id semicolon PROGRAM_A start BLOCK
+
+    id              shift and go to state 3
+
+
+state 3
+
+    (1) PROGRAM -> program id . semicolon PROGRAM_A start BLOCK
+
+    semicolon       shift and go to state 4
+
+
+state 4
+
+    (1) PROGRAM -> program id semicolon . PROGRAM_A start BLOCK
+    (2) PROGRAM_A -> . VARS PROGRAM_A
+    (3) PROGRAM_A -> . METHOD PROGRAM_A
+    (4) PROGRAM_A -> . empty
+    (5) VARS -> . var TYPE colon VARS_A semicolon
+    (76) METHOD -> . func TYPEMETHOD id lParenthesis PARAMS rParenthesis BLOCK semicolon
+    (141) empty -> .
+
+    var             shift and go to state 9
+    func            shift and go to state 10
+    start           reduce using rule 141 (empty -> .)
+
+    PROGRAM_A                      shift and go to state 5
+    VARS                           shift and go to state 6
+    METHOD                         shift and go to state 7
+    empty                          shift and go to state 8
+
+state 5
+
+    (1) PROGRAM -> program id semicolon PROGRAM_A . start BLOCK
+
+    start           shift and go to state 11
+
+
+state 6
+
+    (2) PROGRAM_A -> VARS . PROGRAM_A
+    (2) PROGRAM_A -> . VARS PROGRAM_A
+    (3) PROGRAM_A -> . METHOD PROGRAM_A
+    (4) PROGRAM_A -> . empty
+    (5) VARS -> . var TYPE colon VARS_A semicolon
+    (76) METHOD -> . func TYPEMETHOD id lParenthesis PARAMS rParenthesis BLOCK semicolon
+    (141) empty -> .
+
+    var             shift and go to state 9
+    func            shift and go to state 10
+    start           reduce using rule 141 (empty -> .)
+
+    VARS                           shift and go to state 6
+    PROGRAM_A                      shift and go to state 12
+    METHOD                         shift and go to state 7
+    empty                          shift and go to state 8
+
+state 7
+
+    (3) PROGRAM_A -> METHOD . PROGRAM_A
+    (2) PROGRAM_A -> . VARS PROGRAM_A
+    (3) PROGRAM_A -> . METHOD PROGRAM_A
+    (4) PROGRAM_A -> . empty
+    (5) VARS -> . var TYPE colon VARS_A semicolon
+    (76) METHOD -> . func TYPEMETHOD id lParenthesis PARAMS rParenthesis BLOCK semicolon
+    (141) empty -> .
+
+    var             shift and go to state 9
+    func            shift and go to state 10
+    start           reduce using rule 141 (empty -> .)
+
+    METHOD                         shift and go to state 7
+    PROGRAM_A                      shift and go to state 13
+    VARS                           shift and go to state 6
+    empty                          shift and go to state 8
+
+state 8
+
+    (4) PROGRAM_A -> empty .
+
+    start           reduce using rule 4 (PROGRAM_A -> empty .)
+
+
+state 9
+
+    (5) VARS -> var . TYPE colon VARS_A semicolon
+    (42) TYPE -> . int
+    (43) TYPE -> . float
+    (44) TYPE -> . string
+    (45) TYPE -> . bool
+
+    int             shift and go to state 15
+    float           shift and go to state 16
+    string          shift and go to state 17
+    bool            shift and go to state 18
+
+    TYPE                           shift and go to state 14
+
+state 10
+
+    (76) METHOD -> func . TYPEMETHOD id lParenthesis PARAMS rParenthesis BLOCK semicolon
+    (63) TYPEMETHOD -> . TYPE
+    (64) TYPEMETHOD -> . void
+    (42) TYPE -> . int
+    (43) TYPE -> . float
+    (44) TYPE -> . string
+    (45) TYPE -> . bool
+
+    void            shift and go to state 21
+    int             shift and go to state 15
+    float           shift and go to state 16
+    string          shift and go to state 17
+    bool            shift and go to state 18
+
+    TYPEMETHOD                     shift and go to state 19
+    TYPE                           shift and go to state 20
+
+state 11
+
+    (1) PROGRAM -> program id semicolon PROGRAM_A start . BLOCK
+    (46) BLOCK -> . lCurlyBracket BLOCK_A rCurlyBracket
+
+    lCurlyBracket   shift and go to state 23
+
+    BLOCK                          shift and go to state 22
+
+state 12
+
+    (2) PROGRAM_A -> VARS PROGRAM_A .
+
+    start           reduce using rule 2 (PROGRAM_A -> VARS PROGRAM_A .)
+
+
+state 13
+
+    (3) PROGRAM_A -> METHOD PROGRAM_A .
+
+    start           reduce using rule 3 (PROGRAM_A -> METHOD PROGRAM_A .)
+
+
+state 14
+
+    (5) VARS -> var TYPE . colon VARS_A semicolon
+
+    colon           shift and go to state 24
+
+
+state 15
+
+    (42) TYPE -> int .
+
+    colon           reduce using rule 42 (TYPE -> int .)
+    id              reduce using rule 42 (TYPE -> int .)
+
+
+state 16
+
+    (43) TYPE -> float .
+
+    colon           reduce using rule 43 (TYPE -> float .)
+    id              reduce using rule 43 (TYPE -> float .)
+
+
+state 17
+
+    (44) TYPE -> string .
+
+    colon           reduce using rule 44 (TYPE -> string .)
+    id              reduce using rule 44 (TYPE -> string .)
+
+
+state 18
+
+    (45) TYPE -> bool .
+
+    colon           reduce using rule 45 (TYPE -> bool .)
+    id              reduce using rule 45 (TYPE -> bool .)
+
+
+state 19
+
+    (76) METHOD -> func TYPEMETHOD . id lParenthesis PARAMS rParenthesis BLOCK semicolon
+
+    id              shift and go to state 25
+
+
+state 20
+
+    (63) TYPEMETHOD -> TYPE .
+
+    id              reduce using rule 63 (TYPEMETHOD -> TYPE .)
+
+
+state 21
+
+    (64) TYPEMETHOD -> void .
+
+    id              reduce using rule 64 (TYPEMETHOD -> void .)
+
+
+state 22
+
+    (1) PROGRAM -> program id semicolon PROGRAM_A start BLOCK .
+
+    $end            reduce using rule 1 (PROGRAM -> program id semicolon PROGRAM_A start BLOCK .)
+
+
+state 23
+
+    (46) BLOCK -> lCurlyBracket . BLOCK_A rCurlyBracket
+    (47) BLOCK_A -> . STATEMENT
+    (48) BLOCK_A -> . empty
+    (49) STATEMENT -> . ASSIGNMENT
+    (50) STATEMENT -> . CONDITION
+    (51) STATEMENT -> . WRITE
+    (52) STATEMENT -> . LOOP
+    (53) STATEMENT -> . METHODCALL
+    (54) STATEMENT -> . READ
+    (55) STATEMENT -> . STATMETHODS
+    (56) STATEMENT -> . RETURN
+    (141) empty -> .
+    (57) ASSIGNMENT -> . id ISLIST equals EXPRESSION semicolon
+    (65) CONDITION -> . if lParenthesis EXPLOG rParenthesis BLOCK CONDITION_A semicolon
+    (68) WRITE -> . print lParenthesis EXPRESSION WRITE_A rParenthesis semicolon
+    (80) LOOP -> . while lParenthesis EXPLOG rParenthesis BLOCK
+    (81) METHODCALL -> . id lParenthesis EXP METHODCALL_A rParenthesis semicolon
+    (58) READ -> . scan lParenthesis VARCTE READ_A rParenthesis
+    (87) STATMETHODS -> . ORDINARY_LEAST_SQUARES
+    (88) STATMETHODS -> . LASSO
+    (89) STATMETHODS -> . RIDGE
+    (90) STATMETHODS -> . K_MEANS
+    (91) STATMETHODS -> . MINI_BATCH_MEANS
+    (92) STATMETHODS -> . TIME_SERIES_SPLIT
+    (93) STATMETHODS -> . MEAN_ABSOLUTE_ERROR
+    (94) STATMETHODS -> . MEAN_SQUARED_ERROR
+    (95) STATMETHODS -> . MEDIAN_ABSOLUTE_ERROR
+    (96) STATMETHODS -> . MEAN
+    (97) STATMETHODS -> . MODE
+    (98) STATMETHODS -> . MEDIAN
+    (99) STATMETHODS -> . PROBABILITY
+    (100) STATMETHODS -> . FREQUENCY
+    (101) STATMETHODS -> . VARIANCE
+    (102) STATMETHODS -> . STANDARD_DEVIATION
+    (103) STATMETHODS -> . SKEWNESS
+    (104) STATMETHODS -> . KURTOSI
+    (84) RETURN -> . return EXPLOG semicolon
+    (105) ORDINARY_LEAST_SQUARES -> . ols lParenthesis id comma id comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma BOOLEAN rParenthesis semicolon
+    (106) LASSO -> . las lParenthesis id comma id comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma string comma float comma BOOLEAN rParenthesis semicolon
+    (107) RIDGE -> . rid lParenthesis id comma id comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma VARCONSTAUX comma string comma VARCONSTAUX rParenthesis semicolon
+    (108) K_MEANS -> . kmeans lParenthesis VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma VARCONSTAUX comma string rParenthesis semicolon
+    (109) MINI_BATCH_MEANS -> . mbm lParenthesis VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX rParenthesis semicolon
+    (110) TIME_SERIES_SPLIT -> . tseries lParenthesis VARCONSTAUX comma VARCONSTAUX rParenthesis semicolon
+    (111) MEAN_ABSOLUTE_ERROR -> . mean_abs_err lParenthesis id comma id rParenthesis semicolon
+    (112) MEAN_SQUARED_ERROR -> . mean_sqr_err lParenthesis id comma id rParenthesis semicolon
+    (113) MEDIAN_ABSOLUTE_ERROR -> . median_abs_err lParenthesis id comma id rParenthesis semicolon
+    (114) MEAN -> . mean lParenthesis id MEAN_A rParenthesis semicolon
+    (117) MODE -> . mode lParenthesis id MODE_A rParenthesis semicolon
+    (120) MEDIAN -> . median lParenthesis id MEDIAN_A rParenthesis semicolon
+    (123) PROBABILITY -> . prob lParenthesis id PROBABILITY_A rParenthesis semicolon
+    (126) FREQUENCY -> . freq lParenthesis id FREQUENCY_A rParenthesis semicolon
+    (129) VARIANCE -> . variance lParenthesis id VARIANCE_A rParenthesis semicolon
+    (132) STANDARD_DEVIATION -> . stddev lParenthesis id STANDARD_DEVIATION_A rParenthesis semicolon
+    (135) SKEWNESS -> . skew lParenthesis id SKEWNESS_A rParenthesis semicolon
+    (138) KURTOSI -> . kurt lParenthesis id KURTOSI_A rParenthesis semicolon
+
+    rCurlyBracket   reduce using rule 141 (empty -> .)
+    id              shift and go to state 37
+    if              shift and go to state 38
+    print           shift and go to state 39
+    while           shift and go to state 40
+    scan            shift and go to state 41
+    return          shift and go to state 60
+    ols             shift and go to state 61
+    las             shift and go to state 62
+    rid             shift and go to state 63
+    kmeans          shift and go to state 64
+    mbm             shift and go to state 65
+    tseries         shift and go to state 66
+    mean_abs_err    shift and go to state 67
+    mean_sqr_err    shift and go to state 68
+    median_abs_err  shift and go to state 69
+    mean            shift and go to state 70
+    mode            shift and go to state 71
+    median          shift and go to state 72
+    prob            shift and go to state 73
+    freq            shift and go to state 74
+    variance        shift and go to state 75
+    stddev          shift and go to state 76
+    skew            shift and go to state 77
+    kurt            shift and go to state 78
+
+    BLOCK_A                        shift and go to state 26
+    STATEMENT                      shift and go to state 27
+    empty                          shift and go to state 28
+    ASSIGNMENT                     shift and go to state 29
+    CONDITION                      shift and go to state 30
+    WRITE                          shift and go to state 31
+    LOOP                           shift and go to state 32
+    METHODCALL                     shift and go to state 33
+    READ                           shift and go to state 34
+    STATMETHODS                    shift and go to state 35
+    RETURN                         shift and go to state 36
+    ORDINARY_LEAST_SQUARES         shift and go to state 42
+    LASSO                          shift and go to state 43
+    RIDGE                          shift and go to state 44
+    K_MEANS                        shift and go to state 45
+    MINI_BATCH_MEANS               shift and go to state 46
+    TIME_SERIES_SPLIT              shift and go to state 47
+    MEAN_ABSOLUTE_ERROR            shift and go to state 48
+    MEAN_SQUARED_ERROR             shift and go to state 49
+    MEDIAN_ABSOLUTE_ERROR          shift and go to state 50
+    MEAN                           shift and go to state 51
+    MODE                           shift and go to state 52
+    MEDIAN                         shift and go to state 53
+    PROBABILITY                    shift and go to state 54
+    FREQUENCY                      shift and go to state 55
+    VARIANCE                       shift and go to state 56
+    STANDARD_DEVIATION             shift and go to state 57
+    SKEWNESS                       shift and go to state 58
+    KURTOSI                        shift and go to state 59
+
+state 24
+
+    (5) VARS -> var TYPE colon . VARS_A semicolon
+    (6) VARS_A -> . SIMPLE
+    (7) VARS_A -> . LIST
+    (8) SIMPLE -> . id SIMPLE_A
+    (11) LIST -> . id lSqrBracket NUMCONST rSqrBracket LIST_A
+
+    id              shift and go to state 82
+
+    VARS_A                         shift and go to state 79
+    SIMPLE                         shift and go to state 80
+    LIST                           shift and go to state 81
+
+state 25
+
+    (76) METHOD -> func TYPEMETHOD id . lParenthesis PARAMS rParenthesis BLOCK semicolon
+
+    lParenthesis    shift and go to state 83
+
+
+state 26
+
+    (46) BLOCK -> lCurlyBracket BLOCK_A . rCurlyBracket
+
+    rCurlyBracket   shift and go to state 84
+
+
+state 27
+
+    (47) BLOCK_A -> STATEMENT .
+
+    rCurlyBracket   reduce using rule 47 (BLOCK_A -> STATEMENT .)
+
+
+state 28
+
+    (48) BLOCK_A -> empty .
+
+    rCurlyBracket   reduce using rule 48 (BLOCK_A -> empty .)
+
+
+state 29
+
+    (49) STATEMENT -> ASSIGNMENT .
+
+    rCurlyBracket   reduce using rule 49 (STATEMENT -> ASSIGNMENT .)
+
+
+state 30
+
+    (50) STATEMENT -> CONDITION .
+
+    rCurlyBracket   reduce using rule 50 (STATEMENT -> CONDITION .)
+
+
+state 31
+
+    (51) STATEMENT -> WRITE .
+
+    rCurlyBracket   reduce using rule 51 (STATEMENT -> WRITE .)
+
+
+state 32
+
+    (52) STATEMENT -> LOOP .
+
+    rCurlyBracket   reduce using rule 52 (STATEMENT -> LOOP .)
+
+
+state 33
+
+    (53) STATEMENT -> METHODCALL .
+
+    rCurlyBracket   reduce using rule 53 (STATEMENT -> METHODCALL .)
+
+
+state 34
+
+    (54) STATEMENT -> READ .
+
+    rCurlyBracket   reduce using rule 54 (STATEMENT -> READ .)
+
+
+state 35
+
+    (55) STATEMENT -> STATMETHODS .
+
+    rCurlyBracket   reduce using rule 55 (STATEMENT -> STATMETHODS .)
+
+
+state 36
+
+    (56) STATEMENT -> RETURN .
+
+    rCurlyBracket   reduce using rule 56 (STATEMENT -> RETURN .)
+
+
+state 37
+
+    (57) ASSIGNMENT -> id . ISLIST equals EXPRESSION semicolon
+    (81) METHODCALL -> id . lParenthesis EXP METHODCALL_A rParenthesis semicolon
+    (61) ISLIST -> . lSqrBracket EXP rSqrBracket
+    (62) ISLIST -> . empty
+    (141) empty -> .
+
+    lParenthesis    shift and go to state 86
+    lSqrBracket     shift and go to state 87
+    equals          reduce using rule 141 (empty -> .)
+
+    ISLIST                         shift and go to state 85
+    empty                          shift and go to state 88
+
+state 38
+
+    (65) CONDITION -> if . lParenthesis EXPLOG rParenthesis BLOCK CONDITION_A semicolon
+
+    lParenthesis    shift and go to state 89
+
+
+state 39
+
+    (68) WRITE -> print . lParenthesis EXPRESSION WRITE_A rParenthesis semicolon
+
+    lParenthesis    shift and go to state 90
+
+
+state 40
+
+    (80) LOOP -> while . lParenthesis EXPLOG rParenthesis BLOCK
+
+    lParenthesis    shift and go to state 91
+
+
+state 41
+
+    (58) READ -> scan . lParenthesis VARCTE READ_A rParenthesis
+
+    lParenthesis    shift and go to state 92
+
+
+state 42
+
+    (87) STATMETHODS -> ORDINARY_LEAST_SQUARES .
+
+    rCurlyBracket   reduce using rule 87 (STATMETHODS -> ORDINARY_LEAST_SQUARES .)
+
+
+state 43
+
+    (88) STATMETHODS -> LASSO .
+
+    rCurlyBracket   reduce using rule 88 (STATMETHODS -> LASSO .)
+
+
+state 44
+
+    (89) STATMETHODS -> RIDGE .
+
+    rCurlyBracket   reduce using rule 89 (STATMETHODS -> RIDGE .)
+
+
+state 45
+
+    (90) STATMETHODS -> K_MEANS .
+
+    rCurlyBracket   reduce using rule 90 (STATMETHODS -> K_MEANS .)
+
+
+state 46
+
+    (91) STATMETHODS -> MINI_BATCH_MEANS .
+
+    rCurlyBracket   reduce using rule 91 (STATMETHODS -> MINI_BATCH_MEANS .)
+
+
+state 47
+
+    (92) STATMETHODS -> TIME_SERIES_SPLIT .
+
+    rCurlyBracket   reduce using rule 92 (STATMETHODS -> TIME_SERIES_SPLIT .)
+
+
+state 48
+
+    (93) STATMETHODS -> MEAN_ABSOLUTE_ERROR .
+
+    rCurlyBracket   reduce using rule 93 (STATMETHODS -> MEAN_ABSOLUTE_ERROR .)
+
+
+state 49
+
+    (94) STATMETHODS -> MEAN_SQUARED_ERROR .
+
+    rCurlyBracket   reduce using rule 94 (STATMETHODS -> MEAN_SQUARED_ERROR .)
+
+
+state 50
+
+    (95) STATMETHODS -> MEDIAN_ABSOLUTE_ERROR .
+
+    rCurlyBracket   reduce using rule 95 (STATMETHODS -> MEDIAN_ABSOLUTE_ERROR .)
+
+
+state 51
+
+    (96) STATMETHODS -> MEAN .
+
+    rCurlyBracket   reduce using rule 96 (STATMETHODS -> MEAN .)
+
+
+state 52
+
+    (97) STATMETHODS -> MODE .
+
+    rCurlyBracket   reduce using rule 97 (STATMETHODS -> MODE .)
+
+
+state 53
+
+    (98) STATMETHODS -> MEDIAN .
+
+    rCurlyBracket   reduce using rule 98 (STATMETHODS -> MEDIAN .)
+
+
+state 54
+
+    (99) STATMETHODS -> PROBABILITY .
+
+    rCurlyBracket   reduce using rule 99 (STATMETHODS -> PROBABILITY .)
+
+
+state 55
+
+    (100) STATMETHODS -> FREQUENCY .
+
+    rCurlyBracket   reduce using rule 100 (STATMETHODS -> FREQUENCY .)
+
+
+state 56
+
+    (101) STATMETHODS -> VARIANCE .
+
+    rCurlyBracket   reduce using rule 101 (STATMETHODS -> VARIANCE .)
+
+
+state 57
+
+    (102) STATMETHODS -> STANDARD_DEVIATION .
+
+    rCurlyBracket   reduce using rule 102 (STATMETHODS -> STANDARD_DEVIATION .)
+
+
+state 58
+
+    (103) STATMETHODS -> SKEWNESS .
+
+    rCurlyBracket   reduce using rule 103 (STATMETHODS -> SKEWNESS .)
+
+
+state 59
+
+    (104) STATMETHODS -> KURTOSI .
+
+    rCurlyBracket   reduce using rule 104 (STATMETHODS -> KURTOSI .)
+
+
+state 60
+
+    (84) RETURN -> return . EXPLOG semicolon
+    (17) EXPLOG -> . EXPRESSION EXPLOG_A
+    (18) EXPLOG -> . not EXPRESSION EXPLOG_A
+    (22) EXPRESSION -> . EXP EXPRESSION_A EXP
+    (29) EXP -> . TERM EXP_A
+    (33) TERM -> . FACTOR TERM_A
+    (37) FACTOR -> . lParenthesis EXPLOG rParenthesis
+    (38) FACTOR -> . VARCONSTAUX
+    (39) VARCONSTAUX -> . id ISLIST
+    (40) VARCONSTAUX -> . cte_i
+    (41) VARCONSTAUX -> . cte_f
+
+    not             shift and go to state 95
+    lParenthesis    shift and go to state 99
+    id              shift and go to state 101
+    cte_i           shift and go to state 102
+    cte_f           shift and go to state 103
+
+    EXPLOG                         shift and go to state 93
+    EXPRESSION                     shift and go to state 94
+    EXP                            shift and go to state 96
+    TERM                           shift and go to state 97
+    FACTOR                         shift and go to state 98
+    VARCONSTAUX                    shift and go to state 100
+
+state 61
+
+    (105) ORDINARY_LEAST_SQUARES -> ols . lParenthesis id comma id comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma BOOLEAN rParenthesis semicolon
+
+    lParenthesis    shift and go to state 104
+
+
+state 62
+
+    (106) LASSO -> las . lParenthesis id comma id comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma string comma float comma BOOLEAN rParenthesis semicolon
+
+    lParenthesis    shift and go to state 105
+
+
+state 63
+
+    (107) RIDGE -> rid . lParenthesis id comma id comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma VARCONSTAUX comma string comma VARCONSTAUX rParenthesis semicolon
+
+    lParenthesis    shift and go to state 106
+
+
+state 64
+
+    (108) K_MEANS -> kmeans . lParenthesis VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma VARCONSTAUX comma string rParenthesis semicolon
+
+    lParenthesis    shift and go to state 107
+
+
+state 65
+
+    (109) MINI_BATCH_MEANS -> mbm . lParenthesis VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX rParenthesis semicolon
+
+    lParenthesis    shift and go to state 108
+
+
+state 66
+
+    (110) TIME_SERIES_SPLIT -> tseries . lParenthesis VARCONSTAUX comma VARCONSTAUX rParenthesis semicolon
+
+    lParenthesis    shift and go to state 109
+
+
+state 67
+
+    (111) MEAN_ABSOLUTE_ERROR -> mean_abs_err . lParenthesis id comma id rParenthesis semicolon
+
+    lParenthesis    shift and go to state 110
+
+
+state 68
+
+    (112) MEAN_SQUARED_ERROR -> mean_sqr_err . lParenthesis id comma id rParenthesis semicolon
+
+    lParenthesis    shift and go to state 111
+
+
+state 69
+
+    (113) MEDIAN_ABSOLUTE_ERROR -> median_abs_err . lParenthesis id comma id rParenthesis semicolon
+
+    lParenthesis    shift and go to state 112
+
+
+state 70
+
+    (114) MEAN -> mean . lParenthesis id MEAN_A rParenthesis semicolon
+
+    lParenthesis    shift and go to state 113
+
+
+state 71
+
+    (117) MODE -> mode . lParenthesis id MODE_A rParenthesis semicolon
+
+    lParenthesis    shift and go to state 114
+
+
+state 72
+
+    (120) MEDIAN -> median . lParenthesis id MEDIAN_A rParenthesis semicolon
+
+    lParenthesis    shift and go to state 115
+
+
+state 73
+
+    (123) PROBABILITY -> prob . lParenthesis id PROBABILITY_A rParenthesis semicolon
+
+    lParenthesis    shift and go to state 116
+
+
+state 74
+
+    (126) FREQUENCY -> freq . lParenthesis id FREQUENCY_A rParenthesis semicolon
+
+    lParenthesis    shift and go to state 117
+
+
+state 75
+
+    (129) VARIANCE -> variance . lParenthesis id VARIANCE_A rParenthesis semicolon
+
+    lParenthesis    shift and go to state 118
+
+
+state 76
+
+    (132) STANDARD_DEVIATION -> stddev . lParenthesis id STANDARD_DEVIATION_A rParenthesis semicolon
+
+    lParenthesis    shift and go to state 119
+
+
+state 77
+
+    (135) SKEWNESS -> skew . lParenthesis id SKEWNESS_A rParenthesis semicolon
+
+    lParenthesis    shift and go to state 120
+
+
+state 78
+
+    (138) KURTOSI -> kurt . lParenthesis id KURTOSI_A rParenthesis semicolon
+
+    lParenthesis    shift and go to state 121
+
+
+state 79
+
+    (5) VARS -> var TYPE colon VARS_A . semicolon
+
+    semicolon       shift and go to state 122
+
+
+state 80
+
+    (6) VARS_A -> SIMPLE .
+
+    semicolon       reduce using rule 6 (VARS_A -> SIMPLE .)
+
+
+state 81
+
+    (7) VARS_A -> LIST .
+
+    semicolon       reduce using rule 7 (VARS_A -> LIST .)
+
+
+state 82
+
+    (8) SIMPLE -> id . SIMPLE_A
+    (11) LIST -> id . lSqrBracket NUMCONST rSqrBracket LIST_A
+    (9) SIMPLE_A -> . comma SIMPLE
+    (10) SIMPLE_A -> . empty
+    (141) empty -> .
+
+    lSqrBracket     shift and go to state 124
+    comma           shift and go to state 125
+    semicolon       reduce using rule 141 (empty -> .)
+
+    SIMPLE_A                       shift and go to state 123
+    empty                          shift and go to state 126
+
+state 83
+
+    (76) METHOD -> func TYPEMETHOD id lParenthesis . PARAMS rParenthesis BLOCK semicolon
+    (77) PARAMS -> . EXP PARAMS_A
+    (29) EXP -> . TERM EXP_A
+    (33) TERM -> . FACTOR TERM_A
+    (37) FACTOR -> . lParenthesis EXPLOG rParenthesis
+    (38) FACTOR -> . VARCONSTAUX
+    (39) VARCONSTAUX -> . id ISLIST
+    (40) VARCONSTAUX -> . cte_i
+    (41) VARCONSTAUX -> . cte_f
+
+    lParenthesis    shift and go to state 99
+    id              shift and go to state 101
+    cte_i           shift and go to state 102
+    cte_f           shift and go to state 103
+
+    PARAMS                         shift and go to state 127
+    EXP                            shift and go to state 128
+    TERM                           shift and go to state 97
+    FACTOR                         shift and go to state 98
+    VARCONSTAUX                    shift and go to state 100
+
+state 84
+
+    (46) BLOCK -> lCurlyBracket BLOCK_A rCurlyBracket .
+
+    $end            reduce using rule 46 (BLOCK -> lCurlyBracket BLOCK_A rCurlyBracket .)
+    semicolon       reduce using rule 46 (BLOCK -> lCurlyBracket BLOCK_A rCurlyBracket .)
+    else            reduce using rule 46 (BLOCK -> lCurlyBracket BLOCK_A rCurlyBracket .)
+    rCurlyBracket   reduce using rule 46 (BLOCK -> lCurlyBracket BLOCK_A rCurlyBracket .)
+
+
+state 85
+
+    (57) ASSIGNMENT -> id ISLIST . equals EXPRESSION semicolon
+
+    equals          shift and go to state 129
+
+
+state 86
+
+    (81) METHODCALL -> id lParenthesis . EXP METHODCALL_A rParenthesis semicolon
+    (29) EXP -> . TERM EXP_A
+    (33) TERM -> . FACTOR TERM_A
+    (37) FACTOR -> . lParenthesis EXPLOG rParenthesis
+    (38) FACTOR -> . VARCONSTAUX
+    (39) VARCONSTAUX -> . id ISLIST
+    (40) VARCONSTAUX -> . cte_i
+    (41) VARCONSTAUX -> . cte_f
+
+    lParenthesis    shift and go to state 99
+    id              shift and go to state 101
+    cte_i           shift and go to state 102
+    cte_f           shift and go to state 103
+
+    EXP                            shift and go to state 130
+    TERM                           shift and go to state 97
+    FACTOR                         shift and go to state 98
+    VARCONSTAUX                    shift and go to state 100
+
+state 87
+
+    (61) ISLIST -> lSqrBracket . EXP rSqrBracket
+    (29) EXP -> . TERM EXP_A
+    (33) TERM -> . FACTOR TERM_A
+    (37) FACTOR -> . lParenthesis EXPLOG rParenthesis
+    (38) FACTOR -> . VARCONSTAUX
+    (39) VARCONSTAUX -> . id ISLIST
+    (40) VARCONSTAUX -> . cte_i
+    (41) VARCONSTAUX -> . cte_f
+
+    lParenthesis    shift and go to state 99
+    id              shift and go to state 101
+    cte_i           shift and go to state 102
+    cte_f           shift and go to state 103
+
+    EXP                            shift and go to state 131
+    TERM                           shift and go to state 97
+    FACTOR                         shift and go to state 98
+    VARCONSTAUX                    shift and go to state 100
+
+state 88
+
+    (62) ISLIST -> empty .
+
+    equals          reduce using rule 62 (ISLIST -> empty .)
+    times           reduce using rule 62 (ISLIST -> empty .)
+    divide          reduce using rule 62 (ISLIST -> empty .)
+    plus            reduce using rule 62 (ISLIST -> empty .)
+    minus           reduce using rule 62 (ISLIST -> empty .)
+    greater         reduce using rule 62 (ISLIST -> empty .)
+    lessThan        reduce using rule 62 (ISLIST -> empty .)
+    greaterEquals   reduce using rule 62 (ISLIST -> empty .)
+    lessThanEquals  reduce using rule 62 (ISLIST -> empty .)
+    notEquals       reduce using rule 62 (ISLIST -> empty .)
+    comma           reduce using rule 62 (ISLIST -> empty .)
+    rParenthesis    reduce using rule 62 (ISLIST -> empty .)
+    rSqrBracket     reduce using rule 62 (ISLIST -> empty .)
+    and             reduce using rule 62 (ISLIST -> empty .)
+    or              reduce using rule 62 (ISLIST -> empty .)
+    semicolon       reduce using rule 62 (ISLIST -> empty .)
+
+
+state 89
+
+    (65) CONDITION -> if lParenthesis . EXPLOG rParenthesis BLOCK CONDITION_A semicolon
+    (17) EXPLOG -> . EXPRESSION EXPLOG_A
+    (18) EXPLOG -> . not EXPRESSION EXPLOG_A
+    (22) EXPRESSION -> . EXP EXPRESSION_A EXP
+    (29) EXP -> . TERM EXP_A
+    (33) TERM -> . FACTOR TERM_A
+    (37) FACTOR -> . lParenthesis EXPLOG rParenthesis
+    (38) FACTOR -> . VARCONSTAUX
+    (39) VARCONSTAUX -> . id ISLIST
+    (40) VARCONSTAUX -> . cte_i
+    (41) VARCONSTAUX -> . cte_f
+
+    not             shift and go to state 95
+    lParenthesis    shift and go to state 99
+    id              shift and go to state 101
+    cte_i           shift and go to state 102
+    cte_f           shift and go to state 103
+
+    EXPLOG                         shift and go to state 132
+    EXPRESSION                     shift and go to state 94
+    EXP                            shift and go to state 96
+    TERM                           shift and go to state 97
+    FACTOR                         shift and go to state 98
+    VARCONSTAUX                    shift and go to state 100
+
+state 90
+
+    (68) WRITE -> print lParenthesis . EXPRESSION WRITE_A rParenthesis semicolon
+    (22) EXPRESSION -> . EXP EXPRESSION_A EXP
+    (29) EXP -> . TERM EXP_A
+    (33) TERM -> . FACTOR TERM_A
+    (37) FACTOR -> . lParenthesis EXPLOG rParenthesis
+    (38) FACTOR -> . VARCONSTAUX
+    (39) VARCONSTAUX -> . id ISLIST
+    (40) VARCONSTAUX -> . cte_i
+    (41) VARCONSTAUX -> . cte_f
+
+    lParenthesis    shift and go to state 99
+    id              shift and go to state 101
+    cte_i           shift and go to state 102
+    cte_f           shift and go to state 103
+
+    EXPRESSION                     shift and go to state 133
+    EXP                            shift and go to state 96
+    TERM                           shift and go to state 97
+    FACTOR                         shift and go to state 98
+    VARCONSTAUX                    shift and go to state 100
+
+state 91
+
+    (80) LOOP -> while lParenthesis . EXPLOG rParenthesis BLOCK
+    (17) EXPLOG -> . EXPRESSION EXPLOG_A
+    (18) EXPLOG -> . not EXPRESSION EXPLOG_A
+    (22) EXPRESSION -> . EXP EXPRESSION_A EXP
+    (29) EXP -> . TERM EXP_A
+    (33) TERM -> . FACTOR TERM_A
+    (37) FACTOR -> . lParenthesis EXPLOG rParenthesis
+    (38) FACTOR -> . VARCONSTAUX
+    (39) VARCONSTAUX -> . id ISLIST
+    (40) VARCONSTAUX -> . cte_i
+    (41) VARCONSTAUX -> . cte_f
+
+    not             shift and go to state 95
+    lParenthesis    shift and go to state 99
+    id              shift and go to state 101
+    cte_i           shift and go to state 102
+    cte_f           shift and go to state 103
+
+    EXPLOG                         shift and go to state 134
+    EXPRESSION                     shift and go to state 94
+    EXP                            shift and go to state 96
+    TERM                           shift and go to state 97
+    FACTOR                         shift and go to state 98
+    VARCONSTAUX                    shift and go to state 100
+
+state 92
+
+    (58) READ -> scan lParenthesis . VARCTE READ_A rParenthesis
+    (71) VARCTE -> . id ISLIST
+    (72) VARCTE -> . cte_i
+    (73) VARCTE -> . cte_f
+    (74) VARCTE -> . cte_str
+    (75) VARCTE -> . BOOLEAN
+    (85) BOOLEAN -> . FALSE
+    (86) BOOLEAN -> . TRUE
+
+    id              shift and go to state 136
+    cte_i           shift and go to state 137
+    cte_f           shift and go to state 138
+    cte_str         shift and go to state 139
+    FALSE           shift and go to state 141
+    TRUE            shift and go to state 142
+
+    VARCTE                         shift and go to state 135
+    BOOLEAN                        shift and go to state 140
+
+state 93
+
+    (84) RETURN -> return EXPLOG . semicolon
+
+    semicolon       shift and go to state 143
+
+
+state 94
+
+    (17) EXPLOG -> EXPRESSION . EXPLOG_A
+    (19) EXPLOG_A -> . and EXPLOG
+    (20) EXPLOG_A -> . or EXPLOG
+    (21) EXPLOG_A -> . empty
+    (141) empty -> .
+
+    and             shift and go to state 145
+    or              shift and go to state 146
+    semicolon       reduce using rule 141 (empty -> .)
+    rParenthesis    reduce using rule 141 (empty -> .)
+
+    EXPLOG_A                       shift and go to state 144
+    empty                          shift and go to state 147
+
+state 95
+
+    (18) EXPLOG -> not . EXPRESSION EXPLOG_A
+    (22) EXPRESSION -> . EXP EXPRESSION_A EXP
+    (29) EXP -> . TERM EXP_A
+    (33) TERM -> . FACTOR TERM_A
+    (37) FACTOR -> . lParenthesis EXPLOG rParenthesis
+    (38) FACTOR -> . VARCONSTAUX
+    (39) VARCONSTAUX -> . id ISLIST
+    (40) VARCONSTAUX -> . cte_i
+    (41) VARCONSTAUX -> . cte_f
+
+    lParenthesis    shift and go to state 99
+    id              shift and go to state 101
+    cte_i           shift and go to state 102
+    cte_f           shift and go to state 103
+
+    EXPRESSION                     shift and go to state 148
+    EXP                            shift and go to state 96
+    TERM                           shift and go to state 97
+    FACTOR                         shift and go to state 98
+    VARCONSTAUX                    shift and go to state 100
+
+state 96
+
+    (22) EXPRESSION -> EXP . EXPRESSION_A EXP
+    (23) EXPRESSION_A -> . greater
+    (24) EXPRESSION_A -> . lessThan
+    (25) EXPRESSION_A -> . greaterEquals
+    (26) EXPRESSION_A -> . lessThanEquals
+    (27) EXPRESSION_A -> . equals
+    (28) EXPRESSION_A -> . notEquals
+
+    greater         shift and go to state 150
+    lessThan        shift and go to state 151
+    greaterEquals   shift and go to state 152
+    lessThanEquals  shift and go to state 153
+    equals          shift and go to state 154
+    notEquals       shift and go to state 155
+
+    EXPRESSION_A                   shift and go to state 149
+
+state 97
+
+    (29) EXP -> TERM . EXP_A
+    (30) EXP_A -> . plus EXP
+    (31) EXP_A -> . minus EXP
+    (32) EXP_A -> . empty
+    (141) empty -> .
+
+    plus            shift and go to state 157
+    minus           shift and go to state 158
+    greater         reduce using rule 141 (empty -> .)
+    lessThan        reduce using rule 141 (empty -> .)
+    greaterEquals   reduce using rule 141 (empty -> .)
+    lessThanEquals  reduce using rule 141 (empty -> .)
+    equals          reduce using rule 141 (empty -> .)
+    notEquals       reduce using rule 141 (empty -> .)
+    comma           reduce using rule 141 (empty -> .)
+    rParenthesis    reduce using rule 141 (empty -> .)
+    rSqrBracket     reduce using rule 141 (empty -> .)
+    and             reduce using rule 141 (empty -> .)
+    or              reduce using rule 141 (empty -> .)
+    semicolon       reduce using rule 141 (empty -> .)
+
+    EXP_A                          shift and go to state 156
+    empty                          shift and go to state 159
+
+state 98
+
+    (33) TERM -> FACTOR . TERM_A
+    (34) TERM_A -> . times TERM
+    (35) TERM_A -> . divide TERM
+    (36) TERM_A -> . empty
+    (141) empty -> .
+
+    times           shift and go to state 161
+    divide          shift and go to state 162
+    plus            reduce using rule 141 (empty -> .)
+    minus           reduce using rule 141 (empty -> .)
+    greater         reduce using rule 141 (empty -> .)
+    lessThan        reduce using rule 141 (empty -> .)
+    greaterEquals   reduce using rule 141 (empty -> .)
+    lessThanEquals  reduce using rule 141 (empty -> .)
+    equals          reduce using rule 141 (empty -> .)
+    notEquals       reduce using rule 141 (empty -> .)
+    comma           reduce using rule 141 (empty -> .)
+    rParenthesis    reduce using rule 141 (empty -> .)
+    rSqrBracket     reduce using rule 141 (empty -> .)
+    and             reduce using rule 141 (empty -> .)
+    or              reduce using rule 141 (empty -> .)
+    semicolon       reduce using rule 141 (empty -> .)
+
+    TERM_A                         shift and go to state 160
+    empty                          shift and go to state 163
+
+state 99
+
+    (37) FACTOR -> lParenthesis . EXPLOG rParenthesis
+    (17) EXPLOG -> . EXPRESSION EXPLOG_A
+    (18) EXPLOG -> . not EXPRESSION EXPLOG_A
+    (22) EXPRESSION -> . EXP EXPRESSION_A EXP
+    (29) EXP -> . TERM EXP_A
+    (33) TERM -> . FACTOR TERM_A
+    (37) FACTOR -> . lParenthesis EXPLOG rParenthesis
+    (38) FACTOR -> . VARCONSTAUX
+    (39) VARCONSTAUX -> . id ISLIST
+    (40) VARCONSTAUX -> . cte_i
+    (41) VARCONSTAUX -> . cte_f
+
+    not             shift and go to state 95
+    lParenthesis    shift and go to state 99
+    id              shift and go to state 101
+    cte_i           shift and go to state 102
+    cte_f           shift and go to state 103
+
+    EXPLOG                         shift and go to state 164
+    EXPRESSION                     shift and go to state 94
+    EXP                            shift and go to state 96
+    TERM                           shift and go to state 97
+    FACTOR                         shift and go to state 98
+    VARCONSTAUX                    shift and go to state 100
+
+state 100
+
+    (38) FACTOR -> VARCONSTAUX .
+
+    times           reduce using rule 38 (FACTOR -> VARCONSTAUX .)
+    divide          reduce using rule 38 (FACTOR -> VARCONSTAUX .)
+    plus            reduce using rule 38 (FACTOR -> VARCONSTAUX .)
+    minus           reduce using rule 38 (FACTOR -> VARCONSTAUX .)
+    greater         reduce using rule 38 (FACTOR -> VARCONSTAUX .)
+    lessThan        reduce using rule 38 (FACTOR -> VARCONSTAUX .)
+    greaterEquals   reduce using rule 38 (FACTOR -> VARCONSTAUX .)
+    lessThanEquals  reduce using rule 38 (FACTOR -> VARCONSTAUX .)
+    equals          reduce using rule 38 (FACTOR -> VARCONSTAUX .)
+    notEquals       reduce using rule 38 (FACTOR -> VARCONSTAUX .)
+    comma           reduce using rule 38 (FACTOR -> VARCONSTAUX .)
+    rParenthesis    reduce using rule 38 (FACTOR -> VARCONSTAUX .)
+    rSqrBracket     reduce using rule 38 (FACTOR -> VARCONSTAUX .)
+    and             reduce using rule 38 (FACTOR -> VARCONSTAUX .)
+    or              reduce using rule 38 (FACTOR -> VARCONSTAUX .)
+    semicolon       reduce using rule 38 (FACTOR -> VARCONSTAUX .)
+
+
+state 101
+
+    (39) VARCONSTAUX -> id . ISLIST
+    (61) ISLIST -> . lSqrBracket EXP rSqrBracket
+    (62) ISLIST -> . empty
+    (141) empty -> .
+
+    lSqrBracket     shift and go to state 87
+    times           reduce using rule 141 (empty -> .)
+    divide          reduce using rule 141 (empty -> .)
+    plus            reduce using rule 141 (empty -> .)
+    minus           reduce using rule 141 (empty -> .)
+    greater         reduce using rule 141 (empty -> .)
+    lessThan        reduce using rule 141 (empty -> .)
+    greaterEquals   reduce using rule 141 (empty -> .)
+    lessThanEquals  reduce using rule 141 (empty -> .)
+    equals          reduce using rule 141 (empty -> .)
+    notEquals       reduce using rule 141 (empty -> .)
+    comma           reduce using rule 141 (empty -> .)
+    rParenthesis    reduce using rule 141 (empty -> .)
+    rSqrBracket     reduce using rule 141 (empty -> .)
+    and             reduce using rule 141 (empty -> .)
+    or              reduce using rule 141 (empty -> .)
+    semicolon       reduce using rule 141 (empty -> .)
+
+    ISLIST                         shift and go to state 165
+    empty                          shift and go to state 88
+
+state 102
+
+    (40) VARCONSTAUX -> cte_i .
+
+    times           reduce using rule 40 (VARCONSTAUX -> cte_i .)
+    divide          reduce using rule 40 (VARCONSTAUX -> cte_i .)
+    plus            reduce using rule 40 (VARCONSTAUX -> cte_i .)
+    minus           reduce using rule 40 (VARCONSTAUX -> cte_i .)
+    greater         reduce using rule 40 (VARCONSTAUX -> cte_i .)
+    lessThan        reduce using rule 40 (VARCONSTAUX -> cte_i .)
+    greaterEquals   reduce using rule 40 (VARCONSTAUX -> cte_i .)
+    lessThanEquals  reduce using rule 40 (VARCONSTAUX -> cte_i .)
+    equals          reduce using rule 40 (VARCONSTAUX -> cte_i .)
+    notEquals       reduce using rule 40 (VARCONSTAUX -> cte_i .)
+    comma           reduce using rule 40 (VARCONSTAUX -> cte_i .)
+    rParenthesis    reduce using rule 40 (VARCONSTAUX -> cte_i .)
+    rSqrBracket     reduce using rule 40 (VARCONSTAUX -> cte_i .)
+    and             reduce using rule 40 (VARCONSTAUX -> cte_i .)
+    or              reduce using rule 40 (VARCONSTAUX -> cte_i .)
+    semicolon       reduce using rule 40 (VARCONSTAUX -> cte_i .)
+
+
+state 103
+
+    (41) VARCONSTAUX -> cte_f .
+
+    times           reduce using rule 41 (VARCONSTAUX -> cte_f .)
+    divide          reduce using rule 41 (VARCONSTAUX -> cte_f .)
+    plus            reduce using rule 41 (VARCONSTAUX -> cte_f .)
+    minus           reduce using rule 41 (VARCONSTAUX -> cte_f .)
+    greater         reduce using rule 41 (VARCONSTAUX -> cte_f .)
+    lessThan        reduce using rule 41 (VARCONSTAUX -> cte_f .)
+    greaterEquals   reduce using rule 41 (VARCONSTAUX -> cte_f .)
+    lessThanEquals  reduce using rule 41 (VARCONSTAUX -> cte_f .)
+    equals          reduce using rule 41 (VARCONSTAUX -> cte_f .)
+    notEquals       reduce using rule 41 (VARCONSTAUX -> cte_f .)
+    comma           reduce using rule 41 (VARCONSTAUX -> cte_f .)
+    rParenthesis    reduce using rule 41 (VARCONSTAUX -> cte_f .)
+    rSqrBracket     reduce using rule 41 (VARCONSTAUX -> cte_f .)
+    and             reduce using rule 41 (VARCONSTAUX -> cte_f .)
+    or              reduce using rule 41 (VARCONSTAUX -> cte_f .)
+    semicolon       reduce using rule 41 (VARCONSTAUX -> cte_f .)
+
+
+state 104
+
+    (105) ORDINARY_LEAST_SQUARES -> ols lParenthesis . id comma id comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma BOOLEAN rParenthesis semicolon
+
+    id              shift and go to state 166
+
+
+state 105
+
+    (106) LASSO -> las lParenthesis . id comma id comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma string comma float comma BOOLEAN rParenthesis semicolon
+
+    id              shift and go to state 167
+
+
+state 106
+
+    (107) RIDGE -> rid lParenthesis . id comma id comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma VARCONSTAUX comma string comma VARCONSTAUX rParenthesis semicolon
+
+    id              shift and go to state 168
+
+
+state 107
+
+    (108) K_MEANS -> kmeans lParenthesis . VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma VARCONSTAUX comma string rParenthesis semicolon
+    (39) VARCONSTAUX -> . id ISLIST
+    (40) VARCONSTAUX -> . cte_i
+    (41) VARCONSTAUX -> . cte_f
+
+    id              shift and go to state 101
+    cte_i           shift and go to state 102
+    cte_f           shift and go to state 103
+
+    VARCONSTAUX                    shift and go to state 169
+
+state 108
+
+    (109) MINI_BATCH_MEANS -> mbm lParenthesis . VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX rParenthesis semicolon
+    (39) VARCONSTAUX -> . id ISLIST
+    (40) VARCONSTAUX -> . cte_i
+    (41) VARCONSTAUX -> . cte_f
+
+    id              shift and go to state 101
+    cte_i           shift and go to state 102
+    cte_f           shift and go to state 103
+
+    VARCONSTAUX                    shift and go to state 170
+
+state 109
+
+    (110) TIME_SERIES_SPLIT -> tseries lParenthesis . VARCONSTAUX comma VARCONSTAUX rParenthesis semicolon
+    (39) VARCONSTAUX -> . id ISLIST
+    (40) VARCONSTAUX -> . cte_i
+    (41) VARCONSTAUX -> . cte_f
+
+    id              shift and go to state 101
+    cte_i           shift and go to state 102
+    cte_f           shift and go to state 103
+
+    VARCONSTAUX                    shift and go to state 171
+
+state 110
+
+    (111) MEAN_ABSOLUTE_ERROR -> mean_abs_err lParenthesis . id comma id rParenthesis semicolon
+
+    id              shift and go to state 172
+
+
+state 111
+
+    (112) MEAN_SQUARED_ERROR -> mean_sqr_err lParenthesis . id comma id rParenthesis semicolon
+
+    id              shift and go to state 173
+
+
+state 112
+
+    (113) MEDIAN_ABSOLUTE_ERROR -> median_abs_err lParenthesis . id comma id rParenthesis semicolon
+
+    id              shift and go to state 174
+
+
+state 113
+
+    (114) MEAN -> mean lParenthesis . id MEAN_A rParenthesis semicolon
+
+    id              shift and go to state 175
+
+
+state 114
+
+    (117) MODE -> mode lParenthesis . id MODE_A rParenthesis semicolon
+
+    id              shift and go to state 176
+
+
+state 115
+
+    (120) MEDIAN -> median lParenthesis . id MEDIAN_A rParenthesis semicolon
+
+    id              shift and go to state 177
+
+
+state 116
+
+    (123) PROBABILITY -> prob lParenthesis . id PROBABILITY_A rParenthesis semicolon
+
+    id              shift and go to state 178
+
+
+state 117
+
+    (126) FREQUENCY -> freq lParenthesis . id FREQUENCY_A rParenthesis semicolon
+
+    id              shift and go to state 179
+
+
+state 118
+
+    (129) VARIANCE -> variance lParenthesis . id VARIANCE_A rParenthesis semicolon
+
+    id              shift and go to state 180
+
+
+state 119
+
+    (132) STANDARD_DEVIATION -> stddev lParenthesis . id STANDARD_DEVIATION_A rParenthesis semicolon
+
+    id              shift and go to state 181
+
+
+state 120
+
+    (135) SKEWNESS -> skew lParenthesis . id SKEWNESS_A rParenthesis semicolon
+
+    id              shift and go to state 182
+
+
+state 121
+
+    (138) KURTOSI -> kurt lParenthesis . id KURTOSI_A rParenthesis semicolon
+
+    id              shift and go to state 183
+
+
+state 122
+
+    (5) VARS -> var TYPE colon VARS_A semicolon .
+
+    var             reduce using rule 5 (VARS -> var TYPE colon VARS_A semicolon .)
+    func            reduce using rule 5 (VARS -> var TYPE colon VARS_A semicolon .)
+    start           reduce using rule 5 (VARS -> var TYPE colon VARS_A semicolon .)
+
+
+state 123
+
+    (8) SIMPLE -> id SIMPLE_A .
+
+    semicolon       reduce using rule 8 (SIMPLE -> id SIMPLE_A .)
+
+
+state 124
+
+    (11) LIST -> id lSqrBracket . NUMCONST rSqrBracket LIST_A
+    (14) NUMCONST -> . id
+    (15) NUMCONST -> . cte_i
+    (16) NUMCONST -> . cte_f
+
+    id              shift and go to state 184
+    cte_i           shift and go to state 186
+    cte_f           shift and go to state 187
+
+    NUMCONST                       shift and go to state 185
+
+state 125
+
+    (9) SIMPLE_A -> comma . SIMPLE
+    (8) SIMPLE -> . id SIMPLE_A
+
+    id              shift and go to state 189
+
+    SIMPLE                         shift and go to state 188
+
+state 126
+
+    (10) SIMPLE_A -> empty .
+
+    semicolon       reduce using rule 10 (SIMPLE_A -> empty .)
+
+
+state 127
+
+    (76) METHOD -> func TYPEMETHOD id lParenthesis PARAMS . rParenthesis BLOCK semicolon
+
+    rParenthesis    shift and go to state 190
+
+
+state 128
+
+    (77) PARAMS -> EXP . PARAMS_A
+    (78) PARAMS_A -> . comma EXP PARAMS_A
+    (79) PARAMS_A -> . empty
+    (141) empty -> .
+
+    comma           shift and go to state 192
+    rParenthesis    reduce using rule 141 (empty -> .)
+
+    PARAMS_A                       shift and go to state 191
+    empty                          shift and go to state 193
+
+state 129
+
+    (57) ASSIGNMENT -> id ISLIST equals . EXPRESSION semicolon
+    (22) EXPRESSION -> . EXP EXPRESSION_A EXP
+    (29) EXP -> . TERM EXP_A
+    (33) TERM -> . FACTOR TERM_A
+    (37) FACTOR -> . lParenthesis EXPLOG rParenthesis
+    (38) FACTOR -> . VARCONSTAUX
+    (39) VARCONSTAUX -> . id ISLIST
+    (40) VARCONSTAUX -> . cte_i
+    (41) VARCONSTAUX -> . cte_f
+
+    lParenthesis    shift and go to state 99
+    id              shift and go to state 101
+    cte_i           shift and go to state 102
+    cte_f           shift and go to state 103
+
+    EXPRESSION                     shift and go to state 194
+    EXP                            shift and go to state 96
+    TERM                           shift and go to state 97
+    FACTOR                         shift and go to state 98
+    VARCONSTAUX                    shift and go to state 100
+
+state 130
+
+    (81) METHODCALL -> id lParenthesis EXP . METHODCALL_A rParenthesis semicolon
+    (82) METHODCALL_A -> . comma EXP
+    (83) METHODCALL_A -> . empty
+    (141) empty -> .
+
+    comma           shift and go to state 196
+    rParenthesis    reduce using rule 141 (empty -> .)
+
+    METHODCALL_A                   shift and go to state 195
+    empty                          shift and go to state 197
+
+state 131
+
+    (61) ISLIST -> lSqrBracket EXP . rSqrBracket
+
+    rSqrBracket     shift and go to state 198
+
+
+state 132
+
+    (65) CONDITION -> if lParenthesis EXPLOG . rParenthesis BLOCK CONDITION_A semicolon
+
+    rParenthesis    shift and go to state 199
+
+
+state 133
+
+    (68) WRITE -> print lParenthesis EXPRESSION . WRITE_A rParenthesis semicolon
+    (69) WRITE_A -> . comma EXPRESSION WRITE_A
+    (70) WRITE_A -> . empty
+    (141) empty -> .
+
+    comma           shift and go to state 201
+    rParenthesis    reduce using rule 141 (empty -> .)
+
+    WRITE_A                        shift and go to state 200
+    empty                          shift and go to state 202
+
+state 134
+
+    (80) LOOP -> while lParenthesis EXPLOG . rParenthesis BLOCK
+
+    rParenthesis    shift and go to state 203
+
+
+state 135
+
+    (58) READ -> scan lParenthesis VARCTE . READ_A rParenthesis
+    (59) READ_A -> . comma
+    (60) READ_A -> . empty
+    (141) empty -> .
+
+    comma           shift and go to state 205
+    rParenthesis    reduce using rule 141 (empty -> .)
+
+    READ_A                         shift and go to state 204
+    empty                          shift and go to state 206
+
+state 136
+
+    (71) VARCTE -> id . ISLIST
+    (61) ISLIST -> . lSqrBracket EXP rSqrBracket
+    (62) ISLIST -> . empty
+    (141) empty -> .
+
+    lSqrBracket     shift and go to state 87
+    comma           reduce using rule 141 (empty -> .)
+    rParenthesis    reduce using rule 141 (empty -> .)
+
+    ISLIST                         shift and go to state 207
+    empty                          shift and go to state 88
+
+state 137
+
+    (72) VARCTE -> cte_i .
+
+    comma           reduce using rule 72 (VARCTE -> cte_i .)
+    rParenthesis    reduce using rule 72 (VARCTE -> cte_i .)
+
+
+state 138
+
+    (73) VARCTE -> cte_f .
+
+    comma           reduce using rule 73 (VARCTE -> cte_f .)
+    rParenthesis    reduce using rule 73 (VARCTE -> cte_f .)
+
+
+state 139
+
+    (74) VARCTE -> cte_str .
+
+    comma           reduce using rule 74 (VARCTE -> cte_str .)
+    rParenthesis    reduce using rule 74 (VARCTE -> cte_str .)
+
+
+state 140
+
+    (75) VARCTE -> BOOLEAN .
+
+    comma           reduce using rule 75 (VARCTE -> BOOLEAN .)
+    rParenthesis    reduce using rule 75 (VARCTE -> BOOLEAN .)
+
+
+state 141
+
+    (85) BOOLEAN -> FALSE .
+
+    comma           reduce using rule 85 (BOOLEAN -> FALSE .)
+    rParenthesis    reduce using rule 85 (BOOLEAN -> FALSE .)
+
+
+state 142
+
+    (86) BOOLEAN -> TRUE .
+
+    comma           reduce using rule 86 (BOOLEAN -> TRUE .)
+    rParenthesis    reduce using rule 86 (BOOLEAN -> TRUE .)
+
+
+state 143
+
+    (84) RETURN -> return EXPLOG semicolon .
+
+    rCurlyBracket   reduce using rule 84 (RETURN -> return EXPLOG semicolon .)
+
+
+state 144
+
+    (17) EXPLOG -> EXPRESSION EXPLOG_A .
+
+    semicolon       reduce using rule 17 (EXPLOG -> EXPRESSION EXPLOG_A .)
+    rParenthesis    reduce using rule 17 (EXPLOG -> EXPRESSION EXPLOG_A .)
+
+
+state 145
+
+    (19) EXPLOG_A -> and . EXPLOG
+    (17) EXPLOG -> . EXPRESSION EXPLOG_A
+    (18) EXPLOG -> . not EXPRESSION EXPLOG_A
+    (22) EXPRESSION -> . EXP EXPRESSION_A EXP
+    (29) EXP -> . TERM EXP_A
+    (33) TERM -> . FACTOR TERM_A
+    (37) FACTOR -> . lParenthesis EXPLOG rParenthesis
+    (38) FACTOR -> . VARCONSTAUX
+    (39) VARCONSTAUX -> . id ISLIST
+    (40) VARCONSTAUX -> . cte_i
+    (41) VARCONSTAUX -> . cte_f
+
+    not             shift and go to state 95
+    lParenthesis    shift and go to state 99
+    id              shift and go to state 101
+    cte_i           shift and go to state 102
+    cte_f           shift and go to state 103
+
+    EXPLOG                         shift and go to state 208
+    EXPRESSION                     shift and go to state 94
+    EXP                            shift and go to state 96
+    TERM                           shift and go to state 97
+    FACTOR                         shift and go to state 98
+    VARCONSTAUX                    shift and go to state 100
+
+state 146
+
+    (20) EXPLOG_A -> or . EXPLOG
+    (17) EXPLOG -> . EXPRESSION EXPLOG_A
+    (18) EXPLOG -> . not EXPRESSION EXPLOG_A
+    (22) EXPRESSION -> . EXP EXPRESSION_A EXP
+    (29) EXP -> . TERM EXP_A
+    (33) TERM -> . FACTOR TERM_A
+    (37) FACTOR -> . lParenthesis EXPLOG rParenthesis
+    (38) FACTOR -> . VARCONSTAUX
+    (39) VARCONSTAUX -> . id ISLIST
+    (40) VARCONSTAUX -> . cte_i
+    (41) VARCONSTAUX -> . cte_f
+
+    not             shift and go to state 95
+    lParenthesis    shift and go to state 99
+    id              shift and go to state 101
+    cte_i           shift and go to state 102
+    cte_f           shift and go to state 103
+
+    EXPLOG                         shift and go to state 209
+    EXPRESSION                     shift and go to state 94
+    EXP                            shift and go to state 96
+    TERM                           shift and go to state 97
+    FACTOR                         shift and go to state 98
+    VARCONSTAUX                    shift and go to state 100
+
+state 147
+
+    (21) EXPLOG_A -> empty .
+
+    semicolon       reduce using rule 21 (EXPLOG_A -> empty .)
+    rParenthesis    reduce using rule 21 (EXPLOG_A -> empty .)
+
+
+state 148
+
+    (18) EXPLOG -> not EXPRESSION . EXPLOG_A
+    (19) EXPLOG_A -> . and EXPLOG
+    (20) EXPLOG_A -> . or EXPLOG
+    (21) EXPLOG_A -> . empty
+    (141) empty -> .
+
+    and             shift and go to state 145
+    or              shift and go to state 146
+    semicolon       reduce using rule 141 (empty -> .)
+    rParenthesis    reduce using rule 141 (empty -> .)
+
+    EXPLOG_A                       shift and go to state 210
+    empty                          shift and go to state 147
+
+state 149
+
+    (22) EXPRESSION -> EXP EXPRESSION_A . EXP
+    (29) EXP -> . TERM EXP_A
+    (33) TERM -> . FACTOR TERM_A
+    (37) FACTOR -> . lParenthesis EXPLOG rParenthesis
+    (38) FACTOR -> . VARCONSTAUX
+    (39) VARCONSTAUX -> . id ISLIST
+    (40) VARCONSTAUX -> . cte_i
+    (41) VARCONSTAUX -> . cte_f
+
+    lParenthesis    shift and go to state 99
+    id              shift and go to state 101
+    cte_i           shift and go to state 102
+    cte_f           shift and go to state 103
+
+    EXP                            shift and go to state 211
+    TERM                           shift and go to state 97
+    FACTOR                         shift and go to state 98
+    VARCONSTAUX                    shift and go to state 100
+
+state 150
+
+    (23) EXPRESSION_A -> greater .
+
+    lParenthesis    reduce using rule 23 (EXPRESSION_A -> greater .)
+    id              reduce using rule 23 (EXPRESSION_A -> greater .)
+    cte_i           reduce using rule 23 (EXPRESSION_A -> greater .)
+    cte_f           reduce using rule 23 (EXPRESSION_A -> greater .)
+
+
+state 151
+
+    (24) EXPRESSION_A -> lessThan .
+
+    lParenthesis    reduce using rule 24 (EXPRESSION_A -> lessThan .)
+    id              reduce using rule 24 (EXPRESSION_A -> lessThan .)
+    cte_i           reduce using rule 24 (EXPRESSION_A -> lessThan .)
+    cte_f           reduce using rule 24 (EXPRESSION_A -> lessThan .)
+
+
+state 152
+
+    (25) EXPRESSION_A -> greaterEquals .
+
+    lParenthesis    reduce using rule 25 (EXPRESSION_A -> greaterEquals .)
+    id              reduce using rule 25 (EXPRESSION_A -> greaterEquals .)
+    cte_i           reduce using rule 25 (EXPRESSION_A -> greaterEquals .)
+    cte_f           reduce using rule 25 (EXPRESSION_A -> greaterEquals .)
+
+
+state 153
+
+    (26) EXPRESSION_A -> lessThanEquals .
+
+    lParenthesis    reduce using rule 26 (EXPRESSION_A -> lessThanEquals .)
+    id              reduce using rule 26 (EXPRESSION_A -> lessThanEquals .)
+    cte_i           reduce using rule 26 (EXPRESSION_A -> lessThanEquals .)
+    cte_f           reduce using rule 26 (EXPRESSION_A -> lessThanEquals .)
+
+
+state 154
+
+    (27) EXPRESSION_A -> equals .
+
+    lParenthesis    reduce using rule 27 (EXPRESSION_A -> equals .)
+    id              reduce using rule 27 (EXPRESSION_A -> equals .)
+    cte_i           reduce using rule 27 (EXPRESSION_A -> equals .)
+    cte_f           reduce using rule 27 (EXPRESSION_A -> equals .)
+
+
+state 155
+
+    (28) EXPRESSION_A -> notEquals .
+
+    lParenthesis    reduce using rule 28 (EXPRESSION_A -> notEquals .)
+    id              reduce using rule 28 (EXPRESSION_A -> notEquals .)
+    cte_i           reduce using rule 28 (EXPRESSION_A -> notEquals .)
+    cte_f           reduce using rule 28 (EXPRESSION_A -> notEquals .)
+
+
+state 156
+
+    (29) EXP -> TERM EXP_A .
+
+    greater         reduce using rule 29 (EXP -> TERM EXP_A .)
+    lessThan        reduce using rule 29 (EXP -> TERM EXP_A .)
+    greaterEquals   reduce using rule 29 (EXP -> TERM EXP_A .)
+    lessThanEquals  reduce using rule 29 (EXP -> TERM EXP_A .)
+    equals          reduce using rule 29 (EXP -> TERM EXP_A .)
+    notEquals       reduce using rule 29 (EXP -> TERM EXP_A .)
+    comma           reduce using rule 29 (EXP -> TERM EXP_A .)
+    rParenthesis    reduce using rule 29 (EXP -> TERM EXP_A .)
+    rSqrBracket     reduce using rule 29 (EXP -> TERM EXP_A .)
+    and             reduce using rule 29 (EXP -> TERM EXP_A .)
+    or              reduce using rule 29 (EXP -> TERM EXP_A .)
+    semicolon       reduce using rule 29 (EXP -> TERM EXP_A .)
+
+
+state 157
+
+    (30) EXP_A -> plus . EXP
+    (29) EXP -> . TERM EXP_A
+    (33) TERM -> . FACTOR TERM_A
+    (37) FACTOR -> . lParenthesis EXPLOG rParenthesis
+    (38) FACTOR -> . VARCONSTAUX
+    (39) VARCONSTAUX -> . id ISLIST
+    (40) VARCONSTAUX -> . cte_i
+    (41) VARCONSTAUX -> . cte_f
+
+    lParenthesis    shift and go to state 99
+    id              shift and go to state 101
+    cte_i           shift and go to state 102
+    cte_f           shift and go to state 103
+
+    EXP                            shift and go to state 212
+    TERM                           shift and go to state 97
+    FACTOR                         shift and go to state 98
+    VARCONSTAUX                    shift and go to state 100
+
+state 158
+
+    (31) EXP_A -> minus . EXP
+    (29) EXP -> . TERM EXP_A
+    (33) TERM -> . FACTOR TERM_A
+    (37) FACTOR -> . lParenthesis EXPLOG rParenthesis
+    (38) FACTOR -> . VARCONSTAUX
+    (39) VARCONSTAUX -> . id ISLIST
+    (40) VARCONSTAUX -> . cte_i
+    (41) VARCONSTAUX -> . cte_f
+
+    lParenthesis    shift and go to state 99
+    id              shift and go to state 101
+    cte_i           shift and go to state 102
+    cte_f           shift and go to state 103
+
+    EXP                            shift and go to state 213
+    TERM                           shift and go to state 97
+    FACTOR                         shift and go to state 98
+    VARCONSTAUX                    shift and go to state 100
+
+state 159
+
+    (32) EXP_A -> empty .
+
+    greater         reduce using rule 32 (EXP_A -> empty .)
+    lessThan        reduce using rule 32 (EXP_A -> empty .)
+    greaterEquals   reduce using rule 32 (EXP_A -> empty .)
+    lessThanEquals  reduce using rule 32 (EXP_A -> empty .)
+    equals          reduce using rule 32 (EXP_A -> empty .)
+    notEquals       reduce using rule 32 (EXP_A -> empty .)
+    comma           reduce using rule 32 (EXP_A -> empty .)
+    rParenthesis    reduce using rule 32 (EXP_A -> empty .)
+    rSqrBracket     reduce using rule 32 (EXP_A -> empty .)
+    and             reduce using rule 32 (EXP_A -> empty .)
+    or              reduce using rule 32 (EXP_A -> empty .)
+    semicolon       reduce using rule 32 (EXP_A -> empty .)
+
+
+state 160
+
+    (33) TERM -> FACTOR TERM_A .
+
+    plus            reduce using rule 33 (TERM -> FACTOR TERM_A .)
+    minus           reduce using rule 33 (TERM -> FACTOR TERM_A .)
+    greater         reduce using rule 33 (TERM -> FACTOR TERM_A .)
+    lessThan        reduce using rule 33 (TERM -> FACTOR TERM_A .)
+    greaterEquals   reduce using rule 33 (TERM -> FACTOR TERM_A .)
+    lessThanEquals  reduce using rule 33 (TERM -> FACTOR TERM_A .)
+    equals          reduce using rule 33 (TERM -> FACTOR TERM_A .)
+    notEquals       reduce using rule 33 (TERM -> FACTOR TERM_A .)
+    comma           reduce using rule 33 (TERM -> FACTOR TERM_A .)
+    rParenthesis    reduce using rule 33 (TERM -> FACTOR TERM_A .)
+    rSqrBracket     reduce using rule 33 (TERM -> FACTOR TERM_A .)
+    and             reduce using rule 33 (TERM -> FACTOR TERM_A .)
+    or              reduce using rule 33 (TERM -> FACTOR TERM_A .)
+    semicolon       reduce using rule 33 (TERM -> FACTOR TERM_A .)
+
+
+state 161
+
+    (34) TERM_A -> times . TERM
+    (33) TERM -> . FACTOR TERM_A
+    (37) FACTOR -> . lParenthesis EXPLOG rParenthesis
+    (38) FACTOR -> . VARCONSTAUX
+    (39) VARCONSTAUX -> . id ISLIST
+    (40) VARCONSTAUX -> . cte_i
+    (41) VARCONSTAUX -> . cte_f
+
+    lParenthesis    shift and go to state 99
+    id              shift and go to state 101
+    cte_i           shift and go to state 102
+    cte_f           shift and go to state 103
+
+    TERM                           shift and go to state 214
+    FACTOR                         shift and go to state 98
+    VARCONSTAUX                    shift and go to state 100
+
+state 162
+
+    (35) TERM_A -> divide . TERM
+    (33) TERM -> . FACTOR TERM_A
+    (37) FACTOR -> . lParenthesis EXPLOG rParenthesis
+    (38) FACTOR -> . VARCONSTAUX
+    (39) VARCONSTAUX -> . id ISLIST
+    (40) VARCONSTAUX -> . cte_i
+    (41) VARCONSTAUX -> . cte_f
+
+    lParenthesis    shift and go to state 99
+    id              shift and go to state 101
+    cte_i           shift and go to state 102
+    cte_f           shift and go to state 103
+
+    TERM                           shift and go to state 215
+    FACTOR                         shift and go to state 98
+    VARCONSTAUX                    shift and go to state 100
+
+state 163
+
+    (36) TERM_A -> empty .
+
+    plus            reduce using rule 36 (TERM_A -> empty .)
+    minus           reduce using rule 36 (TERM_A -> empty .)
+    greater         reduce using rule 36 (TERM_A -> empty .)
+    lessThan        reduce using rule 36 (TERM_A -> empty .)
+    greaterEquals   reduce using rule 36 (TERM_A -> empty .)
+    lessThanEquals  reduce using rule 36 (TERM_A -> empty .)
+    equals          reduce using rule 36 (TERM_A -> empty .)
+    notEquals       reduce using rule 36 (TERM_A -> empty .)
+    comma           reduce using rule 36 (TERM_A -> empty .)
+    rParenthesis    reduce using rule 36 (TERM_A -> empty .)
+    rSqrBracket     reduce using rule 36 (TERM_A -> empty .)
+    and             reduce using rule 36 (TERM_A -> empty .)
+    or              reduce using rule 36 (TERM_A -> empty .)
+    semicolon       reduce using rule 36 (TERM_A -> empty .)
+
+
+state 164
+
+    (37) FACTOR -> lParenthesis EXPLOG . rParenthesis
+
+    rParenthesis    shift and go to state 216
+
+
+state 165
+
+    (39) VARCONSTAUX -> id ISLIST .
+
+    times           reduce using rule 39 (VARCONSTAUX -> id ISLIST .)
+    divide          reduce using rule 39 (VARCONSTAUX -> id ISLIST .)
+    plus            reduce using rule 39 (VARCONSTAUX -> id ISLIST .)
+    minus           reduce using rule 39 (VARCONSTAUX -> id ISLIST .)
+    greater         reduce using rule 39 (VARCONSTAUX -> id ISLIST .)
+    lessThan        reduce using rule 39 (VARCONSTAUX -> id ISLIST .)
+    greaterEquals   reduce using rule 39 (VARCONSTAUX -> id ISLIST .)
+    lessThanEquals  reduce using rule 39 (VARCONSTAUX -> id ISLIST .)
+    equals          reduce using rule 39 (VARCONSTAUX -> id ISLIST .)
+    notEquals       reduce using rule 39 (VARCONSTAUX -> id ISLIST .)
+    comma           reduce using rule 39 (VARCONSTAUX -> id ISLIST .)
+    rParenthesis    reduce using rule 39 (VARCONSTAUX -> id ISLIST .)
+    rSqrBracket     reduce using rule 39 (VARCONSTAUX -> id ISLIST .)
+    and             reduce using rule 39 (VARCONSTAUX -> id ISLIST .)
+    or              reduce using rule 39 (VARCONSTAUX -> id ISLIST .)
+    semicolon       reduce using rule 39 (VARCONSTAUX -> id ISLIST .)
+
+
+state 166
+
+    (105) ORDINARY_LEAST_SQUARES -> ols lParenthesis id . comma id comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma BOOLEAN rParenthesis semicolon
+
+    comma           shift and go to state 217
+
+
+state 167
+
+    (106) LASSO -> las lParenthesis id . comma id comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma string comma float comma BOOLEAN rParenthesis semicolon
+
+    comma           shift and go to state 218
+
+
+state 168
+
+    (107) RIDGE -> rid lParenthesis id . comma id comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma VARCONSTAUX comma string comma VARCONSTAUX rParenthesis semicolon
+
+    comma           shift and go to state 219
+
+
+state 169
+
+    (108) K_MEANS -> kmeans lParenthesis VARCONSTAUX . comma string comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma VARCONSTAUX comma string rParenthesis semicolon
+
+    comma           shift and go to state 220
+
+
+state 170
+
+    (109) MINI_BATCH_MEANS -> mbm lParenthesis VARCONSTAUX . comma string comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX rParenthesis semicolon
+
+    comma           shift and go to state 221
+
+
+state 171
+
+    (110) TIME_SERIES_SPLIT -> tseries lParenthesis VARCONSTAUX . comma VARCONSTAUX rParenthesis semicolon
+
+    comma           shift and go to state 222
+
+
+state 172
+
+    (111) MEAN_ABSOLUTE_ERROR -> mean_abs_err lParenthesis id . comma id rParenthesis semicolon
+
+    comma           shift and go to state 223
+
+
+state 173
+
+    (112) MEAN_SQUARED_ERROR -> mean_sqr_err lParenthesis id . comma id rParenthesis semicolon
+
+    comma           shift and go to state 224
+
+
+state 174
+
+    (113) MEDIAN_ABSOLUTE_ERROR -> median_abs_err lParenthesis id . comma id rParenthesis semicolon
+
+    comma           shift and go to state 225
+
+
+state 175
+
+    (114) MEAN -> mean lParenthesis id . MEAN_A rParenthesis semicolon
+    (115) MEAN_A -> . comma id MEAN_A
+    (116) MEAN_A -> . empty
+    (141) empty -> .
+
+    comma           shift and go to state 227
+    rParenthesis    reduce using rule 141 (empty -> .)
+
+    MEAN_A                         shift and go to state 226
+    empty                          shift and go to state 228
+
+state 176
+
+    (117) MODE -> mode lParenthesis id . MODE_A rParenthesis semicolon
+    (118) MODE_A -> . comma id MODE_A
+    (119) MODE_A -> . empty
+    (141) empty -> .
+
+    comma           shift and go to state 230
+    rParenthesis    reduce using rule 141 (empty -> .)
+
+    MODE_A                         shift and go to state 229
+    empty                          shift and go to state 231
+
+state 177
+
+    (120) MEDIAN -> median lParenthesis id . MEDIAN_A rParenthesis semicolon
+    (121) MEDIAN_A -> . comma id MEDIAN_A
+    (122) MEDIAN_A -> . empty
+    (141) empty -> .
+
+    comma           shift and go to state 233
+    rParenthesis    reduce using rule 141 (empty -> .)
+
+    MEDIAN_A                       shift and go to state 232
+    empty                          shift and go to state 234
+
+state 178
+
+    (123) PROBABILITY -> prob lParenthesis id . PROBABILITY_A rParenthesis semicolon
+    (124) PROBABILITY_A -> . comma id PROBABILITY_A
+    (125) PROBABILITY_A -> . empty
+    (141) empty -> .
+
+    comma           shift and go to state 236
+    rParenthesis    reduce using rule 141 (empty -> .)
+
+    PROBABILITY_A                  shift and go to state 235
+    empty                          shift and go to state 237
+
+state 179
+
+    (126) FREQUENCY -> freq lParenthesis id . FREQUENCY_A rParenthesis semicolon
+    (127) FREQUENCY_A -> . comma id FREQUENCY_A
+    (128) FREQUENCY_A -> . empty
+    (141) empty -> .
+
+    comma           shift and go to state 239
+    rParenthesis    reduce using rule 141 (empty -> .)
+
+    FREQUENCY_A                    shift and go to state 238
+    empty                          shift and go to state 240
+
+state 180
+
+    (129) VARIANCE -> variance lParenthesis id . VARIANCE_A rParenthesis semicolon
+    (130) VARIANCE_A -> . comma id VARIANCE_A
+    (131) VARIANCE_A -> . empty
+    (141) empty -> .
+
+    comma           shift and go to state 242
+    rParenthesis    reduce using rule 141 (empty -> .)
+
+    VARIANCE_A                     shift and go to state 241
+    empty                          shift and go to state 243
+
+state 181
+
+    (132) STANDARD_DEVIATION -> stddev lParenthesis id . STANDARD_DEVIATION_A rParenthesis semicolon
+    (133) STANDARD_DEVIATION_A -> . comma id STANDARD_DEVIATION_A
+    (134) STANDARD_DEVIATION_A -> . empty
+    (141) empty -> .
+
+    comma           shift and go to state 245
+    rParenthesis    reduce using rule 141 (empty -> .)
+
+    STANDARD_DEVIATION_A           shift and go to state 244
+    empty                          shift and go to state 246
+
+state 182
+
+    (135) SKEWNESS -> skew lParenthesis id . SKEWNESS_A rParenthesis semicolon
+    (136) SKEWNESS_A -> . comma id SKEWNESS_A
+    (137) SKEWNESS_A -> . empty
+    (141) empty -> .
+
+    comma           shift and go to state 248
+    rParenthesis    reduce using rule 141 (empty -> .)
+
+    SKEWNESS_A                     shift and go to state 247
+    empty                          shift and go to state 249
+
+state 183
+
+    (138) KURTOSI -> kurt lParenthesis id . KURTOSI_A rParenthesis semicolon
+    (139) KURTOSI_A -> . comma id KURTOSI_A
+    (140) KURTOSI_A -> . empty
+    (141) empty -> .
+
+    comma           shift and go to state 251
+    rParenthesis    reduce using rule 141 (empty -> .)
+
+    KURTOSI_A                      shift and go to state 250
+    empty                          shift and go to state 252
+
+state 184
+
+    (14) NUMCONST -> id .
+
+    rSqrBracket     reduce using rule 14 (NUMCONST -> id .)
+
+
+state 185
+
+    (11) LIST -> id lSqrBracket NUMCONST . rSqrBracket LIST_A
+
+    rSqrBracket     shift and go to state 253
+
+
+state 186
+
+    (15) NUMCONST -> cte_i .
+
+    rSqrBracket     reduce using rule 15 (NUMCONST -> cte_i .)
+
+
+state 187
+
+    (16) NUMCONST -> cte_f .
+
+    rSqrBracket     reduce using rule 16 (NUMCONST -> cte_f .)
+
+
+state 188
+
+    (9) SIMPLE_A -> comma SIMPLE .
+
+    semicolon       reduce using rule 9 (SIMPLE_A -> comma SIMPLE .)
+
+
+state 189
+
+    (8) SIMPLE -> id . SIMPLE_A
+    (9) SIMPLE_A -> . comma SIMPLE
+    (10) SIMPLE_A -> . empty
+    (141) empty -> .
+
+    comma           shift and go to state 125
+    semicolon       reduce using rule 141 (empty -> .)
+
+    SIMPLE_A                       shift and go to state 123
+    empty                          shift and go to state 126
+
+state 190
+
+    (76) METHOD -> func TYPEMETHOD id lParenthesis PARAMS rParenthesis . BLOCK semicolon
+    (46) BLOCK -> . lCurlyBracket BLOCK_A rCurlyBracket
+
+    lCurlyBracket   shift and go to state 23
+
+    BLOCK                          shift and go to state 254
+
+state 191
+
+    (77) PARAMS -> EXP PARAMS_A .
+
+    rParenthesis    reduce using rule 77 (PARAMS -> EXP PARAMS_A .)
+
+
+state 192
+
+    (78) PARAMS_A -> comma . EXP PARAMS_A
+    (29) EXP -> . TERM EXP_A
+    (33) TERM -> . FACTOR TERM_A
+    (37) FACTOR -> . lParenthesis EXPLOG rParenthesis
+    (38) FACTOR -> . VARCONSTAUX
+    (39) VARCONSTAUX -> . id ISLIST
+    (40) VARCONSTAUX -> . cte_i
+    (41) VARCONSTAUX -> . cte_f
+
+    lParenthesis    shift and go to state 99
+    id              shift and go to state 101
+    cte_i           shift and go to state 102
+    cte_f           shift and go to state 103
+
+    EXP                            shift and go to state 255
+    TERM                           shift and go to state 97
+    FACTOR                         shift and go to state 98
+    VARCONSTAUX                    shift and go to state 100
+
+state 193
+
+    (79) PARAMS_A -> empty .
+
+    rParenthesis    reduce using rule 79 (PARAMS_A -> empty .)
+
+
+state 194
+
+    (57) ASSIGNMENT -> id ISLIST equals EXPRESSION . semicolon
+
+    semicolon       shift and go to state 256
+
+
+state 195
+
+    (81) METHODCALL -> id lParenthesis EXP METHODCALL_A . rParenthesis semicolon
+
+    rParenthesis    shift and go to state 257
+
+
+state 196
+
+    (82) METHODCALL_A -> comma . EXP
+    (29) EXP -> . TERM EXP_A
+    (33) TERM -> . FACTOR TERM_A
+    (37) FACTOR -> . lParenthesis EXPLOG rParenthesis
+    (38) FACTOR -> . VARCONSTAUX
+    (39) VARCONSTAUX -> . id ISLIST
+    (40) VARCONSTAUX -> . cte_i
+    (41) VARCONSTAUX -> . cte_f
+
+    lParenthesis    shift and go to state 99
+    id              shift and go to state 101
+    cte_i           shift and go to state 102
+    cte_f           shift and go to state 103
+
+    EXP                            shift and go to state 258
+    TERM                           shift and go to state 97
+    FACTOR                         shift and go to state 98
+    VARCONSTAUX                    shift and go to state 100
+
+state 197
+
+    (83) METHODCALL_A -> empty .
+
+    rParenthesis    reduce using rule 83 (METHODCALL_A -> empty .)
+
+
+state 198
+
+    (61) ISLIST -> lSqrBracket EXP rSqrBracket .
+
+    equals          reduce using rule 61 (ISLIST -> lSqrBracket EXP rSqrBracket .)
+    times           reduce using rule 61 (ISLIST -> lSqrBracket EXP rSqrBracket .)
+    divide          reduce using rule 61 (ISLIST -> lSqrBracket EXP rSqrBracket .)
+    plus            reduce using rule 61 (ISLIST -> lSqrBracket EXP rSqrBracket .)
+    minus           reduce using rule 61 (ISLIST -> lSqrBracket EXP rSqrBracket .)
+    greater         reduce using rule 61 (ISLIST -> lSqrBracket EXP rSqrBracket .)
+    lessThan        reduce using rule 61 (ISLIST -> lSqrBracket EXP rSqrBracket .)
+    greaterEquals   reduce using rule 61 (ISLIST -> lSqrBracket EXP rSqrBracket .)
+    lessThanEquals  reduce using rule 61 (ISLIST -> lSqrBracket EXP rSqrBracket .)
+    notEquals       reduce using rule 61 (ISLIST -> lSqrBracket EXP rSqrBracket .)
+    comma           reduce using rule 61 (ISLIST -> lSqrBracket EXP rSqrBracket .)
+    rParenthesis    reduce using rule 61 (ISLIST -> lSqrBracket EXP rSqrBracket .)
+    rSqrBracket     reduce using rule 61 (ISLIST -> lSqrBracket EXP rSqrBracket .)
+    and             reduce using rule 61 (ISLIST -> lSqrBracket EXP rSqrBracket .)
+    or              reduce using rule 61 (ISLIST -> lSqrBracket EXP rSqrBracket .)
+    semicolon       reduce using rule 61 (ISLIST -> lSqrBracket EXP rSqrBracket .)
+
+
+state 199
+
+    (65) CONDITION -> if lParenthesis EXPLOG rParenthesis . BLOCK CONDITION_A semicolon
+    (46) BLOCK -> . lCurlyBracket BLOCK_A rCurlyBracket
+
+    lCurlyBracket   shift and go to state 23
+
+    BLOCK                          shift and go to state 259
+
+state 200
+
+    (68) WRITE -> print lParenthesis EXPRESSION WRITE_A . rParenthesis semicolon
+
+    rParenthesis    shift and go to state 260
+
+
+state 201
+
+    (69) WRITE_A -> comma . EXPRESSION WRITE_A
+    (22) EXPRESSION -> . EXP EXPRESSION_A EXP
+    (29) EXP -> . TERM EXP_A
+    (33) TERM -> . FACTOR TERM_A
+    (37) FACTOR -> . lParenthesis EXPLOG rParenthesis
+    (38) FACTOR -> . VARCONSTAUX
+    (39) VARCONSTAUX -> . id ISLIST
+    (40) VARCONSTAUX -> . cte_i
+    (41) VARCONSTAUX -> . cte_f
+
+    lParenthesis    shift and go to state 99
+    id              shift and go to state 101
+    cte_i           shift and go to state 102
+    cte_f           shift and go to state 103
+
+    EXPRESSION                     shift and go to state 261
+    EXP                            shift and go to state 96
+    TERM                           shift and go to state 97
+    FACTOR                         shift and go to state 98
+    VARCONSTAUX                    shift and go to state 100
+
+state 202
+
+    (70) WRITE_A -> empty .
+
+    rParenthesis    reduce using rule 70 (WRITE_A -> empty .)
+
+
+state 203
+
+    (80) LOOP -> while lParenthesis EXPLOG rParenthesis . BLOCK
+    (46) BLOCK -> . lCurlyBracket BLOCK_A rCurlyBracket
+
+    lCurlyBracket   shift and go to state 23
+
+    BLOCK                          shift and go to state 262
+
+state 204
+
+    (58) READ -> scan lParenthesis VARCTE READ_A . rParenthesis
+
+    rParenthesis    shift and go to state 263
+
+
+state 205
+
+    (59) READ_A -> comma .
+
+    rParenthesis    reduce using rule 59 (READ_A -> comma .)
+
+
+state 206
+
+    (60) READ_A -> empty .
+
+    rParenthesis    reduce using rule 60 (READ_A -> empty .)
+
+
+state 207
+
+    (71) VARCTE -> id ISLIST .
+
+    comma           reduce using rule 71 (VARCTE -> id ISLIST .)
+    rParenthesis    reduce using rule 71 (VARCTE -> id ISLIST .)
+
+
+state 208
+
+    (19) EXPLOG_A -> and EXPLOG .
+
+    semicolon       reduce using rule 19 (EXPLOG_A -> and EXPLOG .)
+    rParenthesis    reduce using rule 19 (EXPLOG_A -> and EXPLOG .)
+
+
+state 209
+
+    (20) EXPLOG_A -> or EXPLOG .
+
+    semicolon       reduce using rule 20 (EXPLOG_A -> or EXPLOG .)
+    rParenthesis    reduce using rule 20 (EXPLOG_A -> or EXPLOG .)
+
+
+state 210
+
+    (18) EXPLOG -> not EXPRESSION EXPLOG_A .
+
+    semicolon       reduce using rule 18 (EXPLOG -> not EXPRESSION EXPLOG_A .)
+    rParenthesis    reduce using rule 18 (EXPLOG -> not EXPRESSION EXPLOG_A .)
+
+
+state 211
+
+    (22) EXPRESSION -> EXP EXPRESSION_A EXP .
+
+    and             reduce using rule 22 (EXPRESSION -> EXP EXPRESSION_A EXP .)
+    or              reduce using rule 22 (EXPRESSION -> EXP EXPRESSION_A EXP .)
+    semicolon       reduce using rule 22 (EXPRESSION -> EXP EXPRESSION_A EXP .)
+    rParenthesis    reduce using rule 22 (EXPRESSION -> EXP EXPRESSION_A EXP .)
+    comma           reduce using rule 22 (EXPRESSION -> EXP EXPRESSION_A EXP .)
+
+
+state 212
+
+    (30) EXP_A -> plus EXP .
+
+    greater         reduce using rule 30 (EXP_A -> plus EXP .)
+    lessThan        reduce using rule 30 (EXP_A -> plus EXP .)
+    greaterEquals   reduce using rule 30 (EXP_A -> plus EXP .)
+    lessThanEquals  reduce using rule 30 (EXP_A -> plus EXP .)
+    equals          reduce using rule 30 (EXP_A -> plus EXP .)
+    notEquals       reduce using rule 30 (EXP_A -> plus EXP .)
+    comma           reduce using rule 30 (EXP_A -> plus EXP .)
+    rParenthesis    reduce using rule 30 (EXP_A -> plus EXP .)
+    rSqrBracket     reduce using rule 30 (EXP_A -> plus EXP .)
+    and             reduce using rule 30 (EXP_A -> plus EXP .)
+    or              reduce using rule 30 (EXP_A -> plus EXP .)
+    semicolon       reduce using rule 30 (EXP_A -> plus EXP .)
+
+
+state 213
+
+    (31) EXP_A -> minus EXP .
+
+    greater         reduce using rule 31 (EXP_A -> minus EXP .)
+    lessThan        reduce using rule 31 (EXP_A -> minus EXP .)
+    greaterEquals   reduce using rule 31 (EXP_A -> minus EXP .)
+    lessThanEquals  reduce using rule 31 (EXP_A -> minus EXP .)
+    equals          reduce using rule 31 (EXP_A -> minus EXP .)
+    notEquals       reduce using rule 31 (EXP_A -> minus EXP .)
+    comma           reduce using rule 31 (EXP_A -> minus EXP .)
+    rParenthesis    reduce using rule 31 (EXP_A -> minus EXP .)
+    rSqrBracket     reduce using rule 31 (EXP_A -> minus EXP .)
+    and             reduce using rule 31 (EXP_A -> minus EXP .)
+    or              reduce using rule 31 (EXP_A -> minus EXP .)
+    semicolon       reduce using rule 31 (EXP_A -> minus EXP .)
+
+
+state 214
+
+    (34) TERM_A -> times TERM .
+
+    plus            reduce using rule 34 (TERM_A -> times TERM .)
+    minus           reduce using rule 34 (TERM_A -> times TERM .)
+    greater         reduce using rule 34 (TERM_A -> times TERM .)
+    lessThan        reduce using rule 34 (TERM_A -> times TERM .)
+    greaterEquals   reduce using rule 34 (TERM_A -> times TERM .)
+    lessThanEquals  reduce using rule 34 (TERM_A -> times TERM .)
+    equals          reduce using rule 34 (TERM_A -> times TERM .)
+    notEquals       reduce using rule 34 (TERM_A -> times TERM .)
+    comma           reduce using rule 34 (TERM_A -> times TERM .)
+    rParenthesis    reduce using rule 34 (TERM_A -> times TERM .)
+    rSqrBracket     reduce using rule 34 (TERM_A -> times TERM .)
+    and             reduce using rule 34 (TERM_A -> times TERM .)
+    or              reduce using rule 34 (TERM_A -> times TERM .)
+    semicolon       reduce using rule 34 (TERM_A -> times TERM .)
+
+
+state 215
+
+    (35) TERM_A -> divide TERM .
+
+    plus            reduce using rule 35 (TERM_A -> divide TERM .)
+    minus           reduce using rule 35 (TERM_A -> divide TERM .)
+    greater         reduce using rule 35 (TERM_A -> divide TERM .)
+    lessThan        reduce using rule 35 (TERM_A -> divide TERM .)
+    greaterEquals   reduce using rule 35 (TERM_A -> divide TERM .)
+    lessThanEquals  reduce using rule 35 (TERM_A -> divide TERM .)
+    equals          reduce using rule 35 (TERM_A -> divide TERM .)
+    notEquals       reduce using rule 35 (TERM_A -> divide TERM .)
+    comma           reduce using rule 35 (TERM_A -> divide TERM .)
+    rParenthesis    reduce using rule 35 (TERM_A -> divide TERM .)
+    rSqrBracket     reduce using rule 35 (TERM_A -> divide TERM .)
+    and             reduce using rule 35 (TERM_A -> divide TERM .)
+    or              reduce using rule 35 (TERM_A -> divide TERM .)
+    semicolon       reduce using rule 35 (TERM_A -> divide TERM .)
+
+
+state 216
+
+    (37) FACTOR -> lParenthesis EXPLOG rParenthesis .
+
+    times           reduce using rule 37 (FACTOR -> lParenthesis EXPLOG rParenthesis .)
+    divide          reduce using rule 37 (FACTOR -> lParenthesis EXPLOG rParenthesis .)
+    plus            reduce using rule 37 (FACTOR -> lParenthesis EXPLOG rParenthesis .)
+    minus           reduce using rule 37 (FACTOR -> lParenthesis EXPLOG rParenthesis .)
+    greater         reduce using rule 37 (FACTOR -> lParenthesis EXPLOG rParenthesis .)
+    lessThan        reduce using rule 37 (FACTOR -> lParenthesis EXPLOG rParenthesis .)
+    greaterEquals   reduce using rule 37 (FACTOR -> lParenthesis EXPLOG rParenthesis .)
+    lessThanEquals  reduce using rule 37 (FACTOR -> lParenthesis EXPLOG rParenthesis .)
+    equals          reduce using rule 37 (FACTOR -> lParenthesis EXPLOG rParenthesis .)
+    notEquals       reduce using rule 37 (FACTOR -> lParenthesis EXPLOG rParenthesis .)
+    comma           reduce using rule 37 (FACTOR -> lParenthesis EXPLOG rParenthesis .)
+    rParenthesis    reduce using rule 37 (FACTOR -> lParenthesis EXPLOG rParenthesis .)
+    rSqrBracket     reduce using rule 37 (FACTOR -> lParenthesis EXPLOG rParenthesis .)
+    and             reduce using rule 37 (FACTOR -> lParenthesis EXPLOG rParenthesis .)
+    or              reduce using rule 37 (FACTOR -> lParenthesis EXPLOG rParenthesis .)
+    semicolon       reduce using rule 37 (FACTOR -> lParenthesis EXPLOG rParenthesis .)
+
+
+state 217
+
+    (105) ORDINARY_LEAST_SQUARES -> ols lParenthesis id comma . id comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma BOOLEAN rParenthesis semicolon
+
+    id              shift and go to state 264
+
+
+state 218
+
+    (106) LASSO -> las lParenthesis id comma . id comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma string comma float comma BOOLEAN rParenthesis semicolon
+
+    id              shift and go to state 265
+
+
+state 219
+
+    (107) RIDGE -> rid lParenthesis id comma . id comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma VARCONSTAUX comma string comma VARCONSTAUX rParenthesis semicolon
+
+    id              shift and go to state 266
+
+
+state 220
+
+    (108) K_MEANS -> kmeans lParenthesis VARCONSTAUX comma . string comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma VARCONSTAUX comma string rParenthesis semicolon
+
+    string          shift and go to state 267
+
+
+state 221
+
+    (109) MINI_BATCH_MEANS -> mbm lParenthesis VARCONSTAUX comma . string comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX rParenthesis semicolon
+
+    string          shift and go to state 268
+
+
+state 222
+
+    (110) TIME_SERIES_SPLIT -> tseries lParenthesis VARCONSTAUX comma . VARCONSTAUX rParenthesis semicolon
+    (39) VARCONSTAUX -> . id ISLIST
+    (40) VARCONSTAUX -> . cte_i
+    (41) VARCONSTAUX -> . cte_f
+
+    id              shift and go to state 101
+    cte_i           shift and go to state 102
+    cte_f           shift and go to state 103
+
+    VARCONSTAUX                    shift and go to state 269
+
+state 223
+
+    (111) MEAN_ABSOLUTE_ERROR -> mean_abs_err lParenthesis id comma . id rParenthesis semicolon
+
+    id              shift and go to state 270
+
+
+state 224
+
+    (112) MEAN_SQUARED_ERROR -> mean_sqr_err lParenthesis id comma . id rParenthesis semicolon
+
+    id              shift and go to state 271
+
+
+state 225
+
+    (113) MEDIAN_ABSOLUTE_ERROR -> median_abs_err lParenthesis id comma . id rParenthesis semicolon
+
+    id              shift and go to state 272
+
+
+state 226
+
+    (114) MEAN -> mean lParenthesis id MEAN_A . rParenthesis semicolon
+
+    rParenthesis    shift and go to state 273
+
+
+state 227
+
+    (115) MEAN_A -> comma . id MEAN_A
+
+    id              shift and go to state 274
+
+
+state 228
+
+    (116) MEAN_A -> empty .
+
+    rParenthesis    reduce using rule 116 (MEAN_A -> empty .)
+
+
+state 229
+
+    (117) MODE -> mode lParenthesis id MODE_A . rParenthesis semicolon
+
+    rParenthesis    shift and go to state 275
+
+
+state 230
+
+    (118) MODE_A -> comma . id MODE_A
+
+    id              shift and go to state 276
+
+
+state 231
+
+    (119) MODE_A -> empty .
+
+    rParenthesis    reduce using rule 119 (MODE_A -> empty .)
+
+
+state 232
+
+    (120) MEDIAN -> median lParenthesis id MEDIAN_A . rParenthesis semicolon
+
+    rParenthesis    shift and go to state 277
+
+
+state 233
+
+    (121) MEDIAN_A -> comma . id MEDIAN_A
+
+    id              shift and go to state 278
+
+
+state 234
+
+    (122) MEDIAN_A -> empty .
+
+    rParenthesis    reduce using rule 122 (MEDIAN_A -> empty .)
+
+
+state 235
+
+    (123) PROBABILITY -> prob lParenthesis id PROBABILITY_A . rParenthesis semicolon
+
+    rParenthesis    shift and go to state 279
+
+
+state 236
+
+    (124) PROBABILITY_A -> comma . id PROBABILITY_A
+
+    id              shift and go to state 280
+
+
+state 237
+
+    (125) PROBABILITY_A -> empty .
+
+    rParenthesis    reduce using rule 125 (PROBABILITY_A -> empty .)
+
+
+state 238
+
+    (126) FREQUENCY -> freq lParenthesis id FREQUENCY_A . rParenthesis semicolon
+
+    rParenthesis    shift and go to state 281
+
+
+state 239
+
+    (127) FREQUENCY_A -> comma . id FREQUENCY_A
+
+    id              shift and go to state 282
+
+
+state 240
+
+    (128) FREQUENCY_A -> empty .
+
+    rParenthesis    reduce using rule 128 (FREQUENCY_A -> empty .)
+
+
+state 241
+
+    (129) VARIANCE -> variance lParenthesis id VARIANCE_A . rParenthesis semicolon
+
+    rParenthesis    shift and go to state 283
+
+
+state 242
+
+    (130) VARIANCE_A -> comma . id VARIANCE_A
+
+    id              shift and go to state 284
+
+
+state 243
+
+    (131) VARIANCE_A -> empty .
+
+    rParenthesis    reduce using rule 131 (VARIANCE_A -> empty .)
+
+
+state 244
+
+    (132) STANDARD_DEVIATION -> stddev lParenthesis id STANDARD_DEVIATION_A . rParenthesis semicolon
+
+    rParenthesis    shift and go to state 285
+
+
+state 245
+
+    (133) STANDARD_DEVIATION_A -> comma . id STANDARD_DEVIATION_A
+
+    id              shift and go to state 286
+
+
+state 246
+
+    (134) STANDARD_DEVIATION_A -> empty .
+
+    rParenthesis    reduce using rule 134 (STANDARD_DEVIATION_A -> empty .)
+
+
+state 247
+
+    (135) SKEWNESS -> skew lParenthesis id SKEWNESS_A . rParenthesis semicolon
+
+    rParenthesis    shift and go to state 287
+
+
+state 248
+
+    (136) SKEWNESS_A -> comma . id SKEWNESS_A
+
+    id              shift and go to state 288
+
+
+state 249
+
+    (137) SKEWNESS_A -> empty .
+
+    rParenthesis    reduce using rule 137 (SKEWNESS_A -> empty .)
+
+
+state 250
+
+    (138) KURTOSI -> kurt lParenthesis id KURTOSI_A . rParenthesis semicolon
+
+    rParenthesis    shift and go to state 289
+
+
+state 251
+
+    (139) KURTOSI_A -> comma . id KURTOSI_A
+
+    id              shift and go to state 290
+
+
+state 252
+
+    (140) KURTOSI_A -> empty .
+
+    rParenthesis    reduce using rule 140 (KURTOSI_A -> empty .)
+
+
+state 253
+
+    (11) LIST -> id lSqrBracket NUMCONST rSqrBracket . LIST_A
+    (12) LIST_A -> . LIST
+    (13) LIST_A -> . empty
+    (11) LIST -> . id lSqrBracket NUMCONST rSqrBracket LIST_A
+    (141) empty -> .
+
+    id              shift and go to state 291
+    semicolon       reduce using rule 141 (empty -> .)
+
+    LIST_A                         shift and go to state 292
+    LIST                           shift and go to state 293
+    empty                          shift and go to state 294
+
+state 254
+
+    (76) METHOD -> func TYPEMETHOD id lParenthesis PARAMS rParenthesis BLOCK . semicolon
+
+    semicolon       shift and go to state 295
+
+
+state 255
+
+    (78) PARAMS_A -> comma EXP . PARAMS_A
+    (78) PARAMS_A -> . comma EXP PARAMS_A
+    (79) PARAMS_A -> . empty
+    (141) empty -> .
+
+    comma           shift and go to state 192
+    rParenthesis    reduce using rule 141 (empty -> .)
+
+    PARAMS_A                       shift and go to state 296
+    empty                          shift and go to state 193
+
+state 256
+
+    (57) ASSIGNMENT -> id ISLIST equals EXPRESSION semicolon .
+
+    rCurlyBracket   reduce using rule 57 (ASSIGNMENT -> id ISLIST equals EXPRESSION semicolon .)
+
+
+state 257
+
+    (81) METHODCALL -> id lParenthesis EXP METHODCALL_A rParenthesis . semicolon
+
+    semicolon       shift and go to state 297
+
+
+state 258
+
+    (82) METHODCALL_A -> comma EXP .
+
+    rParenthesis    reduce using rule 82 (METHODCALL_A -> comma EXP .)
+
+
+state 259
+
+    (65) CONDITION -> if lParenthesis EXPLOG rParenthesis BLOCK . CONDITION_A semicolon
+    (66) CONDITION_A -> . else BLOCK
+    (67) CONDITION_A -> . empty
+    (141) empty -> .
+
+    else            shift and go to state 299
+    semicolon       reduce using rule 141 (empty -> .)
+
+    CONDITION_A                    shift and go to state 298
+    empty                          shift and go to state 300
+
+state 260
+
+    (68) WRITE -> print lParenthesis EXPRESSION WRITE_A rParenthesis . semicolon
+
+    semicolon       shift and go to state 301
+
+
+state 261
+
+    (69) WRITE_A -> comma EXPRESSION . WRITE_A
+    (69) WRITE_A -> . comma EXPRESSION WRITE_A
+    (70) WRITE_A -> . empty
+    (141) empty -> .
+
+    comma           shift and go to state 201
+    rParenthesis    reduce using rule 141 (empty -> .)
+
+    WRITE_A                        shift and go to state 302
+    empty                          shift and go to state 202
+
+state 262
+
+    (80) LOOP -> while lParenthesis EXPLOG rParenthesis BLOCK .
+
+    rCurlyBracket   reduce using rule 80 (LOOP -> while lParenthesis EXPLOG rParenthesis BLOCK .)
+
+
+state 263
+
+    (58) READ -> scan lParenthesis VARCTE READ_A rParenthesis .
+
+    rCurlyBracket   reduce using rule 58 (READ -> scan lParenthesis VARCTE READ_A rParenthesis .)
+
+
+state 264
+
+    (105) ORDINARY_LEAST_SQUARES -> ols lParenthesis id comma id . comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma BOOLEAN rParenthesis semicolon
+
+    comma           shift and go to state 303
+
+
+state 265
+
+    (106) LASSO -> las lParenthesis id comma id . comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma string comma float comma BOOLEAN rParenthesis semicolon
+
+    comma           shift and go to state 304
+
+
+state 266
+
+    (107) RIDGE -> rid lParenthesis id comma id . comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma VARCONSTAUX comma string comma VARCONSTAUX rParenthesis semicolon
+
+    comma           shift and go to state 305
+
+
+state 267
+
+    (108) K_MEANS -> kmeans lParenthesis VARCONSTAUX comma string . comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma VARCONSTAUX comma string rParenthesis semicolon
+
+    comma           shift and go to state 306
+
+
+state 268
+
+    (109) MINI_BATCH_MEANS -> mbm lParenthesis VARCONSTAUX comma string . comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX rParenthesis semicolon
+
+    comma           shift and go to state 307
+
+
+state 269
+
+    (110) TIME_SERIES_SPLIT -> tseries lParenthesis VARCONSTAUX comma VARCONSTAUX . rParenthesis semicolon
+
+    rParenthesis    shift and go to state 308
+
+
+state 270
+
+    (111) MEAN_ABSOLUTE_ERROR -> mean_abs_err lParenthesis id comma id . rParenthesis semicolon
+
+    rParenthesis    shift and go to state 309
+
+
+state 271
+
+    (112) MEAN_SQUARED_ERROR -> mean_sqr_err lParenthesis id comma id . rParenthesis semicolon
+
+    rParenthesis    shift and go to state 310
+
+
+state 272
+
+    (113) MEDIAN_ABSOLUTE_ERROR -> median_abs_err lParenthesis id comma id . rParenthesis semicolon
+
+    rParenthesis    shift and go to state 311
+
+
+state 273
+
+    (114) MEAN -> mean lParenthesis id MEAN_A rParenthesis . semicolon
+
+    semicolon       shift and go to state 312
+
+
+state 274
+
+    (115) MEAN_A -> comma id . MEAN_A
+    (115) MEAN_A -> . comma id MEAN_A
+    (116) MEAN_A -> . empty
+    (141) empty -> .
+
+    comma           shift and go to state 227
+    rParenthesis    reduce using rule 141 (empty -> .)
+
+    MEAN_A                         shift and go to state 313
+    empty                          shift and go to state 228
+
+state 275
+
+    (117) MODE -> mode lParenthesis id MODE_A rParenthesis . semicolon
+
+    semicolon       shift and go to state 314
+
+
+state 276
+
+    (118) MODE_A -> comma id . MODE_A
+    (118) MODE_A -> . comma id MODE_A
+    (119) MODE_A -> . empty
+    (141) empty -> .
+
+    comma           shift and go to state 230
+    rParenthesis    reduce using rule 141 (empty -> .)
+
+    MODE_A                         shift and go to state 315
+    empty                          shift and go to state 231
+
+state 277
+
+    (120) MEDIAN -> median lParenthesis id MEDIAN_A rParenthesis . semicolon
+
+    semicolon       shift and go to state 316
+
+
+state 278
+
+    (121) MEDIAN_A -> comma id . MEDIAN_A
+    (121) MEDIAN_A -> . comma id MEDIAN_A
+    (122) MEDIAN_A -> . empty
+    (141) empty -> .
+
+    comma           shift and go to state 233
+    rParenthesis    reduce using rule 141 (empty -> .)
+
+    MEDIAN_A                       shift and go to state 317
+    empty                          shift and go to state 234
+
+state 279
+
+    (123) PROBABILITY -> prob lParenthesis id PROBABILITY_A rParenthesis . semicolon
+
+    semicolon       shift and go to state 318
+
+
+state 280
+
+    (124) PROBABILITY_A -> comma id . PROBABILITY_A
+    (124) PROBABILITY_A -> . comma id PROBABILITY_A
+    (125) PROBABILITY_A -> . empty
+    (141) empty -> .
+
+    comma           shift and go to state 236
+    rParenthesis    reduce using rule 141 (empty -> .)
+
+    PROBABILITY_A                  shift and go to state 319
+    empty                          shift and go to state 237
+
+state 281
+
+    (126) FREQUENCY -> freq lParenthesis id FREQUENCY_A rParenthesis . semicolon
+
+    semicolon       shift and go to state 320
+
+
+state 282
+
+    (127) FREQUENCY_A -> comma id . FREQUENCY_A
+    (127) FREQUENCY_A -> . comma id FREQUENCY_A
+    (128) FREQUENCY_A -> . empty
+    (141) empty -> .
+
+    comma           shift and go to state 239
+    rParenthesis    reduce using rule 141 (empty -> .)
+
+    FREQUENCY_A                    shift and go to state 321
+    empty                          shift and go to state 240
+
+state 283
+
+    (129) VARIANCE -> variance lParenthesis id VARIANCE_A rParenthesis . semicolon
+
+    semicolon       shift and go to state 322
+
+
+state 284
+
+    (130) VARIANCE_A -> comma id . VARIANCE_A
+    (130) VARIANCE_A -> . comma id VARIANCE_A
+    (131) VARIANCE_A -> . empty
+    (141) empty -> .
+
+    comma           shift and go to state 242
+    rParenthesis    reduce using rule 141 (empty -> .)
+
+    VARIANCE_A                     shift and go to state 323
+    empty                          shift and go to state 243
+
+state 285
+
+    (132) STANDARD_DEVIATION -> stddev lParenthesis id STANDARD_DEVIATION_A rParenthesis . semicolon
+
+    semicolon       shift and go to state 324
+
+
+state 286
+
+    (133) STANDARD_DEVIATION_A -> comma id . STANDARD_DEVIATION_A
+    (133) STANDARD_DEVIATION_A -> . comma id STANDARD_DEVIATION_A
+    (134) STANDARD_DEVIATION_A -> . empty
+    (141) empty -> .
+
+    comma           shift and go to state 245
+    rParenthesis    reduce using rule 141 (empty -> .)
+
+    STANDARD_DEVIATION_A           shift and go to state 325
+    empty                          shift and go to state 246
+
+state 287
+
+    (135) SKEWNESS -> skew lParenthesis id SKEWNESS_A rParenthesis . semicolon
+
+    semicolon       shift and go to state 326
+
+
+state 288
+
+    (136) SKEWNESS_A -> comma id . SKEWNESS_A
+    (136) SKEWNESS_A -> . comma id SKEWNESS_A
+    (137) SKEWNESS_A -> . empty
+    (141) empty -> .
+
+    comma           shift and go to state 248
+    rParenthesis    reduce using rule 141 (empty -> .)
+
+    SKEWNESS_A                     shift and go to state 327
+    empty                          shift and go to state 249
+
+state 289
+
+    (138) KURTOSI -> kurt lParenthesis id KURTOSI_A rParenthesis . semicolon
+
+    semicolon       shift and go to state 328
+
+
+state 290
+
+    (139) KURTOSI_A -> comma id . KURTOSI_A
+    (139) KURTOSI_A -> . comma id KURTOSI_A
+    (140) KURTOSI_A -> . empty
+    (141) empty -> .
+
+    comma           shift and go to state 251
+    rParenthesis    reduce using rule 141 (empty -> .)
+
+    KURTOSI_A                      shift and go to state 329
+    empty                          shift and go to state 252
+
+state 291
+
+    (11) LIST -> id . lSqrBracket NUMCONST rSqrBracket LIST_A
+
+    lSqrBracket     shift and go to state 124
+
+
+state 292
+
+    (11) LIST -> id lSqrBracket NUMCONST rSqrBracket LIST_A .
+
+    semicolon       reduce using rule 11 (LIST -> id lSqrBracket NUMCONST rSqrBracket LIST_A .)
+
+
+state 293
+
+    (12) LIST_A -> LIST .
+
+    semicolon       reduce using rule 12 (LIST_A -> LIST .)
+
+
+state 294
+
+    (13) LIST_A -> empty .
+
+    semicolon       reduce using rule 13 (LIST_A -> empty .)
+
+
+state 295
+
+    (76) METHOD -> func TYPEMETHOD id lParenthesis PARAMS rParenthesis BLOCK semicolon .
+
+    var             reduce using rule 76 (METHOD -> func TYPEMETHOD id lParenthesis PARAMS rParenthesis BLOCK semicolon .)
+    func            reduce using rule 76 (METHOD -> func TYPEMETHOD id lParenthesis PARAMS rParenthesis BLOCK semicolon .)
+    start           reduce using rule 76 (METHOD -> func TYPEMETHOD id lParenthesis PARAMS rParenthesis BLOCK semicolon .)
+
+
+state 296
+
+    (78) PARAMS_A -> comma EXP PARAMS_A .
+
+    rParenthesis    reduce using rule 78 (PARAMS_A -> comma EXP PARAMS_A .)
+
+
+state 297
+
+    (81) METHODCALL -> id lParenthesis EXP METHODCALL_A rParenthesis semicolon .
+
+    rCurlyBracket   reduce using rule 81 (METHODCALL -> id lParenthesis EXP METHODCALL_A rParenthesis semicolon .)
+
+
+state 298
+
+    (65) CONDITION -> if lParenthesis EXPLOG rParenthesis BLOCK CONDITION_A . semicolon
+
+    semicolon       shift and go to state 330
+
+
+state 299
+
+    (66) CONDITION_A -> else . BLOCK
+    (46) BLOCK -> . lCurlyBracket BLOCK_A rCurlyBracket
+
+    lCurlyBracket   shift and go to state 23
+
+    BLOCK                          shift and go to state 331
+
+state 300
+
+    (67) CONDITION_A -> empty .
+
+    semicolon       reduce using rule 67 (CONDITION_A -> empty .)
+
+
+state 301
+
+    (68) WRITE -> print lParenthesis EXPRESSION WRITE_A rParenthesis semicolon .
+
+    rCurlyBracket   reduce using rule 68 (WRITE -> print lParenthesis EXPRESSION WRITE_A rParenthesis semicolon .)
+
+
+state 302
+
+    (69) WRITE_A -> comma EXPRESSION WRITE_A .
+
+    rParenthesis    reduce using rule 69 (WRITE_A -> comma EXPRESSION WRITE_A .)
+
+
+state 303
+
+    (105) ORDINARY_LEAST_SQUARES -> ols lParenthesis id comma id comma . BOOLEAN comma BOOLEAN comma VARCONSTAUX comma BOOLEAN rParenthesis semicolon
+    (85) BOOLEAN -> . FALSE
+    (86) BOOLEAN -> . TRUE
+
+    FALSE           shift and go to state 141
+    TRUE            shift and go to state 142
+
+    BOOLEAN                        shift and go to state 332
+
+state 304
+
+    (106) LASSO -> las lParenthesis id comma id comma . VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma string comma float comma BOOLEAN rParenthesis semicolon
+    (39) VARCONSTAUX -> . id ISLIST
+    (40) VARCONSTAUX -> . cte_i
+    (41) VARCONSTAUX -> . cte_f
+
+    id              shift and go to state 101
+    cte_i           shift and go to state 102
+    cte_f           shift and go to state 103
+
+    VARCONSTAUX                    shift and go to state 333
+
+state 305
+
+    (107) RIDGE -> rid lParenthesis id comma id comma . VARCONSTAUX comma BOOLEAN comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma VARCONSTAUX comma string comma VARCONSTAUX rParenthesis semicolon
+    (39) VARCONSTAUX -> . id ISLIST
+    (40) VARCONSTAUX -> . cte_i
+    (41) VARCONSTAUX -> . cte_f
+
+    id              shift and go to state 101
+    cte_i           shift and go to state 102
+    cte_f           shift and go to state 103
+
+    VARCONSTAUX                    shift and go to state 334
+
+state 306
+
+    (108) K_MEANS -> kmeans lParenthesis VARCONSTAUX comma string comma . VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma VARCONSTAUX comma string rParenthesis semicolon
+    (39) VARCONSTAUX -> . id ISLIST
+    (40) VARCONSTAUX -> . cte_i
+    (41) VARCONSTAUX -> . cte_f
+
+    id              shift and go to state 101
+    cte_i           shift and go to state 102
+    cte_f           shift and go to state 103
+
+    VARCONSTAUX                    shift and go to state 335
+
+state 307
+
+    (109) MINI_BATCH_MEANS -> mbm lParenthesis VARCONSTAUX comma string comma . VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX rParenthesis semicolon
+    (39) VARCONSTAUX -> . id ISLIST
+    (40) VARCONSTAUX -> . cte_i
+    (41) VARCONSTAUX -> . cte_f
+
+    id              shift and go to state 101
+    cte_i           shift and go to state 102
+    cte_f           shift and go to state 103
+
+    VARCONSTAUX                    shift and go to state 336
+
+state 308
+
+    (110) TIME_SERIES_SPLIT -> tseries lParenthesis VARCONSTAUX comma VARCONSTAUX rParenthesis . semicolon
+
+    semicolon       shift and go to state 337
+
+
+state 309
+
+    (111) MEAN_ABSOLUTE_ERROR -> mean_abs_err lParenthesis id comma id rParenthesis . semicolon
+
+    semicolon       shift and go to state 338
+
+
+state 310
+
+    (112) MEAN_SQUARED_ERROR -> mean_sqr_err lParenthesis id comma id rParenthesis . semicolon
+
+    semicolon       shift and go to state 339
+
+
+state 311
+
+    (113) MEDIAN_ABSOLUTE_ERROR -> median_abs_err lParenthesis id comma id rParenthesis . semicolon
+
+    semicolon       shift and go to state 340
+
+
+state 312
+
+    (114) MEAN -> mean lParenthesis id MEAN_A rParenthesis semicolon .
+
+    rCurlyBracket   reduce using rule 114 (MEAN -> mean lParenthesis id MEAN_A rParenthesis semicolon .)
+
+
+state 313
+
+    (115) MEAN_A -> comma id MEAN_A .
+
+    rParenthesis    reduce using rule 115 (MEAN_A -> comma id MEAN_A .)
+
+
+state 314
+
+    (117) MODE -> mode lParenthesis id MODE_A rParenthesis semicolon .
+
+    rCurlyBracket   reduce using rule 117 (MODE -> mode lParenthesis id MODE_A rParenthesis semicolon .)
+
+
+state 315
+
+    (118) MODE_A -> comma id MODE_A .
+
+    rParenthesis    reduce using rule 118 (MODE_A -> comma id MODE_A .)
+
+
+state 316
+
+    (120) MEDIAN -> median lParenthesis id MEDIAN_A rParenthesis semicolon .
+
+    rCurlyBracket   reduce using rule 120 (MEDIAN -> median lParenthesis id MEDIAN_A rParenthesis semicolon .)
+
+
+state 317
+
+    (121) MEDIAN_A -> comma id MEDIAN_A .
+
+    rParenthesis    reduce using rule 121 (MEDIAN_A -> comma id MEDIAN_A .)
+
+
+state 318
+
+    (123) PROBABILITY -> prob lParenthesis id PROBABILITY_A rParenthesis semicolon .
+
+    rCurlyBracket   reduce using rule 123 (PROBABILITY -> prob lParenthesis id PROBABILITY_A rParenthesis semicolon .)
+
+
+state 319
+
+    (124) PROBABILITY_A -> comma id PROBABILITY_A .
+
+    rParenthesis    reduce using rule 124 (PROBABILITY_A -> comma id PROBABILITY_A .)
+
+
+state 320
+
+    (126) FREQUENCY -> freq lParenthesis id FREQUENCY_A rParenthesis semicolon .
+
+    rCurlyBracket   reduce using rule 126 (FREQUENCY -> freq lParenthesis id FREQUENCY_A rParenthesis semicolon .)
+
+
+state 321
+
+    (127) FREQUENCY_A -> comma id FREQUENCY_A .
+
+    rParenthesis    reduce using rule 127 (FREQUENCY_A -> comma id FREQUENCY_A .)
+
+
+state 322
+
+    (129) VARIANCE -> variance lParenthesis id VARIANCE_A rParenthesis semicolon .
+
+    rCurlyBracket   reduce using rule 129 (VARIANCE -> variance lParenthesis id VARIANCE_A rParenthesis semicolon .)
+
+
+state 323
+
+    (130) VARIANCE_A -> comma id VARIANCE_A .
+
+    rParenthesis    reduce using rule 130 (VARIANCE_A -> comma id VARIANCE_A .)
+
+
+state 324
+
+    (132) STANDARD_DEVIATION -> stddev lParenthesis id STANDARD_DEVIATION_A rParenthesis semicolon .
+
+    rCurlyBracket   reduce using rule 132 (STANDARD_DEVIATION -> stddev lParenthesis id STANDARD_DEVIATION_A rParenthesis semicolon .)
+
+
+state 325
+
+    (133) STANDARD_DEVIATION_A -> comma id STANDARD_DEVIATION_A .
+
+    rParenthesis    reduce using rule 133 (STANDARD_DEVIATION_A -> comma id STANDARD_DEVIATION_A .)
+
+
+state 326
+
+    (135) SKEWNESS -> skew lParenthesis id SKEWNESS_A rParenthesis semicolon .
+
+    rCurlyBracket   reduce using rule 135 (SKEWNESS -> skew lParenthesis id SKEWNESS_A rParenthesis semicolon .)
+
+
+state 327
+
+    (136) SKEWNESS_A -> comma id SKEWNESS_A .
+
+    rParenthesis    reduce using rule 136 (SKEWNESS_A -> comma id SKEWNESS_A .)
+
+
+state 328
+
+    (138) KURTOSI -> kurt lParenthesis id KURTOSI_A rParenthesis semicolon .
+
+    rCurlyBracket   reduce using rule 138 (KURTOSI -> kurt lParenthesis id KURTOSI_A rParenthesis semicolon .)
+
+
+state 329
+
+    (139) KURTOSI_A -> comma id KURTOSI_A .
+
+    rParenthesis    reduce using rule 139 (KURTOSI_A -> comma id KURTOSI_A .)
+
+
+state 330
+
+    (65) CONDITION -> if lParenthesis EXPLOG rParenthesis BLOCK CONDITION_A semicolon .
+
+    rCurlyBracket   reduce using rule 65 (CONDITION -> if lParenthesis EXPLOG rParenthesis BLOCK CONDITION_A semicolon .)
+
+
+state 331
+
+    (66) CONDITION_A -> else BLOCK .
+
+    semicolon       reduce using rule 66 (CONDITION_A -> else BLOCK .)
+
+
+state 332
+
+    (105) ORDINARY_LEAST_SQUARES -> ols lParenthesis id comma id comma BOOLEAN . comma BOOLEAN comma VARCONSTAUX comma BOOLEAN rParenthesis semicolon
+
+    comma           shift and go to state 341
+
+
+state 333
+
+    (106) LASSO -> las lParenthesis id comma id comma VARCONSTAUX . comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma string comma float comma BOOLEAN rParenthesis semicolon
+
+    comma           shift and go to state 342
+
+
+state 334
+
+    (107) RIDGE -> rid lParenthesis id comma id comma VARCONSTAUX . comma BOOLEAN comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma VARCONSTAUX comma string comma VARCONSTAUX rParenthesis semicolon
+
+    comma           shift and go to state 343
+
+
+state 335
+
+    (108) K_MEANS -> kmeans lParenthesis VARCONSTAUX comma string comma VARCONSTAUX . comma VARCONSTAUX comma VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma VARCONSTAUX comma string rParenthesis semicolon
+
+    comma           shift and go to state 344
+
+
+state 336
+
+    (109) MINI_BATCH_MEANS -> mbm lParenthesis VARCONSTAUX comma string comma VARCONSTAUX . comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX rParenthesis semicolon
+
+    comma           shift and go to state 345
+
+
+state 337
+
+    (110) TIME_SERIES_SPLIT -> tseries lParenthesis VARCONSTAUX comma VARCONSTAUX rParenthesis semicolon .
+
+    rCurlyBracket   reduce using rule 110 (TIME_SERIES_SPLIT -> tseries lParenthesis VARCONSTAUX comma VARCONSTAUX rParenthesis semicolon .)
+
+
+state 338
+
+    (111) MEAN_ABSOLUTE_ERROR -> mean_abs_err lParenthesis id comma id rParenthesis semicolon .
+
+    rCurlyBracket   reduce using rule 111 (MEAN_ABSOLUTE_ERROR -> mean_abs_err lParenthesis id comma id rParenthesis semicolon .)
+
+
+state 339
+
+    (112) MEAN_SQUARED_ERROR -> mean_sqr_err lParenthesis id comma id rParenthesis semicolon .
+
+    rCurlyBracket   reduce using rule 112 (MEAN_SQUARED_ERROR -> mean_sqr_err lParenthesis id comma id rParenthesis semicolon .)
+
+
+state 340
+
+    (113) MEDIAN_ABSOLUTE_ERROR -> median_abs_err lParenthesis id comma id rParenthesis semicolon .
+
+    rCurlyBracket   reduce using rule 113 (MEDIAN_ABSOLUTE_ERROR -> median_abs_err lParenthesis id comma id rParenthesis semicolon .)
+
+
+state 341
+
+    (105) ORDINARY_LEAST_SQUARES -> ols lParenthesis id comma id comma BOOLEAN comma . BOOLEAN comma VARCONSTAUX comma BOOLEAN rParenthesis semicolon
+    (85) BOOLEAN -> . FALSE
+    (86) BOOLEAN -> . TRUE
+
+    FALSE           shift and go to state 141
+    TRUE            shift and go to state 142
+
+    BOOLEAN                        shift and go to state 346
+
+state 342
+
+    (106) LASSO -> las lParenthesis id comma id comma VARCONSTAUX comma . BOOLEAN comma BOOLEAN comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma string comma float comma BOOLEAN rParenthesis semicolon
+    (85) BOOLEAN -> . FALSE
+    (86) BOOLEAN -> . TRUE
+
+    FALSE           shift and go to state 141
+    TRUE            shift and go to state 142
+
+    BOOLEAN                        shift and go to state 347
+
+state 343
+
+    (107) RIDGE -> rid lParenthesis id comma id comma VARCONSTAUX comma . BOOLEAN comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma VARCONSTAUX comma string comma VARCONSTAUX rParenthesis semicolon
+    (85) BOOLEAN -> . FALSE
+    (86) BOOLEAN -> . TRUE
+
+    FALSE           shift and go to state 141
+    TRUE            shift and go to state 142
+
+    BOOLEAN                        shift and go to state 348
+
+state 344
+
+    (108) K_MEANS -> kmeans lParenthesis VARCONSTAUX comma string comma VARCONSTAUX comma . VARCONSTAUX comma VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma VARCONSTAUX comma string rParenthesis semicolon
+    (39) VARCONSTAUX -> . id ISLIST
+    (40) VARCONSTAUX -> . cte_i
+    (41) VARCONSTAUX -> . cte_f
+
+    id              shift and go to state 101
+    cte_i           shift and go to state 102
+    cte_f           shift and go to state 103
+
+    VARCONSTAUX                    shift and go to state 349
+
+state 345
+
+    (109) MINI_BATCH_MEANS -> mbm lParenthesis VARCONSTAUX comma string comma VARCONSTAUX comma . VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX rParenthesis semicolon
+    (39) VARCONSTAUX -> . id ISLIST
+    (40) VARCONSTAUX -> . cte_i
+    (41) VARCONSTAUX -> . cte_f
+
+    id              shift and go to state 101
+    cte_i           shift and go to state 102
+    cte_f           shift and go to state 103
+
+    VARCONSTAUX                    shift and go to state 350
+
+state 346
+
+    (105) ORDINARY_LEAST_SQUARES -> ols lParenthesis id comma id comma BOOLEAN comma BOOLEAN . comma VARCONSTAUX comma BOOLEAN rParenthesis semicolon
+
+    comma           shift and go to state 351
+
+
+state 347
+
+    (106) LASSO -> las lParenthesis id comma id comma VARCONSTAUX comma BOOLEAN . comma BOOLEAN comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma string comma float comma BOOLEAN rParenthesis semicolon
+
+    comma           shift and go to state 352
+
+
+state 348
+
+    (107) RIDGE -> rid lParenthesis id comma id comma VARCONSTAUX comma BOOLEAN . comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma VARCONSTAUX comma string comma VARCONSTAUX rParenthesis semicolon
+
+    comma           shift and go to state 353
+
+
+state 349
+
+    (108) K_MEANS -> kmeans lParenthesis VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX . comma VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma VARCONSTAUX comma string rParenthesis semicolon
+
+    comma           shift and go to state 354
+
+
+state 350
+
+    (109) MINI_BATCH_MEANS -> mbm lParenthesis VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX . comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX rParenthesis semicolon
+
+    comma           shift and go to state 355
+
+
+state 351
+
+    (105) ORDINARY_LEAST_SQUARES -> ols lParenthesis id comma id comma BOOLEAN comma BOOLEAN comma . VARCONSTAUX comma BOOLEAN rParenthesis semicolon
+    (39) VARCONSTAUX -> . id ISLIST
+    (40) VARCONSTAUX -> . cte_i
+    (41) VARCONSTAUX -> . cte_f
+
+    id              shift and go to state 101
+    cte_i           shift and go to state 102
+    cte_f           shift and go to state 103
+
+    VARCONSTAUX                    shift and go to state 356
+
+state 352
+
+    (106) LASSO -> las lParenthesis id comma id comma VARCONSTAUX comma BOOLEAN comma . BOOLEAN comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma string comma float comma BOOLEAN rParenthesis semicolon
+    (85) BOOLEAN -> . FALSE
+    (86) BOOLEAN -> . TRUE
+
+    FALSE           shift and go to state 141
+    TRUE            shift and go to state 142
+
+    BOOLEAN                        shift and go to state 357
+
+state 353
+
+    (107) RIDGE -> rid lParenthesis id comma id comma VARCONSTAUX comma BOOLEAN comma . BOOLEAN comma BOOLEAN comma VARCONSTAUX comma VARCONSTAUX comma string comma VARCONSTAUX rParenthesis semicolon
+    (85) BOOLEAN -> . FALSE
+    (86) BOOLEAN -> . TRUE
+
+    FALSE           shift and go to state 141
+    TRUE            shift and go to state 142
+
+    BOOLEAN                        shift and go to state 358
+
+state 354
+
+    (108) K_MEANS -> kmeans lParenthesis VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma . VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma VARCONSTAUX comma string rParenthesis semicolon
+    (39) VARCONSTAUX -> . id ISLIST
+    (40) VARCONSTAUX -> . cte_i
+    (41) VARCONSTAUX -> . cte_f
+
+    id              shift and go to state 101
+    cte_i           shift and go to state 102
+    cte_f           shift and go to state 103
+
+    VARCONSTAUX                    shift and go to state 359
+
+state 355
+
+    (109) MINI_BATCH_MEANS -> mbm lParenthesis VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma . BOOLEAN comma BOOLEAN comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX rParenthesis semicolon
+    (85) BOOLEAN -> . FALSE
+    (86) BOOLEAN -> . TRUE
+
+    FALSE           shift and go to state 141
+    TRUE            shift and go to state 142
+
+    BOOLEAN                        shift and go to state 360
+
+state 356
+
+    (105) ORDINARY_LEAST_SQUARES -> ols lParenthesis id comma id comma BOOLEAN comma BOOLEAN comma VARCONSTAUX . comma BOOLEAN rParenthesis semicolon
+
+    comma           shift and go to state 361
+
+
+state 357
+
+    (106) LASSO -> las lParenthesis id comma id comma VARCONSTAUX comma BOOLEAN comma BOOLEAN . comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma string comma float comma BOOLEAN rParenthesis semicolon
+
+    comma           shift and go to state 362
+
+
+state 358
+
+    (107) RIDGE -> rid lParenthesis id comma id comma VARCONSTAUX comma BOOLEAN comma BOOLEAN . comma BOOLEAN comma VARCONSTAUX comma VARCONSTAUX comma string comma VARCONSTAUX rParenthesis semicolon
+
+    comma           shift and go to state 363
+
+
+state 359
+
+    (108) K_MEANS -> kmeans lParenthesis VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX . comma string comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma VARCONSTAUX comma string rParenthesis semicolon
+
+    comma           shift and go to state 364
+
+
+state 360
+
+    (109) MINI_BATCH_MEANS -> mbm lParenthesis VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN . comma BOOLEAN comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX rParenthesis semicolon
+
+    comma           shift and go to state 365
+
+
+state 361
+
+    (105) ORDINARY_LEAST_SQUARES -> ols lParenthesis id comma id comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma . BOOLEAN rParenthesis semicolon
+    (85) BOOLEAN -> . FALSE
+    (86) BOOLEAN -> . TRUE
+
+    FALSE           shift and go to state 141
+    TRUE            shift and go to state 142
+
+    BOOLEAN                        shift and go to state 366
+
+state 362
+
+    (106) LASSO -> las lParenthesis id comma id comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma . VARCONSTAUX comma BOOLEAN comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma string comma float comma BOOLEAN rParenthesis semicolon
+    (39) VARCONSTAUX -> . id ISLIST
+    (40) VARCONSTAUX -> . cte_i
+    (41) VARCONSTAUX -> . cte_f
+
+    id              shift and go to state 101
+    cte_i           shift and go to state 102
+    cte_f           shift and go to state 103
+
+    VARCONSTAUX                    shift and go to state 367
+
+state 363
+
+    (107) RIDGE -> rid lParenthesis id comma id comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma . BOOLEAN comma VARCONSTAUX comma VARCONSTAUX comma string comma VARCONSTAUX rParenthesis semicolon
+    (85) BOOLEAN -> . FALSE
+    (86) BOOLEAN -> . TRUE
+
+    FALSE           shift and go to state 141
+    TRUE            shift and go to state 142
+
+    BOOLEAN                        shift and go to state 368
+
+state 364
+
+    (108) K_MEANS -> kmeans lParenthesis VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma . string comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma VARCONSTAUX comma string rParenthesis semicolon
+
+    string          shift and go to state 369
+
+
+state 365
+
+    (109) MINI_BATCH_MEANS -> mbm lParenthesis VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma . BOOLEAN comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX rParenthesis semicolon
+    (85) BOOLEAN -> . FALSE
+    (86) BOOLEAN -> . TRUE
+
+    FALSE           shift and go to state 141
+    TRUE            shift and go to state 142
+
+    BOOLEAN                        shift and go to state 370
+
+state 366
+
+    (105) ORDINARY_LEAST_SQUARES -> ols lParenthesis id comma id comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma BOOLEAN . rParenthesis semicolon
+
+    rParenthesis    shift and go to state 371
+
+
+state 367
+
+    (106) LASSO -> las lParenthesis id comma id comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX . comma BOOLEAN comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma string comma float comma BOOLEAN rParenthesis semicolon
+
+    comma           shift and go to state 372
+
+
+state 368
+
+    (107) RIDGE -> rid lParenthesis id comma id comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma BOOLEAN . comma VARCONSTAUX comma VARCONSTAUX comma string comma VARCONSTAUX rParenthesis semicolon
+
+    comma           shift and go to state 373
+
+
+state 369
+
+    (108) K_MEANS -> kmeans lParenthesis VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma string . comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma VARCONSTAUX comma string rParenthesis semicolon
+
+    comma           shift and go to state 374
+
+
+state 370
+
+    (109) MINI_BATCH_MEANS -> mbm lParenthesis VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma BOOLEAN . comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX rParenthesis semicolon
+
+    comma           shift and go to state 375
+
+
+state 371
+
+    (105) ORDINARY_LEAST_SQUARES -> ols lParenthesis id comma id comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma BOOLEAN rParenthesis . semicolon
+
+    semicolon       shift and go to state 376
+
+
+state 372
+
+    (106) LASSO -> las lParenthesis id comma id comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma . BOOLEAN comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma string comma float comma BOOLEAN rParenthesis semicolon
+    (85) BOOLEAN -> . FALSE
+    (86) BOOLEAN -> . TRUE
+
+    FALSE           shift and go to state 141
+    TRUE            shift and go to state 142
+
+    BOOLEAN                        shift and go to state 377
+
+state 373
+
+    (107) RIDGE -> rid lParenthesis id comma id comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma BOOLEAN comma . VARCONSTAUX comma VARCONSTAUX comma string comma VARCONSTAUX rParenthesis semicolon
+    (39) VARCONSTAUX -> . id ISLIST
+    (40) VARCONSTAUX -> . cte_i
+    (41) VARCONSTAUX -> . cte_f
+
+    id              shift and go to state 101
+    cte_i           shift and go to state 102
+    cte_f           shift and go to state 103
+
+    VARCONSTAUX                    shift and go to state 378
+
+state 374
+
+    (108) K_MEANS -> kmeans lParenthesis VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma string comma . VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma VARCONSTAUX comma string rParenthesis semicolon
+    (39) VARCONSTAUX -> . id ISLIST
+    (40) VARCONSTAUX -> . cte_i
+    (41) VARCONSTAUX -> . cte_f
+
+    id              shift and go to state 101
+    cte_i           shift and go to state 102
+    cte_f           shift and go to state 103
+
+    VARCONSTAUX                    shift and go to state 379
+
+state 375
+
+    (109) MINI_BATCH_MEANS -> mbm lParenthesis VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma . VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX rParenthesis semicolon
+    (39) VARCONSTAUX -> . id ISLIST
+    (40) VARCONSTAUX -> . cte_i
+    (41) VARCONSTAUX -> . cte_f
+
+    id              shift and go to state 101
+    cte_i           shift and go to state 102
+    cte_f           shift and go to state 103
+
+    VARCONSTAUX                    shift and go to state 380
+
+state 376
+
+    (105) ORDINARY_LEAST_SQUARES -> ols lParenthesis id comma id comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma BOOLEAN rParenthesis semicolon .
+
+    rCurlyBracket   reduce using rule 105 (ORDINARY_LEAST_SQUARES -> ols lParenthesis id comma id comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma BOOLEAN rParenthesis semicolon .)
+
+
+state 377
+
+    (106) LASSO -> las lParenthesis id comma id comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma BOOLEAN . comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma string comma float comma BOOLEAN rParenthesis semicolon
+
+    comma           shift and go to state 381
+
+
+state 378
+
+    (107) RIDGE -> rid lParenthesis id comma id comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma BOOLEAN comma VARCONSTAUX . comma VARCONSTAUX comma string comma VARCONSTAUX rParenthesis semicolon
+
+    comma           shift and go to state 382
+
+
+state 379
+
+    (108) K_MEANS -> kmeans lParenthesis VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma string comma VARCONSTAUX . comma VARCONSTAUX comma BOOLEAN comma VARCONSTAUX comma string rParenthesis semicolon
+
+    comma           shift and go to state 383
+
+
+state 380
+
+    (109) MINI_BATCH_MEANS -> mbm lParenthesis VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX . comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX rParenthesis semicolon
+
+    comma           shift and go to state 384
+
+
+state 381
+
+    (106) LASSO -> las lParenthesis id comma id comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma BOOLEAN comma . BOOLEAN comma BOOLEAN comma VARCONSTAUX comma string comma float comma BOOLEAN rParenthesis semicolon
+    (85) BOOLEAN -> . FALSE
+    (86) BOOLEAN -> . TRUE
+
+    FALSE           shift and go to state 141
+    TRUE            shift and go to state 142
+
+    BOOLEAN                        shift and go to state 385
+
+state 382
+
+    (107) RIDGE -> rid lParenthesis id comma id comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma . VARCONSTAUX comma string comma VARCONSTAUX rParenthesis semicolon
+    (39) VARCONSTAUX -> . id ISLIST
+    (40) VARCONSTAUX -> . cte_i
+    (41) VARCONSTAUX -> . cte_f
+
+    id              shift and go to state 101
+    cte_i           shift and go to state 102
+    cte_f           shift and go to state 103
+
+    VARCONSTAUX                    shift and go to state 386
+
+state 383
+
+    (108) K_MEANS -> kmeans lParenthesis VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma string comma VARCONSTAUX comma . VARCONSTAUX comma BOOLEAN comma VARCONSTAUX comma string rParenthesis semicolon
+    (39) VARCONSTAUX -> . id ISLIST
+    (40) VARCONSTAUX -> . cte_i
+    (41) VARCONSTAUX -> . cte_f
+
+    id              shift and go to state 101
+    cte_i           shift and go to state 102
+    cte_f           shift and go to state 103
+
+    VARCONSTAUX                    shift and go to state 387
+
+state 384
+
+    (109) MINI_BATCH_MEANS -> mbm lParenthesis VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma . VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX rParenthesis semicolon
+    (39) VARCONSTAUX -> . id ISLIST
+    (40) VARCONSTAUX -> . cte_i
+    (41) VARCONSTAUX -> . cte_f
+
+    id              shift and go to state 101
+    cte_i           shift and go to state 102
+    cte_f           shift and go to state 103
+
+    VARCONSTAUX                    shift and go to state 388
+
+state 385
+
+    (106) LASSO -> las lParenthesis id comma id comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma BOOLEAN comma BOOLEAN . comma BOOLEAN comma VARCONSTAUX comma string comma float comma BOOLEAN rParenthesis semicolon
+
+    comma           shift and go to state 389
+
+
+state 386
+
+    (107) RIDGE -> rid lParenthesis id comma id comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma VARCONSTAUX . comma string comma VARCONSTAUX rParenthesis semicolon
+
+    comma           shift and go to state 390
+
+
+state 387
+
+    (108) K_MEANS -> kmeans lParenthesis VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX . comma BOOLEAN comma VARCONSTAUX comma string rParenthesis semicolon
+
+    comma           shift and go to state 391
+
+
+state 388
+
+    (109) MINI_BATCH_MEANS -> mbm lParenthesis VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma VARCONSTAUX . comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX rParenthesis semicolon
+
+    comma           shift and go to state 392
+
+
+state 389
+
+    (106) LASSO -> las lParenthesis id comma id comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma . BOOLEAN comma VARCONSTAUX comma string comma float comma BOOLEAN rParenthesis semicolon
+    (85) BOOLEAN -> . FALSE
+    (86) BOOLEAN -> . TRUE
+
+    FALSE           shift and go to state 141
+    TRUE            shift and go to state 142
+
+    BOOLEAN                        shift and go to state 393
+
+state 390
+
+    (107) RIDGE -> rid lParenthesis id comma id comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma VARCONSTAUX comma . string comma VARCONSTAUX rParenthesis semicolon
+
+    string          shift and go to state 394
+
+
+state 391
+
+    (108) K_MEANS -> kmeans lParenthesis VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma . BOOLEAN comma VARCONSTAUX comma string rParenthesis semicolon
+    (85) BOOLEAN -> . FALSE
+    (86) BOOLEAN -> . TRUE
+
+    FALSE           shift and go to state 141
+    TRUE            shift and go to state 142
+
+    BOOLEAN                        shift and go to state 395
+
+state 392
+
+    (109) MINI_BATCH_MEANS -> mbm lParenthesis VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma VARCONSTAUX comma . VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX rParenthesis semicolon
+    (39) VARCONSTAUX -> . id ISLIST
+    (40) VARCONSTAUX -> . cte_i
+    (41) VARCONSTAUX -> . cte_f
+
+    id              shift and go to state 101
+    cte_i           shift and go to state 102
+    cte_f           shift and go to state 103
+
+    VARCONSTAUX                    shift and go to state 396
+
+state 393
+
+    (106) LASSO -> las lParenthesis id comma id comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma BOOLEAN . comma VARCONSTAUX comma string comma float comma BOOLEAN rParenthesis semicolon
+
+    comma           shift and go to state 397
+
+
+state 394
+
+    (107) RIDGE -> rid lParenthesis id comma id comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma VARCONSTAUX comma string . comma VARCONSTAUX rParenthesis semicolon
+
+    comma           shift and go to state 398
+
+
+state 395
+
+    (108) K_MEANS -> kmeans lParenthesis VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN . comma VARCONSTAUX comma string rParenthesis semicolon
+
+    comma           shift and go to state 399
+
+
+state 396
+
+    (109) MINI_BATCH_MEANS -> mbm lParenthesis VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX . comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX rParenthesis semicolon
+
+    comma           shift and go to state 400
+
+
+state 397
+
+    (106) LASSO -> las lParenthesis id comma id comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma BOOLEAN comma . VARCONSTAUX comma string comma float comma BOOLEAN rParenthesis semicolon
+    (39) VARCONSTAUX -> . id ISLIST
+    (40) VARCONSTAUX -> . cte_i
+    (41) VARCONSTAUX -> . cte_f
+
+    id              shift and go to state 101
+    cte_i           shift and go to state 102
+    cte_f           shift and go to state 103
+
+    VARCONSTAUX                    shift and go to state 401
+
+state 398
+
+    (107) RIDGE -> rid lParenthesis id comma id comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma VARCONSTAUX comma string comma . VARCONSTAUX rParenthesis semicolon
+    (39) VARCONSTAUX -> . id ISLIST
+    (40) VARCONSTAUX -> . cte_i
+    (41) VARCONSTAUX -> . cte_f
+
+    id              shift and go to state 101
+    cte_i           shift and go to state 102
+    cte_f           shift and go to state 103
+
+    VARCONSTAUX                    shift and go to state 402
+
+state 399
+
+    (108) K_MEANS -> kmeans lParenthesis VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma . VARCONSTAUX comma string rParenthesis semicolon
+    (39) VARCONSTAUX -> . id ISLIST
+    (40) VARCONSTAUX -> . cte_i
+    (41) VARCONSTAUX -> . cte_f
+
+    id              shift and go to state 101
+    cte_i           shift and go to state 102
+    cte_f           shift and go to state 103
+
+    VARCONSTAUX                    shift and go to state 403
+
+state 400
+
+    (109) MINI_BATCH_MEANS -> mbm lParenthesis VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma . VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX rParenthesis semicolon
+    (39) VARCONSTAUX -> . id ISLIST
+    (40) VARCONSTAUX -> . cte_i
+    (41) VARCONSTAUX -> . cte_f
+
+    id              shift and go to state 101
+    cte_i           shift and go to state 102
+    cte_f           shift and go to state 103
+
+    VARCONSTAUX                    shift and go to state 404
+
+state 401
+
+    (106) LASSO -> las lParenthesis id comma id comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma BOOLEAN comma VARCONSTAUX . comma string comma float comma BOOLEAN rParenthesis semicolon
+
+    comma           shift and go to state 405
+
+
+state 402
+
+    (107) RIDGE -> rid lParenthesis id comma id comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma VARCONSTAUX comma string comma VARCONSTAUX . rParenthesis semicolon
+
+    rParenthesis    shift and go to state 406
+
+
+state 403
+
+    (108) K_MEANS -> kmeans lParenthesis VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma VARCONSTAUX . comma string rParenthesis semicolon
+
+    comma           shift and go to state 407
+
+
+state 404
+
+    (109) MINI_BATCH_MEANS -> mbm lParenthesis VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX . comma VARCONSTAUX comma VARCONSTAUX rParenthesis semicolon
+
+    comma           shift and go to state 408
+
+
+state 405
+
+    (106) LASSO -> las lParenthesis id comma id comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma . string comma float comma BOOLEAN rParenthesis semicolon
+
+    string          shift and go to state 409
+
+
+state 406
+
+    (107) RIDGE -> rid lParenthesis id comma id comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma VARCONSTAUX comma string comma VARCONSTAUX rParenthesis . semicolon
+
+    semicolon       shift and go to state 410
+
+
+state 407
+
+    (108) K_MEANS -> kmeans lParenthesis VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma VARCONSTAUX comma . string rParenthesis semicolon
+
+    string          shift and go to state 411
+
+
+state 408
+
+    (109) MINI_BATCH_MEANS -> mbm lParenthesis VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma . VARCONSTAUX comma VARCONSTAUX rParenthesis semicolon
+    (39) VARCONSTAUX -> . id ISLIST
+    (40) VARCONSTAUX -> . cte_i
+    (41) VARCONSTAUX -> . cte_f
+
+    id              shift and go to state 101
+    cte_i           shift and go to state 102
+    cte_f           shift and go to state 103
+
+    VARCONSTAUX                    shift and go to state 412
+
+state 409
+
+    (106) LASSO -> las lParenthesis id comma id comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma string . comma float comma BOOLEAN rParenthesis semicolon
+
+    comma           shift and go to state 413
+
+
+state 410
+
+    (107) RIDGE -> rid lParenthesis id comma id comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma VARCONSTAUX comma string comma VARCONSTAUX rParenthesis semicolon .
+
+    rCurlyBracket   reduce using rule 107 (RIDGE -> rid lParenthesis id comma id comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma VARCONSTAUX comma string comma VARCONSTAUX rParenthesis semicolon .)
+
+
+state 411
+
+    (108) K_MEANS -> kmeans lParenthesis VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma VARCONSTAUX comma string . rParenthesis semicolon
+
+    rParenthesis    shift and go to state 414
+
+
+state 412
+
+    (109) MINI_BATCH_MEANS -> mbm lParenthesis VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX . comma VARCONSTAUX rParenthesis semicolon
+
+    comma           shift and go to state 415
+
+
+state 413
+
+    (106) LASSO -> las lParenthesis id comma id comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma string comma . float comma BOOLEAN rParenthesis semicolon
+
+    float           shift and go to state 416
+
+
+state 414
+
+    (108) K_MEANS -> kmeans lParenthesis VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma VARCONSTAUX comma string rParenthesis . semicolon
+
+    semicolon       shift and go to state 417
+
+
+state 415
+
+    (109) MINI_BATCH_MEANS -> mbm lParenthesis VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma . VARCONSTAUX rParenthesis semicolon
+    (39) VARCONSTAUX -> . id ISLIST
+    (40) VARCONSTAUX -> . cte_i
+    (41) VARCONSTAUX -> . cte_f
+
+    id              shift and go to state 101
+    cte_i           shift and go to state 102
+    cte_f           shift and go to state 103
+
+    VARCONSTAUX                    shift and go to state 418
+
+state 416
+
+    (106) LASSO -> las lParenthesis id comma id comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma string comma float . comma BOOLEAN rParenthesis semicolon
+
+    comma           shift and go to state 419
+
+
+state 417
+
+    (108) K_MEANS -> kmeans lParenthesis VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma VARCONSTAUX comma string rParenthesis semicolon .
+
+    rCurlyBracket   reduce using rule 108 (K_MEANS -> kmeans lParenthesis VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma VARCONSTAUX comma string rParenthesis semicolon .)
+
+
+state 418
+
+    (109) MINI_BATCH_MEANS -> mbm lParenthesis VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX . rParenthesis semicolon
+
+    rParenthesis    shift and go to state 420
+
+
+state 419
+
+    (106) LASSO -> las lParenthesis id comma id comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma string comma float comma . BOOLEAN rParenthesis semicolon
+    (85) BOOLEAN -> . FALSE
+    (86) BOOLEAN -> . TRUE
+
+    FALSE           shift and go to state 141
+    TRUE            shift and go to state 142
+
+    BOOLEAN                        shift and go to state 421
+
+state 420
+
+    (109) MINI_BATCH_MEANS -> mbm lParenthesis VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX rParenthesis . semicolon
+
+    semicolon       shift and go to state 422
+
+
+state 421
+
+    (106) LASSO -> las lParenthesis id comma id comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma string comma float comma BOOLEAN . rParenthesis semicolon
+
+    rParenthesis    shift and go to state 423
+
+
+state 422
+
+    (109) MINI_BATCH_MEANS -> mbm lParenthesis VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX rParenthesis semicolon .
+
+    rCurlyBracket   reduce using rule 109 (MINI_BATCH_MEANS -> mbm lParenthesis VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX rParenthesis semicolon .)
+
+
+state 423
+
+    (106) LASSO -> las lParenthesis id comma id comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma string comma float comma BOOLEAN rParenthesis . semicolon
+
+    semicolon       shift and go to state 424
+
+
+state 424
+
+    (106) LASSO -> las lParenthesis id comma id comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma string comma float comma BOOLEAN rParenthesis semicolon .
+
+    rCurlyBracket   reduce using rule 106 (LASSO -> las lParenthesis id comma id comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma string comma float comma BOOLEAN rParenthesis semicolon .)
+
