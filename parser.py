@@ -1,13 +1,14 @@
 import ply.yacc as yacc
 from lexer import lexer, tokens
 
-# NumConst puro numero
+dicDirectorioFunciones = {} # "nombreFuncion" : { "tipo": void/TYPE/null, "dirDirectorioVariables": {} }
+lastReadType = ""
+
 # VarConstAux puro numero y acceder a arreglo
-# checar si NumConst es necesario, porque segun yo se puede hacer con varcteaux (porque tambien se puede definir tamaños de arreglos si pasas el indice de un arreglo)
 
 def p_PROGRAM(p):
 	"""
-	PROGRAM : program id semicolon PROGRAM_A start BLOCK
+	PROGRAM : program globalFunc START_GLOBAL_FUNCTION semicolon PROGRAM_A start BLOCK
 	"""
 
 def p_PROGRAM_A(p):
@@ -17,21 +18,31 @@ def p_PROGRAM_A(p):
 			| empty
 	"""
 
-# falta poner la recursividad
 def p_VARS(p):
 	"""
-	VARS : var TYPE colon VARS_A semicolon
+	VARS : var VARS_A
 	"""
 
 def p_VARS_A(p):
 	"""
-	VARS_A : SIMPLE
+	VARS_A: TYPE SAVE_TYPE colon VARS_B semicolon VARS_C
+	"""
+
+def p_VARS_B(p):
+	"""
+	VARS_B : SIMPLE
 		| LIST
+	"""
+
+def p_VARS_C(p):
+	"""
+	VARS_C: VARS_A
+			|empty
 	"""
 
 def p_SIMPLE(p):
 	"""
-	SIMPLE : id SIMPLE_A
+	SIMPLE : id SAVE_VAR_TYPE SIMPLE_A
 	"""
 
 def p_SIMPLE_A(p):
@@ -42,22 +53,13 @@ def p_SIMPLE_A(p):
 
 def p_LIST(p):
 	"""
-	LIST : id lSqrBracket NUMCONST rSqrBracket LIST_A
+	LIST : id lSqrBracket VARCONSTAUX rSqrBracket SAVE_VAR_TYPE LIST_A
 	"""
 
 def p_LIST_A(p):
 	"""
-	LIST_A : LIST
+	LIST_A : comma LIST
 		| empty
-	"""
-
-# Para definir el tamaño de un arreglo
-# Solo se aceptan numeros 
-def p_NUMCONST(p):
-	"""
-	NUMCONST : id 
-			| cte_i 
-			| cte_f
 	"""
 
 def p_EXPLOG(p):
@@ -434,11 +436,35 @@ def p_error(p):
     print("Syntax error at '%s'" % p)
     exit(1)
 
+
+# ACCIONES SEMANTICAS
+
+def p_START_GLOBAL_FUNCTION(p):
+
+	dicDirectorioFunciones[ "globalFunc" ]  = { "tipo": "null", "dirDirectorioVariables": {} }
+
+def p_SAVE_TYPE(p):
+
+	lastReadType = str( p[1] )
+
+def p_SAVE_VAR_TYPE(p):
+
+	# Diferenciar entre variable simple y lista
+	if len( p ) == 1:
+		dicDirectorioFunciones[ "globalFunc" ][ "dirDirectorioVariables" ][ p.id ] = { "type": lastReadType }
+	else:
+		dicDirectorioFunciones[ "globalFunc" ][ "dirDirectorioVariables" ][ p.id ] = { "type": lastReadType, "tamaño": p.tamaño }
+
 parser = yacc.yacc()
 
-
-
- 
+while True:
+    try:
+        s = 'calc > '
+    except EOFError:
+        break
+    if not s: continue
+    result = parser.parse(s)
+    print(result)
  
  
  
