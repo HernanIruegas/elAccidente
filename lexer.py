@@ -6,17 +6,16 @@ reserved = {
     
     # Code Related and Decision Making
     'program' : 'program',
+    'globalFunc' : 'globalFunc',
     'start' : 'start',
     'var' : 'var',
     'scan' : 'scan',
     'print': 'print',
     'func' : 'func',
     'while' : 'while',
-    'return' : 'return',
     'if' : 'if',
     'else' : 'else',
     'void' : 'void',
-    'func' : 'func',
     'return' : 'return',
     'not' : 'not',
     'and' : 'and',
@@ -127,7 +126,7 @@ def t_cte_f(t):
     return t
 
 
-t_ignore = " \t"
+t_ignore = "\t\r "
 def t_newline(t):
     r"\n+"
     t.lexer.lineno += t.value.count("\n")
@@ -139,19 +138,3 @@ def t_error(t):
 
 # Build the lexer
 lexer = lex.lex()
-
-# Test it out
-data = '''
-3 + 4 * 10
-+ -20 *2
-'''
-
-# Give the lexer some input
-lexer.input(data)
-# Tokenize
-while True:
-    tok = lexer.token()
-    if not tok:
-         print("kk")
-         break      # No more input
-    print(tok)

@@ -2,7 +2,9 @@ import ply.yacc as yacc
 from lexer import lexer, tokens
 
 dicDirectorioFunciones = {} # "nombreFuncion" : { "tipo": void/TYPE/null, "dirDirectorioVariables": {} }
+# dirDirectorioVariables = "nombreVariable" : { }
 lastReadType = ""
+
 
 # VarConstAux puro numero y acceder a arreglo
 
@@ -10,6 +12,8 @@ def p_PROGRAM(p):
 	"""
 	PROGRAM : program globalFunc START_GLOBAL_FUNCTION semicolon PROGRAM_A start BLOCK
 	"""
+	for item in p:
+		print(item)
 
 def p_PROGRAM_A(p):
 	"""
@@ -25,7 +29,7 @@ def p_VARS(p):
 
 def p_VARS_A(p):
 	"""
-	VARS_A: TYPE SAVE_TYPE colon VARS_B semicolon VARS_C
+	VARS_A : TYPE colon VARS_B semicolon VARS_C
 	"""
 
 def p_VARS_B(p):
@@ -36,8 +40,8 @@ def p_VARS_B(p):
 
 def p_VARS_C(p):
 	"""
-	VARS_C: VARS_A
-			|empty
+	VARS_C : VARS_A
+			| empty
 	"""
 
 def p_SIMPLE(p):
@@ -53,7 +57,7 @@ def p_SIMPLE_A(p):
 
 def p_LIST(p):
 	"""
-	LIST : id lSqrBracket VARCONSTAUX rSqrBracket SAVE_VAR_TYPE LIST_A
+	LIST : id lSqrBracket VARCONSTAUX rSqrBracket LIST_A
 	"""
 
 def p_LIST_A(p):
@@ -130,10 +134,10 @@ def p_VARCONSTAUX(p):
 
 def p_TYPE(p):
 	"""
-	TYPE : int
-		| float 
-		| string 
-		| bool
+	TYPE : int SAVE_TYPE
+		| float SAVE_TYPE
+		| string SAVE_TYPE
+		| bool SAVE_TYPE
 	"""
 
 def p_BLOCK(p):
@@ -418,7 +422,7 @@ def p_SKEWNESS_A(p):
 
 def p_KURTOSI(p):
 	"""
-	KURTOSI : kurt lParenthesis id KURTOSI_A rParenthesis semicolon
+	KURTOSI : kurt  lParenthesis id KURTOSI_A rParenthesis semicolon
 	"""
 
 def p_KURTOSI_A(p):
@@ -440,31 +444,35 @@ def p_error(p):
 # ACCIONES SEMANTICAS
 
 def p_START_GLOBAL_FUNCTION(p):
-
+	"""
+	START_GLOBAL_FUNCTION : empty
+	"""
 	dicDirectorioFunciones[ "globalFunc" ]  = { "tipo": "null", "dirDirectorioVariables": {} }
 
 def p_SAVE_TYPE(p):
-
-	lastReadType = str( p[1] )
+	"""
+	SAVE_TYPE : empty
+	"""
+	lastReadType = str( p.type )
+	
 
 def p_SAVE_VAR_TYPE(p):
+	"""
+	SAVE_VAR_TYPE : empty
+	"""
+
+	# Validar que la variable no haya sido previamente declarada
+	#if( p.var in dicDirectorioFunciones[ p.nombreFunc ][ "dirDirectorioVariables" ] ):
+	#	print( "ERROR: Variable previamente declarada" )
+		# exit
 
 	# Diferenciar entre variable simple y lista
-	if len( p ) == 1:
-		dicDirectorioFunciones[ "globalFunc" ][ "dirDirectorioVariables" ][ p.id ] = { "type": lastReadType }
-	else:
-		dicDirectorioFunciones[ "globalFunc" ][ "dirDirectorioVariables" ][ p.id ] = { "type": lastReadType, "tamaño": p.tamaño }
+	#if len( p ) == 1:
+	#	dicDirectorioFunciones[ "globalFunc" ][ "dirDirectorioVariables" ][ p.id ] = { "type": lastReadType }
+	#else:
+	#	dicDirectorioFunciones[ "globalFunc" ][ "dirDirectorioVariables" ][ p.id ] = { "type": lastReadType, "tamaño": p.tamaño }
 
 parser = yacc.yacc()
-
-while True:
-    try:
-        s = 'calc > '
-    except EOFError:
-        break
-    if not s: continue
-    result = parser.parse(s)
-    print(result)
  
  
  
