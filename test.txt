@@ -1,3 +1,5 @@
  program globalFunc;
 
+ var int : varuno;
+
  start{}

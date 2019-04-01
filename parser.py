@@ -12,8 +12,6 @@ def p_PROGRAM(p):
 	"""
 	PROGRAM : program globalFunc START_GLOBAL_FUNCTION semicolon PROGRAM_A start BLOCK
 	"""
-	for item in p:
-		print(item)
 
 def p_PROGRAM_A(p):
 	"""
@@ -447,20 +445,20 @@ def p_START_GLOBAL_FUNCTION(p):
 	"""
 	START_GLOBAL_FUNCTION : empty
 	"""
-	dicDirectorioFunciones[ "globalFunc" ]  = { "tipo": "null", "dirDirectorioVariables": {} }
+	dicDirectorioFunciones[ p[-1] ]  = { "tipo": "null", "dirDirectorioVariables": {} }
 
 def p_SAVE_TYPE(p):
 	"""
 	SAVE_TYPE : empty
 	"""
-	lastReadType = str( p.type )
+	#lastReadType = str( p.type )
 	
 
 def p_SAVE_VAR_TYPE(p):
 	"""
 	SAVE_VAR_TYPE : empty
 	"""
-
+	print(p[1])
 	# Validar que la variable no haya sido previamente declarada
 	#if( p.var in dicDirectorioFunciones[ p.nombreFunc ][ "dirDirectorioVariables" ] ):
 	#	print( "ERROR: Variable previamente declarada" )
