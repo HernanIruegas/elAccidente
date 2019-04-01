@@ -1,9 +1,11 @@
+
 import ply.yacc as yacc
 from lexer import lexer, tokens
 
-dicDirectorioFunciones = {} # "nombreFuncion" : { "tipo": void/TYPE/null, "dirDirectorioVariables": {} }
-# dirDirectorioVariables = "nombreVariable" : { }
+dicDirectorioFunciones = {} # "nombreFuncion" : { "Type": void/TYPE/null, "dicDirectorioVariables": {} }
+# dicDirectorioVariables = "VarName" : { "Type": ..., "Value": ...}
 lastReadType = ""
+currentFunction = ""
 
 
 # VarConstAux puro numero y acceder a arreglo
@@ -12,6 +14,8 @@ def p_PROGRAM(p):
 	"""
 	PROGRAM : program globalFunc START_GLOBAL_FUNCTION semicolon PROGRAM_A start BLOCK
 	"""
+	for item in p:
+		print(item)
 
 def p_PROGRAM_A(p):
 	"""
@@ -44,7 +48,7 @@ def p_VARS_C(p):
 
 def p_SIMPLE(p):
 	"""
-	SIMPLE : id SAVE_VAR_TYPE SIMPLE_A
+	SIMPLE : id SAVE_VAR SIMPLE_A
 	"""
 
 def p_SIMPLE_A(p):
@@ -445,59 +449,23 @@ def p_START_GLOBAL_FUNCTION(p):
 	"""
 	START_GLOBAL_FUNCTION : empty
 	"""
-	dicDirectorioFunciones[ p[-1] ]  = { "tipo": "null", "dirDirectorioVariables": {} }
+	dicDirectorioFunciones[ "globalFunc" ]  = { "tipo": "null", "dirDirectorioVariables": {} }
 
 def p_SAVE_TYPE(p):
 	"""
 	SAVE_TYPE : empty
 	"""
-	#lastReadType = str( p.type )
+	lastReadType = str( p[-1])
 	
 
-def p_SAVE_VAR_TYPE(p):
+def p_SAVE_VAR(p):
 	"""
-	SAVE_VAR_TYPE : empty
+	SAVE_VAR : empty
 	"""
-	print(p[1])
-	# Validar que la variable no haya sido previamente declarada
-	#if( p.var in dicDirectorioFunciones[ p.nombreFunc ][ "dirDirectorioVariables" ] ):
-	#	print( "ERROR: Variable previamente declarada" )
-		# exit
-
-	# Diferenciar entre variable simple y lista
-	#if len( p ) == 1:
-	#	dicDirectorioFunciones[ "globalFunc" ][ "dirDirectorioVariables" ][ p.id ] = { "type": lastReadType }
-	#else:
-	#	dicDirectorioFunciones[ "globalFunc" ][ "dirDirectorioVariables" ][ p.id ] = { "type": lastReadType, "tamaño": p.tamaño }
+    # Validar que variable leida no este declarada
+    if str( p[-1] ) in dicDirectorioFunciones[currentFunction]["dirDirectorioVariables"]:
+        print("Error")
+    else:
+        dicDirectorioFunciones[currentFunction]["dicDirectorioVariables"][str(p[-1])] = {"Type": lastReadType, "Value": ""}
 
 parser = yacc.yacc()
- 
- 
- 
- 
- 
- 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
