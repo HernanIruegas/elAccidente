@@ -1,12 +1,16 @@
-
 import ply.yacc as yacc
 from lexer import lexer, tokens
+from Stack import Stack
+
 
 dicDirectorioFunciones = {} # "nombreFuncion" : { "Type": void/TYPE/null, "dicDirectorioVariables": {} }
 # dicDirectorioVariables = "VarName" : { "Type": ..., "Value": ...}
+
 lastReadType = ""
 currentFunction = ""
 
+sOperators = Stack()
+sOperands = Stack()
 
 # VarConstAux puro numero y acceder a arreglo
 
@@ -14,8 +18,6 @@ def p_PROGRAM(p):
 	"""
 	PROGRAM : program globalFunc START_GLOBAL_FUNCTION semicolon PROGRAM_A start BLOCK
 	"""
-	for item in p:
-		print(item)
 
 def p_PROGRAM_A(p):
 	"""
@@ -50,6 +52,7 @@ def p_SIMPLE(p):
 	"""
 	SIMPLE : id SAVE_VAR SIMPLE_A
 	"""
+	print("hey")
 
 def p_SIMPLE_A(p):
 	"""
@@ -59,7 +62,7 @@ def p_SIMPLE_A(p):
 
 def p_LIST(p):
 	"""
-	LIST : id lSqrBracket VARCONSTAUX rSqrBracket LIST_A
+	LIST : id lSqrBracket VARCONSTAUX rSqrBracket SAVE_ARRAY LIST_A
 	"""
 
 def p_LIST_A(p):
@@ -445,27 +448,56 @@ def p_error(p):
 
 # ACCIONES SEMANTICAS
 
+# Crea el directorio de funciones y agrega la función global
 def p_START_GLOBAL_FUNCTION(p):
 	"""
 	START_GLOBAL_FUNCTION : empty
 	"""
-	dicDirectorioFunciones[ "globalFunc" ]  = { "tipo": "null", "dirDirectorioVariables": {} }
+	global currentFunction 
+	currentFunction = p[ -1 ]
+	dicDirectorioFunciones[ currentFunction ]  = { "Type": "null", "dicDirectorioVariables": {} }
 
+
+# Guarda el último tipo de variable leido en una variable global lastReadType
 def p_SAVE_TYPE(p):
 	"""
 	SAVE_TYPE : empty
 	"""
-	lastReadType = str( p[-1])
+	global lastReadType
+	lastReadType = p[-1]
 	
 
 def p_SAVE_VAR(p):
 	"""
 	SAVE_VAR : empty
 	"""
-    # Validar que variable leida no este declarada
-    if str( p[-1] ) in dicDirectorioFunciones[currentFunction]["dirDirectorioVariables"]:
-        print("Error")
-    else:
-        dicDirectorioFunciones[currentFunction]["dicDirectorioVariables"][str(p[-1])] = {"Type": lastReadType, "Value": ""}
+
+	# Validar que variable leida no esté previamente declarada
+	if p[-1] in dicDirectorioFunciones[currentFunction]["dicDirectorioVariables"]:
+	    print("Error: Variable Duplicada")
+	    exit(1)
+	else:
+	    dicDirectorioFunciones[currentFunction]["dicDirectorioVariables"][ p[-1] ] = {"Type": lastReadType, "Value": ""}
+
+def p_SAVE_ARRAY(p):
+	"""
+	SAVE_ARRAY : empty
+	"""
+
+	# Validar que arreglo leido no esté previamente declarado
+	if p[-4] in dicDirectorioFunciones[currentFunction]["dicDirectorioVariables"]:
+	    print("Error: Arreglo Duplicado")
+	    exit(1)
+	else:
+	    dicDirectorioFunciones[currentFunction]["dicDirectorioVariables"][ p[-4] ] = {"Type": lastReadType, "Value": p[-2]}
+
+
+def 
 
 parser = yacc.yacc()
+
+
+
+
+
+
