@@ -17,7 +17,6 @@ reserved = {
     'else' : 'else',
     'void' : 'void',
     'return' : 'return',
-    'not' : 'not',
     'and' : 'and',
     'or' : 'or',
 
@@ -64,8 +63,10 @@ tokens = [
     'lessThan',
     'greaterEquals',
     'lessThanEquals',
+    'assign',
     'equals',
     'notEquals',
+    'not',
     'minus',
     'times',
     'divide',
@@ -91,8 +92,10 @@ t_greater = r'>'
 t_lessThan = r'<'
 t_greaterEquals = r'>='
 t_lessThanEquals = r'<='
-t_equals = r'='
+t_assign = r'='
+t_equals = r'=='
 t_notEquals = r'!='
+t_not = r'!'
 t_minus = r'-'
 t_times = r'\*'
 t_divide = r'/'

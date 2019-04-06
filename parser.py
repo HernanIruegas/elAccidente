@@ -1,6 +1,7 @@
 import ply.yacc as yacc
 from lexer import lexer, tokens
 from Stack import Stack
+from SemanticCube import semanticCube, dicOperatorIndexCube, validateExpression
 
 
 dicDirectorioFunciones = {} # "nombreFuncion" : { "Type": void/TYPE/null, "dicDirectorioVariables": {} }
@@ -11,6 +12,8 @@ currentFunction = ""
 
 sOperators = Stack()
 sOperands = Stack()
+qQuads = []
+iQuadCounter = 0
 
 # VarConstAux puro numero y acceder a arreglo
 
@@ -118,8 +121,8 @@ def p_TERM(p):
 
 def p_TERM_A(p):
 	"""
-	TERM_A : times TERM
-			| divide TERM
+	TERM_A : times GENERATE_QUAD TERM
+			| divide GENERATE_QUAD TERM
 			| empty
 	"""
 
@@ -132,9 +135,9 @@ def p_FACTOR(p):
 # Define numeros y accesos a indices de arreglos (sin string y boolean de VARCTE)
 def p_VARCONSTAUX(p):
 	"""
-	VARCONSTAUX : id ISLIST 
-		| cte_i 
-		| cte_f 
+	VARCONSTAUX : id PUSH_STACK_OPERANDS ISLIST 
+		| cte_i PUSH_STACK_OPERANDS
+		| cte_f PUSH_STACK_OPERANDS
 	"""
 
 def p_TYPE(p):
@@ -454,6 +457,8 @@ def p_START_GLOBAL_FUNCTION(p):
 	START_GLOBAL_FUNCTION : empty
 	"""
 	global currentFunction 
+	global dicDirectorioFunciones
+
 	currentFunction = p[ -1 ]
 	dicDirectorioFunciones[ currentFunction ]  = { "Type": "null", "dicDirectorioVariables": {} }
 
@@ -464,6 +469,7 @@ def p_SAVE_TYPE(p):
 	SAVE_TYPE : empty
 	"""
 	global lastReadType
+
 	lastReadType = p[-1]
 	
 
@@ -471,6 +477,9 @@ def p_SAVE_VAR(p):
 	"""
 	SAVE_VAR : empty
 	"""
+	global dicDirectorioFunciones
+	global currentFunction
+	global lastReadType
 
 	# Validar que variable leida no esté previamente declarada
 	if p[-1] in dicDirectorioFunciones[currentFunction]["dicDirectorioVariables"]:
@@ -479,10 +488,15 @@ def p_SAVE_VAR(p):
 	else:
 	    dicDirectorioFunciones[currentFunction]["dicDirectorioVariables"][ p[-1] ] = {"Type": lastReadType, "Value": ""}
 
-def p_SAVE_ARRAY(p):
+
+# Todavia no se debe hacer nada de arreglos (esperar a elda)
+def p_SAVE_ARRAY(p): 
 	"""
 	SAVE_ARRAY : empty
 	"""
+	global dicDirectorioFunciones
+	global currentFunction
+	global lastReadType
 
 	# Validar que arreglo leido no esté previamente declarado
 	if p[-4] in dicDirectorioFunciones[currentFunction]["dicDirectorioVariables"]:
@@ -492,7 +506,41 @@ def p_SAVE_ARRAY(p):
 	    dicDirectorioFunciones[currentFunction]["dicDirectorioVariables"][ p[-4] ] = {"Type": lastReadType, "Value": p[-2]}
 
 
-def 
+# Insertar operando en stack de operandos
+def p_PUSH_STACK_OPERANDS(p):
+	"""
+	PUSH_STACK_OPERANDS : empty
+	"""
+	global sOperands
+
+	sOperands.push( p[-1] )
+
+
+# Resolver expresión y Generar cuadruplo
+def p_GENERATE_QUAD(p):
+	"""
+	GENERATE_QUAD : empty
+	"""
+
+	global sOperands
+	global iQuadCounter
+
+	operandDer = sOperands.top()
+	sOperands.pop()
+	operandIzq = sOperands.top()
+	sOperands.pop()
+
+	# Get return_operation_type from SemanticCube
+	if validateExpression( operandIzq, operandDer, p[ -1 ] ) != "error":
+
+		# Cast p[-1], from string to operand
+
+		#result = operandIzq p[ -1 ] operandDer
+
+		qQuads.append( [ p[ -1 ] , operandIzq, operandDer, result ] )
+		iQuadCounter = iQuadCounter + 1
+
+
 
 parser = yacc.yacc()
 
