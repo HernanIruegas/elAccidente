@@ -1,7 +1,7 @@
 import ply.yacc as yacc
 from lexer import lexer, tokens
 from Stack import Stack
-from SemanticCube import semanticCube, dicOperatorIndexCube, validateExpression
+from SemanticCube import dicOperandIndexCube, semanticCube, dicOperatorIndexCube, validateExpression
 
 
 dicDirectorioFunciones = {} # "nombreFuncion" : { "Type": void/TYPE/null, "dicDirectorioVariables": {} }
@@ -12,6 +12,8 @@ currentFunction = ""
 
 sOperators = Stack()
 sOperands = Stack()
+sTypes = Stack()
+sJumps = Stack()
 qQuads = []
 iQuadCounter = 0
 
@@ -55,7 +57,6 @@ def p_SIMPLE(p):
 	"""
 	SIMPLE : id SAVE_VAR SIMPLE_A
 	"""
-	print("hey")
 
 def p_SIMPLE_A(p):
 	"""
@@ -79,6 +80,7 @@ def p_EXPLOG(p):
 	EXPLOG : EXPRESSION EXPLOG_A
 		| not EXPRESSION EXPLOG_A
 	"""
+	#print("p_EXPLOG")
 
 def p_EXPLOG_A(p):
 	"""
@@ -86,11 +88,14 @@ def p_EXPLOG_A(p):
 		| or EXPLOG
 		| empty
 	"""
+	#print("p_EXPLOG_A")
 
 def p_EXPRESSION(p):
 	"""
-	EXPRESSION : EXP EXPRESSION_A EXP
+	EXPRESSION : EXP 
+				| EXP EXPRESSION_A EXP
 	"""
+	#print("EXPRESSION")
 
 def p_EXPRESSION_A(p):
 	"""
@@ -101,36 +106,42 @@ def p_EXPRESSION_A(p):
 				| equals
 				| notEquals
 	"""
+	#print("EXPRESSION_A")
 
 def p_EXP(p):
 	"""
-	EXP : TERM EXP_A
+	EXP : TERM EXP_A SOLVE_OPERATION
 	"""
+	#print("EXP")
 
 def p_EXP_A(p):
 	"""
-	EXP_A : plus EXP
-		| minus EXP
-		| empty
+	EXP_A : plus PUSH_STACK_OPERATORS EXP
+		| minus PUSH_STACK_OPERATORS EXP
+		| empty 
 	"""
+	#print("EXP_A")
 
 def p_TERM(p):
 	"""
 	TERM : FACTOR TERM_A
 	"""
+	#print("TERM")
 
 def p_TERM_A(p):
 	"""
-	TERM_A : times GENERATE_QUAD TERM
-			| divide GENERATE_QUAD TERM
+	TERM_A : times PUSH_STACK_OPERATORS TERM
+			| divide PUSH_STACK_OPERATORS TERM
 			| empty
 	"""
+	#print("TERM_A")
 
 def p_FACTOR(p):
 	"""
 	FACTOR : lParenthesis EXPLOG rParenthesis
 			| VARCONSTAUX
 	"""
+	#print("FACTOR")
 
 # Define numeros y accesos a indices de arreglos (sin string y boolean de VARCTE)
 def p_VARCONSTAUX(p):
@@ -139,6 +150,7 @@ def p_VARCONSTAUX(p):
 		| cte_i PUSH_STACK_OPERANDS
 		| cte_f PUSH_STACK_OPERANDS
 	"""
+	#print("VARCONSTAUX")
 
 def p_TYPE(p):
 	"""
@@ -173,7 +185,7 @@ def p_STATEMENT(p):
 
 def p_ASSIGNMENT(p):
 	"""
-	ASSIGNMENT : id ISLIST equals EXPRESSION semicolon 
+	ASSIGNMENT : id ISLIST assign EXPLOG semicolon 
 	"""
 
 def p_READ(p):
@@ -446,6 +458,7 @@ def p_empty(p):
 
 def p_error(p):
     print("Syntax error at '%s'" % p)
+
     exit(1)
 
 
@@ -473,6 +486,7 @@ def p_SAVE_TYPE(p):
 	lastReadType = p[-1]
 	
 
+# Guardar nombre de variable en directorio de variables de la función y pushear tipo de variable a stack de tipos
 def p_SAVE_VAR(p):
 	"""
 	SAVE_VAR : empty
@@ -480,6 +494,7 @@ def p_SAVE_VAR(p):
 	global dicDirectorioFunciones
 	global currentFunction
 	global lastReadType
+	global sTypes
 
 	# Validar que variable leida no esté previamente declarada
 	if p[-1] in dicDirectorioFunciones[currentFunction]["dicDirectorioVariables"]:
@@ -487,6 +502,7 @@ def p_SAVE_VAR(p):
 	    exit(1)
 	else:
 	    dicDirectorioFunciones[currentFunction]["dicDirectorioVariables"][ p[-1] ] = {"Type": lastReadType, "Value": ""}
+	    sTypes.push( lastReadType )
 
 
 # Todavia no se debe hacer nada de arreglos (esperar a elda)
@@ -504,16 +520,45 @@ def p_SAVE_ARRAY(p):
 	    exit(1)
 	else:
 	    dicDirectorioFunciones[currentFunction]["dicDirectorioVariables"][ p[-4] ] = {"Type": lastReadType, "Value": p[-2]}
+	    sTypes.push( lastReadType )
 
 
-# Insertar operando en stack de operandos
+# Insertar operando en stack de operandos y su tipo en stack de tipos
 def p_PUSH_STACK_OPERANDS(p):
 	"""
 	PUSH_STACK_OPERANDS : empty
 	"""
 	global sOperands
+	global lastReadType
 
+	print("aaa")
 	sOperands.push( p[-1] )
+	sTypes.push( lastReadType )
+
+
+# Insertar operador en stack de operadores
+def p_PUSH_STACK_OPERATORS(p):
+	"""
+	PUSH_STACK_OPERATORS : empty
+	"""
+	global sOperators
+	sOperators.push( p[-1] )
+
+
+def p_SOLVE_OPERATION(p):
+	"""
+	SOLVE_OPERATION : empty
+	"""
+
+	global sOperands
+	global sOperators
+	global sTypes
+	global qQuads
+
+	#if sOperators.top() == 'plus'
+
+
+
 
 
 # Resolver expresión y Generar cuadruplo
@@ -525,19 +570,28 @@ def p_GENERATE_QUAD(p):
 	global sOperands
 	global iQuadCounter
 
-	operandDer = sOperands.top()
-	sOperands.pop()
-	operandIzq = sOperands.top()
+	operandRight = sOperands.top()
 	sOperands.pop()
 
+	typeRight = sTypes.top()
+	sTypes.pop()
+
+	operandLeft = sOperands.top()
+	sOperands.pop()
+
+	typeLeft = sTypes.top()
+	sTypes.pop()
+
+	#if semanticCube[ dicOperandIndexCube[ typeLeft ] ][ dicOperandIndexCube[ typeRight ] ][ ] 
+
 	# Get return_operation_type from SemanticCube
-	if validateExpression( operandIzq, operandDer, p[ -1 ] ) != "error":
+	if validateExpression( operandLeft, operandRight, p[ -1 ] ) != "error":
 
 		# Cast p[-1], from string to operand
 
-		#result = operandIzq p[ -1 ] operandDer
+		#result = operandLeft p[ -1 ] operandRight
 
-		qQuads.append( [ p[ -1 ] , operandIzq, operandDer, result ] )
+		qQuads.append( [ p[ -1 ] , operandLeft, operandRight, result ] )
 		iQuadCounter = iQuadCounter + 1
 
 
@@ -545,7 +599,14 @@ def p_GENERATE_QUAD(p):
 parser = yacc.yacc()
 
 
-
+#while True:
+#	try:
+#	    s = input('program globalFunc; start{ varuno = 2 * 3; }')
+#	except EOFError:
+#	    break
+#	if not s: continue
+#	result = parser.parse(s)
+#	print(result)
 
 
 

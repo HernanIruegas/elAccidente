@@ -92,14 +92,12 @@ t_greater = r'>'
 t_lessThan = r'<'
 t_greaterEquals = r'>='
 t_lessThanEquals = r'<='
-t_assign = r'='
 t_equals = r'=='
 t_notEquals = r'!='
 t_not = r'!'
 t_minus = r'-'
 t_times = r'\*'
 t_divide = r'/'
-t_plus = r'\+'
 t_lParenthesis = r'\('
 t_rParenthesis = r'\)'
 t_lCurlyBracket = r'\{'
@@ -113,6 +111,14 @@ def t_id(t):
     t.type = reserved.get(t.value, "id")
     return t
 
+def t_plus(t):
+    r'\+'
+    return t
+
+def t_assign(t):
+    r'\='
+    return t
+    
 def t_cte_str(t):
     r'\".*\"'
     t.value = str(t.value)
@@ -141,3 +147,19 @@ def t_error(t):
 
 # Build the lexer
 lexer = lex.lex()
+
+# Test it out
+#data = '''
+#3 + 4 * 10
+#+ -20 *2
+#'''
+
+# Give the lexer some input
+#lexer.input(data)
+
+# Tokenize
+#while True:
+# tok = lexer.token()
+# if not tok: 
+#     break      # No more input
+# print(tok)

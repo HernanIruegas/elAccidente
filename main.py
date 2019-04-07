@@ -7,7 +7,6 @@ if __name__ == "__main__":
             f = open(file, "r")
             data = f.read()
             f.close()
-            #print(data)
             yacc.parse(data, tracking=True)
         except EOFError:
             print("EOFError")

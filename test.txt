@@ -1,5 +1,7 @@
- program globalFunc;
+program globalFunc;
 
- var int : varuno; int : vardos[2], vardos[2];
+var int : varuno; 
 
- start{}
+start{
+	varuno = 2;
+}
