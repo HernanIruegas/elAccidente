@@ -28,39 +28,25 @@ dicOperandIndexCube = {
 dicOperatorIndexCube = {
     # Operaciones
     "+" : 0,
-    "plus" : 0,
     "-" : 1,
-    "minus" : 1,
     "*" : 2,
-    "times" : 2,
     "/" : 3,
-    "divide" : 3,
 
     # Asignación
     "=" : 4,
-    "assign" : 4,
 
     # Relacionales
     ">" : 5,
-    "greater" : 5,
     "<" : 6,
-    "lessThan" : 6,
     "<=" : 7,
-    "lessThanEquals" : 7,
     ">=" : 8,
-    "greaterEquals" : 8,
 
     # Lógicos
     "==" : 9,
-    "equals" : 9,
     "!=" : 10,
-    "notEquals" : 10,
     "&&" : 11,
-    "and" : 11,
     "||" : 12,
-    "or" : 12,
-    "!" : 13,
-    "not" : 13
+    "!" : 13
 }
 
 
@@ -160,12 +146,12 @@ semanticCube = [
 
 # Consulta con el cubo semántico para validar si una expresión se puede realizar
 # Regresar el tipo del resultado de la expresión
-def validateExpression( operand1, operand2, operator ):
+#def validateExpression( operand1, operand2, operator ):
 
-    if dicReturnValuesCube[ semanticCube[ operand1 ][ operand2 ][ operator] ] != "error" :
-        return dicReturnValuesCube[ semanticCube[ operand1 ][ operand2 ][ operator] ]
-    else:
-        return "error"
+#    if dicReturnValuesCube[ semanticCube[ operand1 ][ operand2 ][ operator] ] != "error" :
+#        return dicReturnValuesCube[ semanticCube[ operand1 ][ operand2 ][ operator] ]
+#    else:
+#        return "error"
 
 
 
