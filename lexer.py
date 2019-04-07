@@ -88,16 +88,6 @@ t_colon = r'\:'
 t_comma = r'\,'
 t_lSqrBracket = r'\['
 t_rSqrBracket = r'\]'
-t_greater = r'>'
-t_lessThan = r'<'
-t_greaterEquals = r'>='
-t_lessThanEquals = r'<='
-t_equals = r'=='
-t_notEquals = r'!='
-t_not = r'!'
-t_minus = r'-'
-t_times = r'\*'
-t_divide = r'/'
 t_lParenthesis = r'\('
 t_rParenthesis = r'\)'
 t_lCurlyBracket = r'\{'
@@ -111,8 +101,48 @@ def t_id(t):
     t.type = reserved.get(t.value, "id")
     return t
 
+def t_greater(t):
+    r'\>'
+    return t
+
+def t_lessThan(t):
+    r'\<'
+    return t
+
+def t_greaterEquals(t):
+    r'\>\='
+    return t
+
+def t_equals(t):
+    r'\=\='
+    return t
+
+def t_notEquals(t):
+    r'\!\='
+    return t
+
+def t_lessThanEquals(t):
+    r'\<\='
+    return t
+
+def t_not(t):
+    r'\!'
+    return t
+
 def t_plus(t):
     r'\+'
+    return t
+
+def t_minus(t):
+    r'\-'
+    return t
+
+def t_times(t):
+    r'\*'
+    return t
+
+def t_divide(t):
+    r'\/'
     return t
 
 def t_assign(t):

@@ -3,5 +3,5 @@ program globalFunc;
 var int : varuno; 
 
 start{
-	varuno = 2;
+	A = B + C ( D - E / F ) * H
 }

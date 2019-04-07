@@ -80,7 +80,7 @@ def p_EXPLOG(p):
 	EXPLOG : EXPRESSION EXPLOG_A
 		| not EXPRESSION EXPLOG_A
 	"""
-	#print("p_EXPLOG")
+	print("p_EXPLOG")
 
 def p_EXPLOG_A(p):
 	"""
@@ -88,14 +88,14 @@ def p_EXPLOG_A(p):
 		| or EXPLOG
 		| empty
 	"""
-	#print("p_EXPLOG_A")
+	print("p_EXPLOG_A")
 
 def p_EXPRESSION(p):
 	"""
 	EXPRESSION : EXP 
-				| EXP EXPRESSION_A EXP
+				| EXP EXPRESSION_A PUSH_STACK_OPERATORS EXP SOLVE_OPERATION_RELATIONSHIP
 	"""
-	#print("EXPRESSION")
+	print("EXPRESSION")
 
 def p_EXPRESSION_A(p):
 	"""
@@ -106,42 +106,42 @@ def p_EXPRESSION_A(p):
 				| equals
 				| notEquals
 	"""
-	#print("EXPRESSION_A")
+	print("EXPRESSION_A")
 
 def p_EXP(p):
 	"""
-	EXP : TERM EXP_A SOLVE_OPERATION
+	EXP : TERM 
+		| TERM EXP_A SOLVE_OPERATION_SUM_MINUS
 	"""
-	#print("EXP")
+	print("EXP")
 
 def p_EXP_A(p):
 	"""
 	EXP_A : plus PUSH_STACK_OPERATORS EXP
 		| minus PUSH_STACK_OPERATORS EXP
-		| empty 
 	"""
-	#print("EXP_A")
+	print("EXP_A")
 
 def p_TERM(p):
 	"""
-	TERM : FACTOR TERM_A
+	TERM : FACTOR 
+		| FACTOR TERM_A SOLVE_OPERATION_TIMES_DIVIDE
 	"""
-	#print("TERM")
+	print("TERM")
 
 def p_TERM_A(p):
 	"""
 	TERM_A : times PUSH_STACK_OPERATORS TERM
 			| divide PUSH_STACK_OPERATORS TERM
-			| empty
 	"""
-	#print("TERM_A")
+	print("TERM_A")
 
 def p_FACTOR(p):
 	"""
-	FACTOR : lParenthesis EXPLOG rParenthesis
+	FACTOR : lParenthesis PUSH_STACK_OPERATORS EXPLOG rParenthesis POP_STACK_OPERATORS
 			| VARCONSTAUX
 	"""
-	#print("FACTOR")
+	print("FACTOR")
 
 # Define numeros y accesos a indices de arreglos (sin string y boolean de VARCTE)
 def p_VARCONSTAUX(p):
@@ -150,7 +150,7 @@ def p_VARCONSTAUX(p):
 		| cte_i PUSH_STACK_OPERANDS
 		| cte_f PUSH_STACK_OPERANDS
 	"""
-	#print("VARCONSTAUX")
+	print("VARCONSTAUX")
 
 def p_TYPE(p):
 	"""
@@ -531,7 +531,6 @@ def p_PUSH_STACK_OPERANDS(p):
 	global sOperands
 	global lastReadType
 
-	print("aaa")
 	sOperands.push( p[-1] )
 	sTypes.push( lastReadType )
 
@@ -545,56 +544,94 @@ def p_PUSH_STACK_OPERATORS(p):
 	sOperators.push( p[-1] )
 
 
-def p_SOLVE_OPERATION(p):
+# Se ejecuta cuando se topa con un closing parenthesis ')'
+# Genera cuadruplos hasta encontrar el opening parenthesis '('
+def p_POP_STACK_OPERATORS(p):
 	"""
-	SOLVE_OPERATION : empty
+	POP_STACK_OPERATORS : empty
 	"""
+
+	# Generar cuadruplos con los operadores pendientes
+	# Hasta encontrarte con el fondo falso
+	while( sOperators.top() != '(' ):
+		solveOperationHelper()
+
+	sOperators.pop() # Eliminar el fondo falso de la pila de operadores
+
+
+# Código compartido para función de SOLVE_OPERATION
+def solveOperationHelper():
 
 	global sOperands
 	global sOperators
 	global sTypes
 	global qQuads
 
-	#if sOperators.top() == 'plus'
-
-
-
-
-
-# Resolver expresión y Generar cuadruplo
-def p_GENERATE_QUAD(p):
-	"""
-	GENERATE_QUAD : empty
-	"""
-
-	global sOperands
-	global iQuadCounter
-
-	operandRight = sOperands.top()
+	rightOperand = sOperands.top()
 	sOperands.pop()
-
-	typeRight = sTypes.top()
+	rightType = sTypes.top()
 	sTypes.pop()
 
-	operandLeft = sOperands.top()
+	leftOperand = sOperands.top()
+	sOperands.pop()
+	leftType = sOperands.top()
 	sOperands.pop()
 
-	typeLeft = sTypes.top()
-	sTypes.pop()
+	operator = sOperators.top()
+	sOperators.pop()
 
-	#if semanticCube[ dicOperandIndexCube[ typeLeft ] ][ dicOperandIndexCube[ typeRight ] ][ ] 
+	resultType = semanticCube[ dicOperandIndexCube[ leftType ] ][ dicOperandIndexCube[ rightType ] ][ dicOperatorIndexCube[ operator ] ]
 
-	# Get return_operation_type from SemanticCube
-	if validateExpression( operandLeft, operandRight, p[ -1 ] ) != "error":
-
-		# Cast p[-1], from string to operand
-
-		#result = operandLeft p[ -1 ] operandRight
-
-		qQuads.append( [ p[ -1 ] , operandLeft, operandRight, result ] )
+	if resultType != 0:
+		#result <- AVAIL.next() No sabemos que es pero viene en la hoja
+		result = 'result'
+		quad = [ operator, leftOperand, rightOperand, result ]
 		iQuadCounter = iQuadCounter + 1
+		qQuads.push( quad )
+		sOperands.push( result )
+		sTypes.push( resultType )
+	else:
+		#printError()
+		print("ERROR")
 
 
+# Resuelve operación de operadores '+' y '-'
+# Se consulta el cubo semántico para saber si la operación es valida
+def p_SOLVE_OPERATION_SUM_MINUS(p):
+	"""
+	SOLVE_OPERATION_SUM_MINUS : empty
+	"""
+	print("+ || -")
+	global sOperators
+
+	if sOperators.size() > 0:
+		if sOperators.top() == '+' or sOperators.top() == '-':
+			solveOperationHelper()
+
+
+# Resuelve operación de operadores '*' y '/'
+# Se consulta el cubo semántico para saber si la operación es valida
+def p_SOLVE_OPERATION_TIMES_DIVIDE(p):
+	"""
+	SOLVE_OPERATION_TIMES_DIVIDE : empty
+	"""
+	print("* || /")
+	global sOperators
+
+	if sOperators.size() > 0:
+		if sOperators.top() == '*' or sOperators.top() == '/':
+			solveOperationHelper()
+
+
+def p_SOLVE_OPERATION_RELATIONSHIP(p):
+	"""
+	SOLVE_OPERATION_RELATIONSHIP : empty
+	"""
+	global sOperators
+
+	if sOperators.size() > 0:
+		if sOperators.top() == '>' or sOperators.top() == '<' or sOperators.top() == '>=' or sOperators.top() == '<=' or sOperators.top() == '==' or sOperators.top() == '!=':
+			solveOperationHelper()
 
 parser = yacc.yacc()
 
