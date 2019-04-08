@@ -4,4 +4,8 @@ var int : A, B, C, D,E,F,K,H,J,G,L;
 
 start{
 	A = ( ( A + B ) * C + D * E * F + K / H * J ) + G * L + H + J > ( A - C * D ) / F;
+
+	if( A > B ){
+		A = B;
+	}
 }

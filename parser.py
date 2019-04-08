@@ -218,12 +218,12 @@ def p_TYPEMETHOD(p):
 
 def p_CONDITION(p):
 	"""
-	CONDITION : if lParenthesis EXPLOG rParenthesis BLOCK CONDITION_A semicolon
+	CONDITION : if lParenthesis EXPLOG rParenthesis GENERATE_GOTOF_CONDITIONAL BLOCK CONDITION_A semicolon SOLVE_OPERATION_CONDITIONAL
 	"""
 
 def p_CONDITION_A(p):
 	"""
-	CONDITION_A : else BLOCK
+	CONDITION_A : else GENERATE_GOTO_CONDITIONAL BLOCK
 				| empty
 	"""
 
@@ -676,13 +676,26 @@ def p_SOLVE_OPERATION_LOGIC(p):
 			solveOperationHelper()
 
 
-def p_SOLVE_OPERATION_CONDITIONAL(p):
+# Resuelve cuadruplo con salto pendiente
+def fill( end ):
+	global iQuadCounter
+	global qQuads
+
+	aux = qQuads[ end ] # Cuadruplo con salto pendiente
+	aux[ 3 ] = iQuadCounter # Llenar cuadruplo con el siguiente cuadruplo a ejecutar
+	qQuads[ end ] = aux # Reemplazar breadcrumb por cuadruplo con salto a fin de ciclo
+
+
+# Genera cuadruplo con salto pendiente después de haber leido un if condicional
+def p_GENERATE_GOTOF_CONDITIONAL(p):
 	"""
-	SOLVE_OPERATION_CONDITIONAL : empty
+	GENERATE_GOTOF_CONDITIONAL : empty
 	"""
 
 	global sTypes
 	global sOperands
+	global sJumps
+	global iQuadCounter
 
 	expType = sTypes.pop()
 
@@ -693,14 +706,39 @@ def p_SOLVE_OPERATION_CONDITIONAL(p):
 		iQuadCounter = iQuadCounter + 1
 		qQuads.append( quad )
 		sOperands.push( result )
-		#print(str(sOperands.top()) +" solveOperationHelper")
-
-
+		sJumps.push( iQuadCounter - 1 )
+		print(str(sOperands.top()) +" solveOperationHelper")
 	else:
 		imprimirError(4)
 
 
+# Indica el fin de un if condicional y resuelve su cuadruplo con el salto pendiente
+def p_SOLVE_OPERATION_CONDITIONAL(p):
+	"""
+	SOLVE_OPERATION_CONDITIONAL : empty
+	"""
+	global sJumps
 
+	end = sJumps.pop()
+	fill( end )
+
+
+def p_GENERATE_GOTO_CONDITIONAL(p):
+	"""
+	GENERATE_GOTO_CONDITIONAL : empty
+	"""
+
+	global sJumps
+
+	quad = [ 'GOTO', '', '', '' ]
+	iQuadCounter = iQuadCounter + 1
+
+	false = sJumps.pop()
+	sJumps.push( iQuadCounter - 1 )
+	fill( false )
+
+
+#
 def p_PRINTQUADS(p):
 	"""
 	PRINTQUADS : empty
@@ -710,6 +748,7 @@ def p_PRINTQUADS(p):
 
 	for i in qQuads:
 		print( i )
+
 
 parser = yacc.yacc()
 
