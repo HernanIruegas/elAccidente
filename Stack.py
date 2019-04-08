@@ -16,9 +16,9 @@ class Stack(object):
 
     def push(self, elem):
         self.stack.append(elem)
-        print(elem)
 
     def pop(self):
         top = self.top()
         self.stack.pop()
         return top
+

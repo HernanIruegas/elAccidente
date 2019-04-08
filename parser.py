@@ -1,7 +1,7 @@
 import ply.yacc as yacc
 from lexer import lexer, tokens
 from Stack import Stack
-from SemanticCube import dicOperandIndexCube, semanticCube, dicOperatorIndexCube, validateExpression
+from SemanticCube import dicOperandIndexCube, semanticCube, dicOperatorIndexCube, dicReturnValuesCube
 
 
 dicDirectorioFunciones = {} # "nombreFuncion" : { "Type": void/TYPE/null, "dicDirectorioVariables": {} }
@@ -21,13 +21,19 @@ iQuadCounter = 0
 
 def p_PROGRAM(p):
 	"""
-	PROGRAM : program globalFunc START_GLOBAL_FUNCTION semicolon PROGRAM_A start BLOCK
+	PROGRAM : program globalFunc START_GLOBAL_FUNCTION semicolon PROGRAM_A start BLOCK PRINTQUADS
 	"""
 
 def p_PROGRAM_A(p):
 	"""
 	PROGRAM_A : VARS PROGRAM_A
-			| METHOD PROGRAM_A
+			| METHOD PROGRAM_B
+			| empty
+	"""
+
+def p_PROGRAM_B(p):
+	"""
+	PROGRAM_B : METHOD PROGRAM_B
 			| empty
 	"""
 
@@ -77,10 +83,10 @@ def p_LIST_A(p):
 
 def p_EXPLOG(p):
 	"""
-	EXPLOG : EXPRESSION EXPLOG_A
-		| not EXPRESSION EXPLOG_A
+	EXPLOG : EXPRESSION EXPLOG_A SOLVE_OPERATION_LOGIC
+		| not EXPRESSION EXPLOG_A SOLVE_OPERATION_LOGIC
 	"""
-	print("p_EXPLOG")
+	#print("p_EXPLOG")
 
 def p_EXPLOG_A(p):
 	"""
@@ -88,14 +94,14 @@ def p_EXPLOG_A(p):
 		| or EXPLOG
 		| empty
 	"""
-	print("p_EXPLOG_A")
+	#print("p_EXPLOG_A")
 
 def p_EXPRESSION(p):
 	"""
 	EXPRESSION : EXP 
 				| EXP EXPRESSION_A PUSH_STACK_OPERATORS EXP SOLVE_OPERATION_RELATIONSHIP
 	"""
-	print("EXPRESSION")
+	#print("EXPRESSION")
 
 def p_EXPRESSION_A(p):
 	"""
@@ -106,42 +112,42 @@ def p_EXPRESSION_A(p):
 				| equals
 				| notEquals
 	"""
-	print("EXPRESSION_A")
+	#print("EXPRESSION_A")
 
 def p_EXP(p):
 	"""
-	EXP : TERM 
+	EXP : TERM SOLVE_OPERATION_SUM_MINUS
 		| TERM EXP_A SOLVE_OPERATION_SUM_MINUS
 	"""
-	print("EXP")
+	#print("EXP")
 
 def p_EXP_A(p):
 	"""
 	EXP_A : plus PUSH_STACK_OPERATORS EXP
 		| minus PUSH_STACK_OPERATORS EXP
 	"""
-	print("EXP_A")
+	#print("EXP_A")
 
 def p_TERM(p):
 	"""
-	TERM : FACTOR 
+	TERM : FACTOR SOLVE_OPERATION_TIMES_DIVIDE
 		| FACTOR TERM_A SOLVE_OPERATION_TIMES_DIVIDE
 	"""
-	print("TERM")
+	#print("TERM")
 
 def p_TERM_A(p):
 	"""
 	TERM_A : times PUSH_STACK_OPERATORS TERM
 			| divide PUSH_STACK_OPERATORS TERM
 	"""
-	print("TERM_A")
+	#print("TERM_A")
 
 def p_FACTOR(p):
 	"""
 	FACTOR : lParenthesis PUSH_STACK_OPERATORS EXPLOG rParenthesis POP_STACK_OPERATORS
 			| VARCONSTAUX
 	"""
-	print("FACTOR")
+	#print("FACTOR")
 
 # Define numeros y accesos a indices de arreglos (sin string y boolean de VARCTE)
 def p_VARCONSTAUX(p):
@@ -150,7 +156,7 @@ def p_VARCONSTAUX(p):
 		| cte_i PUSH_STACK_OPERANDS
 		| cte_f PUSH_STACK_OPERANDS
 	"""
-	print("VARCONSTAUX")
+	#print("VARCONSTAUX")
 
 def p_TYPE(p):
 	"""
@@ -464,6 +470,22 @@ def p_error(p):
 
 # ACCIONES SEMANTICAS
 
+# Función manejadora de errores
+def imprimirError(error):
+	if error == 0:
+		print( "Error: Variable Duplicada" )
+	elif error == 1:
+		print( "Error: Arreglo Duplicado" )
+	elif error == 2:
+		print( "Error: Operación invalida" )
+	elif error == 3:
+		print( "Error: Variable sin declarar" )
+	elif error == 4:
+		print( "Error: Type-mismatch" )
+
+	exit(1)
+
+
 # Crea el directorio de funciones y agrega la función global
 def p_START_GLOBAL_FUNCTION(p):
 	"""
@@ -486,7 +508,7 @@ def p_SAVE_TYPE(p):
 	lastReadType = p[-1]
 	
 
-# Guardar nombre de variable en directorio de variables de la función y pushear tipo de variable a stack de tipos
+# Guardar nombre de variable en directorio de variables de la función
 def p_SAVE_VAR(p):
 	"""
 	SAVE_VAR : empty
@@ -494,15 +516,12 @@ def p_SAVE_VAR(p):
 	global dicDirectorioFunciones
 	global currentFunction
 	global lastReadType
-	global sTypes
 
 	# Validar que variable leida no esté previamente declarada
 	if p[-1] in dicDirectorioFunciones[currentFunction]["dicDirectorioVariables"]:
-	    print("Error: Variable Duplicada")
-	    exit(1)
+		imprimirError(0)
 	else:
 	    dicDirectorioFunciones[currentFunction]["dicDirectorioVariables"][ p[-1] ] = {"Type": lastReadType, "Value": ""}
-	    sTypes.push( lastReadType )
 
 
 # Todavia no se debe hacer nada de arreglos (esperar a elda)
@@ -516,23 +535,27 @@ def p_SAVE_ARRAY(p):
 
 	# Validar que arreglo leido no esté previamente declarado
 	if p[-4] in dicDirectorioFunciones[currentFunction]["dicDirectorioVariables"]:
-	    print("Error: Arreglo Duplicado")
-	    exit(1)
+	    imprimirError(1)
 	else:
 	    dicDirectorioFunciones[currentFunction]["dicDirectorioVariables"][ p[-4] ] = {"Type": lastReadType, "Value": p[-2]}
-	    sTypes.push( lastReadType )
 
 
 # Insertar operando en stack de operandos y su tipo en stack de tipos
+# Necesitas consultar el tipo de la variable con el diccioanrio de variables de la función
 def p_PUSH_STACK_OPERANDS(p):
 	"""
 	PUSH_STACK_OPERANDS : empty
 	"""
 	global sOperands
-	global lastReadType
 
-	sOperands.push( p[-1] )
-	sTypes.push( lastReadType )
+	# Validar que la variable leida haya sido previamente declarada, que exista en el diccionario de variables de la función
+	if p[-1] in dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ]:
+		sOperands.push( p[-1] )
+		print(str(sOperands.top())+ " PUSH_STACK_OPERANDS")
+		#print("sTypes: " + str( dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[-1] ][ "Type" ] ) )
+		sTypes.push( dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[-1] ][ "Type" ] )
+	else:
+		imprimirError(3)
 
 
 # Insertar operador en stack de operadores
@@ -542,6 +565,7 @@ def p_PUSH_STACK_OPERATORS(p):
 	"""
 	global sOperators
 	sOperators.push( p[-1] )
+	print(str(sOperators.top())+ " PUSH_STACK_OPERATORS")
 
 
 # Se ejecuta cuando se topa con un closing parenthesis ')'
@@ -566,33 +590,37 @@ def solveOperationHelper():
 	global sOperators
 	global sTypes
 	global qQuads
+	global iQuadCounter
 
-	rightOperand = sOperands.top()
-	sOperands.pop()
-	rightType = sTypes.top()
-	sTypes.pop()
+	rightOperand = sOperands.pop()
+	rightType = sTypes.pop()
 
-	leftOperand = sOperands.top()
-	sOperands.pop()
-	leftType = sOperands.top()
-	sOperands.pop()
+	leftOperand = sOperands.pop()
+	leftType = sTypes.pop()
 
-	operator = sOperators.top()
-	sOperators.pop()
+	operator = sOperators.pop()
+
+	#print("leftType: " + str(leftType))
+	#print(dicOperandIndexCube[ leftType ])
+	#print("rightType: " + str(rightType))
+	#print(dicOperandIndexCube[ rightType ])
+	#print("operator: " + str(operator))
+	#print(dicOperatorIndexCube[ operator ])
 
 	resultType = semanticCube[ dicOperandIndexCube[ leftType ] ][ dicOperandIndexCube[ rightType ] ][ dicOperatorIndexCube[ operator ] ]
 
-	if resultType != 0:
+	if resultType != 0: # 0 = error en subo semantico
 		#result <- AVAIL.next() No sabemos que es pero viene en la hoja
-		result = 'result'
-		quad = [ operator, leftOperand, rightOperand, result ]
+		result = 'result' # es un valor dummy por mientras, solo para ver que se generen los quads
+		quad = [ operator, leftOperand, rightOperand, result + str(iQuadCounter+1) ]
 		iQuadCounter = iQuadCounter + 1
-		qQuads.push( quad )
-		sOperands.push( result )
-		sTypes.push( resultType )
+		qQuads.append( quad )
+		sOperands.push( result + str(iQuadCounter) )
+		print(str(sOperands.top())+ " solveOperationHelper")
+		#print("sTypes: " + str(resultType) )
+		sTypes.push( dicReturnValuesCube[ resultType ] )
 	else:
-		#printError()
-		print("ERROR")
+		imprimirError(2)
 
 
 # Resuelve operación de operadores '+' y '-'
@@ -601,7 +629,7 @@ def p_SOLVE_OPERATION_SUM_MINUS(p):
 	"""
 	SOLVE_OPERATION_SUM_MINUS : empty
 	"""
-	print("+ || -")
+	#print("+ || -")
 	global sOperators
 
 	if sOperators.size() > 0:
@@ -615,7 +643,7 @@ def p_SOLVE_OPERATION_TIMES_DIVIDE(p):
 	"""
 	SOLVE_OPERATION_TIMES_DIVIDE : empty
 	"""
-	print("* || /")
+	#print("* || /")
 	global sOperators
 
 	if sOperators.size() > 0:
@@ -623,6 +651,8 @@ def p_SOLVE_OPERATION_TIMES_DIVIDE(p):
 			solveOperationHelper()
 
 
+# Resuelve operación de operadores relacionales
+# Se consulta el cubo semántico para saber si la operación es valida
 def p_SOLVE_OPERATION_RELATIONSHIP(p):
 	"""
 	SOLVE_OPERATION_RELATIONSHIP : empty
@@ -632,6 +662,55 @@ def p_SOLVE_OPERATION_RELATIONSHIP(p):
 	if sOperators.size() > 0:
 		if sOperators.top() == '>' or sOperators.top() == '<' or sOperators.top() == '>=' or sOperators.top() == '<=' or sOperators.top() == '==' or sOperators.top() == '!=':
 			solveOperationHelper()
+
+
+# Resuelve operación de operadores lógicos
+# Se consulta el cubo semántico para saber si la operación es valida
+def p_SOLVE_OPERATION_LOGIC(p):
+	"""
+	SOLVE_OPERATION_LOGIC : empty
+	"""
+	global sOperators
+
+	if sOperators.size() > 0:
+		if sOperators.top() == 'and' or sOperators.top() == 'or' or sOperators.top() == 'not':
+			solveOperationHelper()
+
+
+def p_SOLVE_OPERATION_CONDITIONAL(p):
+	"""
+	SOLVE_OPERATION_CONDITIONAL : empty
+	"""
+
+	global sTypes
+	global sOperands
+
+	expType = sTypes.pop()
+
+	if expType == 'bool':
+		result = sOperands.pop()
+
+		quad = [ 'GotoF', result, '', '' ]
+		iQuadCounter = iQuadCounter + 1
+		qQuads.append( quad )
+		sOperands.push( result )
+		print(str(sOperands.top()) +" solveOperationHelper")
+
+
+	else:
+		imprimirError(4)
+
+
+
+def p_PRINTQUADS(p):
+	"""
+	PRINTQUADS : empty
+	"""
+
+	global qQuads
+
+	for i in qQuads:
+		print( i )
 
 parser = yacc.yacc()
 
