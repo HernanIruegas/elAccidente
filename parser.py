@@ -169,14 +169,14 @@ def p_BLOCK(p):
 	"""
 	BLOCK : lCurlyBracket BLOCK_A rCurlyBracket
 	"""
-	print("p_BLOCK {}".format(p[-1]))
+	# print("p_BLOCK {}".format(p[-1]))
 
 def p_BLOCK_A(p):
 	"""
 	BLOCK_A : STATEMENT BLOCK_A
 			| empty
 	"""
-	print("p_BLOCK_A {}".format(p[-1]))
+	# print("p_BLOCK_A {}".format(p[-1]))
 
 def p_STATEMENT(p):
 	"""
@@ -189,13 +189,13 @@ def p_STATEMENT(p):
 			| STATMETHODS
 			| RETURN 
 	"""
-	print("STATEMENT {}" .format(p[-1]))
+	# print("STATEMENT {}" .format(p[-1]))
 
 def p_ASSIGNMENT(p):
 	"""
 	ASSIGNMENT : id ISLIST assign EXPLOG semicolon 
 	"""
-	print("ASSIGNMENT {}".format(p[-1]))
+	# print("ASSIGNMENT {}".format(p[-1]))
 
 def p_READ(p):
 	"""
@@ -225,14 +225,14 @@ def p_CONDITION(p):
 	CONDITION : if lParenthesis EXPLOG rParenthesis GENERATE_GOTOF_CONDITIONAL BLOCK CONDITION_A SOLVE_OPERATION_CONDITIONAL
 	"""
 	# if lParenthesis EXPLOG rParenthesis GENERATE_GOTOF_CONDITIONAL BLOCK CONDITION_A SOLVE_OPERATION_CONDITIONAL
-	print("CONDITION {}" .format(p[-1]))
+	# print("CONDITION {}" .format(p[-1]))
 
 def p_CONDITION_A(p):
 	"""
 	CONDITION_A : else GENERATE_GOTO_CONDITIONAL BLOCK
 				| empty
 	"""
-	print("CONDITION_A")
+	# print("CONDITION_A")
 
 
 def p_WRITE(p):
@@ -715,7 +715,7 @@ def p_GENERATE_GOTOF_CONDITIONAL(p):
 		qQuads.append( quad )
 		sOperands.push( result )
 		sJumps.push( iQuadCounter - 1 )
-		print(str(sOperands.top()) +" solveOperationHelper")
+		# print(str(sOperands.top()) +" solveOperationHelper")
 	else:
 		imprimirError(4)
 
