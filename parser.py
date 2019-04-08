@@ -99,25 +99,26 @@ def p_EXPLOG_A(p):
 def p_EXPRESSION(p):
 	"""
 	EXPRESSION : EXP 
-				| EXP EXPRESSION_A PUSH_STACK_OPERATORS EXP SOLVE_OPERATION_RELATIONSHIP
+				| EXP EXPRESSION_A EXP SOLVE_OPERATION_RELATIONSHIP
 	"""
 	#print("EXPRESSION")
 
 def p_EXPRESSION_A(p):
 	"""
-	EXPRESSION_A : greater 
-				| lessThan
-				| greaterEquals
-				| lessThanEquals
-				| equals
-				| notEquals
+	EXPRESSION_A : greater PUSH_STACK_OPERATORS
+				| lessThan PUSH_STACK_OPERATORS
+				| greaterEquals PUSH_STACK_OPERATORS
+				| lessThanEquals PUSH_STACK_OPERATORS
+				| equals PUSH_STACK_OPERATORS
+				| notEquals PUSH_STACK_OPERATORS
 	"""
-	#print("EXPRESSION_A")
+
+	print(p[1])
 
 def p_EXP(p):
 	"""
 	EXP : TERM SOLVE_OPERATION_SUM_MINUS
-		| TERM EXP_A SOLVE_OPERATION_SUM_MINUS
+		| TERM SOLVE_OPERATION_SUM_MINUS EXP_A 
 	"""
 	#print("EXP")
 
@@ -131,7 +132,7 @@ def p_EXP_A(p):
 def p_TERM(p):
 	"""
 	TERM : FACTOR SOLVE_OPERATION_TIMES_DIVIDE
-		| FACTOR TERM_A SOLVE_OPERATION_TIMES_DIVIDE
+		| FACTOR SOLVE_OPERATION_TIMES_DIVIDE TERM_A 
 	"""
 	#print("TERM")
 
@@ -566,7 +567,7 @@ def p_PUSH_STACK_OPERATORS(p):
 	global sOperators
 	sOperators.push( p[-1] )
 	print(str(sOperators.top())+ " PUSH_STACK_OPERATORS")
-
+	
 
 # Se ejecuta cuando se topa con un closing parenthesis ')'
 # Genera cuadruplos hasta encontrar el opening parenthesis '('
@@ -694,7 +695,7 @@ def p_SOLVE_OPERATION_CONDITIONAL(p):
 		iQuadCounter = iQuadCounter + 1
 		qQuads.append( quad )
 		sOperands.push( result )
-		print(str(sOperands.top()) +" solveOperationHelper")
+		#print(str(sOperands.top()) +" solveOperationHelper")
 
 
 	else:
