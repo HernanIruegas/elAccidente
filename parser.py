@@ -113,8 +113,6 @@ def p_EXPRESSION_A(p):
 				| notEquals PUSH_STACK_OPERATORS
 	"""
 
-	print(p[1])
-
 def p_EXP(p):
 	"""
 	EXP : TERM SOLVE_OPERATION_SUM_MINUS
