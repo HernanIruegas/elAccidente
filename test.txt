@@ -1,11 +1,17 @@
 program globalFunc;
 
-var int : A, B, C, D,E,F,K,H,J,G,L; 
+var int : A, B, C, D, E, F, K, H, J, G, L,X;
+var string : str;
 
 start{
-	A = ( ( A + B ) * C + D * E * F + K / H * J ) + G * L + H + J > ( A - C * D ) / F;
+	A = ( ( A + B ) * C + D * E * F + K / H * J ) + G * L + H + J + ( A - C * D ) / F;
 
 	if( A > B ){
 		A = B;
+	}
+	else{
+	    B = 66.78;
+	    F = H * J;
+	    str = "_";
 	}
 }

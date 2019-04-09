@@ -193,7 +193,7 @@ def p_STATEMENT(p):
 
 def p_ASSIGNMENT(p):
 	"""
-	ASSIGNMENT : id ISLIST assign EXPLOG semicolon 
+	ASSIGNMENT : id PUSH_STACK_OPERANDS ISLIST assign PUSH_STACK_OPERATORS EXPLOG SOLVE_OPERATION_ASSIGNMENT semicolon
 	"""
 	# print("ASSIGNMENT {}".format(p[-1]))
 
@@ -558,11 +558,18 @@ def p_PUSH_STACK_OPERANDS(p):
 	# Validar que la variable leida haya sido previamente declarada, que exista en el diccionario de variables de la función
 	if p[-1] in dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ]:
 		sOperands.push( p[-1] )
-		# print(str(sOperands.top())+ " PUSH_STACK_OPERANDS")
-		#print("sTypes: " + str( dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[-1] ][ "Type" ] ) )
+		# print("\t"+str(sOperands.top())+ " PUSH_STACK_OPERANDS")
+		# print("\t\tsTypes: " + str( dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[-1] ][ "Type" ] ) )
 		sTypes.push( dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[-1] ][ "Type" ] )
 	else:
-		imprimirError(3)
+		# validar que no sea un cte_i o cte_f
+		sOperands.push("{}".format(p[-1]))
+		if type(p[-1]) == int:
+			sTypes.push("int")
+		elif type(p[-1]) == float:
+			sTypes.push("float")
+		else:
+			imprimirError(3)
 
 
 # Insertar operador en stack de operadores
@@ -623,8 +630,10 @@ def solveOperationHelper():
 		iQuadCounter = iQuadCounter + 1
 		qQuads.append( quad )
 		sOperands.push( result + str(iQuadCounter) )
+
 		# print(str(sOperands.top())+ " solveOperationHelper")
-		#print("sTypes: " + str(resultType) )
+		# print("sTypes: " + str(resultType) )
+
 		sTypes.push( dicReturnValuesCube[ resultType ] )
 	else:
 		imprimirError(2)
@@ -641,6 +650,7 @@ def p_SOLVE_OPERATION_SUM_MINUS(p):
 
 	if sOperators.size() > 0:
 		if sOperators.top() == '+' or sOperators.top() == '-':
+			# print("\tsOperator: {}".format(sOperators.top()))
 			solveOperationHelper()
 
 
@@ -655,6 +665,7 @@ def p_SOLVE_OPERATION_TIMES_DIVIDE(p):
 
 	if sOperators.size() > 0:
 		if sOperators.top() == '*' or sOperators.top() == '/':
+			# print("\tsOperator: {}".format(sOperators.top()))
 			solveOperationHelper()
 
 
@@ -668,6 +679,7 @@ def p_SOLVE_OPERATION_RELATIONSHIP(p):
 
 	if sOperators.size() > 0:
 		if sOperators.top() == '>' or sOperators.top() == '<' or sOperators.top() == '>=' or sOperators.top() == '<=' or sOperators.top() == '==' or sOperators.top() == '!=':
+			# print("\tsOperator: {}".format(sOperators.top()))
 			solveOperationHelper()
 
 
@@ -681,6 +693,7 @@ def p_SOLVE_OPERATION_LOGIC(p):
 
 	if sOperators.size() > 0:
 		if sOperators.top() == 'and' or sOperators.top() == 'or' or sOperators.top() == 'not':
+			print("\tsOperator: {}".format(sOperators.top()))
 			solveOperationHelper()
 
 
@@ -730,6 +743,16 @@ def p_SOLVE_OPERATION_CONDITIONAL(p):
 	end = sJumps.pop()
 	fill( end )
 
+def p_SOLVE_OPERATION_ASSIGNMENT(p):
+	"""
+	SOLVE_OPERATION_ASSIGNMENT : empty
+	"""
+	global sOperators
+
+	if sOperators.size() > 0:
+		if sOperators.top() == '=':
+			solveOperationHelper()
+
 
 def p_GENERATE_GOTO_CONDITIONAL(p):
 	"""
@@ -737,9 +760,11 @@ def p_GENERATE_GOTO_CONDITIONAL(p):
 	"""
 
 	global sJumps
+	global iQuadCounter
 
 	quad = [ 'GOTO', '', '', '' ]
 	iQuadCounter = iQuadCounter + 1
+	qQuads.append(quad)
 
 	false = sJumps.pop()
 	sJumps.push( iQuadCounter - 1 )

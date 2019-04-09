@@ -101,6 +101,18 @@ def t_id(t):
     return t
 
 
+def t_greaterEquals(t):
+    r'\>\='
+    return t
+
+def t_lessThanEquals(t):
+    r'\<\='
+    return t
+
+def t_equals(t):
+    r'\=\='
+    return t
+
 def t_greater(t):
     r'\>'
     return t
@@ -110,31 +122,13 @@ def t_lessThan(t):
     r'\<'
     return t
 
-
-def t_greaterEquals(t):
-    r'\>\='
-    return t
-
-
-def t_equals(t):
-    r'\=\='
-    return t
-
-
 def t_notEquals(t):
     r'\!\='
     return t
 
-
-def t_lessThanEquals(t):
-    r'\<\='
-    return t
-
-
 def t_not(t):
     r'\!'
     return t
-
 
 def t_plus(t):
     r'\+'
@@ -166,16 +160,14 @@ def t_cte_str(t):
     t.value = str(t.value)
     return t
 
+def t_cte_f(t):
+    r'[0-9]+\.[0-9]+'
+    t.value = float(t.value)
+    return t
 
 def t_cte_i(t):
     r'[0-9]+'
     t.value = int(t.value)
-    return t
-
-
-def t_cte_f(t):
-    r'[0-9]+\.[0-9]+'
-    t.value = float(t.value)
     return t
 
 
