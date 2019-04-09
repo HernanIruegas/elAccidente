@@ -22,157 +22,157 @@ varTemp = 0
 
 def p_PROGRAM(p):
     """
-	PROGRAM : program globalFunc START_GLOBAL_FUNCTION semicolon PROGRAM_A start BLOCK PRINTQUADS
-	"""
+    PROGRAM : program globalFunc START_GLOBAL_FUNCTION semicolon PROGRAM_A start BLOCK PRINTQUADS
+    """
 
 
 def p_PROGRAM_A(p):
     """
-	PROGRAM_A : VARS PROGRAM_A
-			| METHOD PROGRAM_B
-			| empty
-	"""
+    PROGRAM_A : VARS PROGRAM_A
+            | METHOD PROGRAM_B
+            | empty
+    """
 
 
 def p_PROGRAM_B(p):
     """
-	PROGRAM_B : METHOD PROGRAM_B
-			| empty
-	"""
+    PROGRAM_B : METHOD PROGRAM_B
+            | empty
+    """
 
 
 def p_VARS(p):
     """
-	VARS : var VARS_A
-	"""
+    VARS : var VARS_A
+    """
 
 
 def p_VARS_A(p):
     """
-	VARS_A : TYPE colon VARS_B semicolon VARS_C
-	"""
+    VARS_A : TYPE colon VARS_B semicolon VARS_C
+    """
 
 
 def p_VARS_B(p):
     """
-	VARS_B : SIMPLE
-		| LIST
-	"""
+    VARS_B : SIMPLE
+        | LIST
+    """
 
 
 def p_VARS_C(p):
     """
-	VARS_C : VARS_A
-			| empty
-	"""
+    VARS_C : VARS_A
+            | empty
+    """
 
 
 def p_SIMPLE(p):
     """
-	SIMPLE : id SAVE_VAR SIMPLE_A
-	"""
+    SIMPLE : id SAVE_VAR SIMPLE_A
+    """
 
 
 def p_SIMPLE_A(p):
     """
-	SIMPLE_A : comma SIMPLE
-			| empty
-	"""
+    SIMPLE_A : comma SIMPLE
+            | empty
+    """
 
 
 def p_LIST(p):
     """
-	LIST : id lSqrBracket VARCONSTAUX rSqrBracket SAVE_ARRAY LIST_A
-	"""
+    LIST : id lSqrBracket VARCONSTAUX rSqrBracket SAVE_ARRAY LIST_A
+    """
 
 
 def p_LIST_A(p):
     """
-	LIST_A : comma LIST
-		| empty
-	"""
+    LIST_A : comma LIST
+        | empty
+    """
 
 
 def p_EXPLOG(p):
     """
-	EXPLOG : EXPRESSION EXPLOG_A SOLVE_OPERATION_LOGIC
-		| not EXPRESSION EXPLOG_A SOLVE_OPERATION_LOGIC
-	"""
+    EXPLOG : EXPRESSION EXPLOG_A SOLVE_OPERATION_LOGIC
+        | not EXPRESSION EXPLOG_A SOLVE_OPERATION_LOGIC
+    """
 
 
 # print("p_EXPLOG")
 
 def p_EXPLOG_A(p):
     """
-	EXPLOG_A : and EXPLOG
-		| or EXPLOG
-		| empty
-	"""
+    EXPLOG_A : and EXPLOG
+        | or EXPLOG
+        | empty
+    """
 
 
 # print("p_EXPLOG_A")
 
 def p_EXPRESSION(p):
     """
-	EXPRESSION : EXP
-				| EXP EXPRESSION_A EXP SOLVE_OPERATION_RELATIONSHIP
-	"""
+    EXPRESSION : EXP
+                | EXP EXPRESSION_A EXP SOLVE_OPERATION_RELATIONSHIP
+    """
 
 
 # print("EXPRESSION")
 
 def p_EXPRESSION_A(p):
     """
-	EXPRESSION_A : greater PUSH_STACK_OPERATORS
-				| lessThan PUSH_STACK_OPERATORS
-				| greaterEquals PUSH_STACK_OPERATORS
-				| lessThanEquals PUSH_STACK_OPERATORS
-				| equals PUSH_STACK_OPERATORS
-				| notEquals PUSH_STACK_OPERATORS
-	"""
+    EXPRESSION_A : greater PUSH_STACK_OPERATORS
+                | lessThan PUSH_STACK_OPERATORS
+                | greaterEquals PUSH_STACK_OPERATORS
+                | lessThanEquals PUSH_STACK_OPERATORS
+                | equals PUSH_STACK_OPERATORS
+                | notEquals PUSH_STACK_OPERATORS
+    """
 
 
 def p_EXP(p):
     """
-	EXP : TERM SOLVE_OPERATION_SUM_MINUS
-		| TERM SOLVE_OPERATION_SUM_MINUS EXP_A
-	"""
+    EXP : TERM SOLVE_OPERATION_SUM_MINUS
+        | TERM SOLVE_OPERATION_SUM_MINUS EXP_A
+    """
 
 
 # print("EXP")
 
 def p_EXP_A(p):
     """
-	EXP_A : plus PUSH_STACK_OPERATORS EXP
-		| minus PUSH_STACK_OPERATORS EXP
-	"""
+    EXP_A : plus PUSH_STACK_OPERATORS EXP
+        | minus PUSH_STACK_OPERATORS EXP
+    """
 
 
 # print("EXP_A")
 
 def p_TERM(p):
     """
-	TERM : FACTOR SOLVE_OPERATION_TIMES_DIVIDE
-		| FACTOR SOLVE_OPERATION_TIMES_DIVIDE TERM_A
-	"""
+    TERM : FACTOR SOLVE_OPERATION_TIMES_DIVIDE
+        | FACTOR SOLVE_OPERATION_TIMES_DIVIDE TERM_A
+    """
 
 
 # print("TERM")
 
 def p_TERM_A(p):
     """
-	TERM_A : times PUSH_STACK_OPERATORS TERM
-			| divide PUSH_STACK_OPERATORS TERM
-	"""
+    TERM_A : times PUSH_STACK_OPERATORS TERM
+            | divide PUSH_STACK_OPERATORS TERM
+    """
 
 
 # print("TERM_A")
 
 def p_FACTOR(p):
     """
-	FACTOR : lParenthesis PUSH_STACK_OPERATORS EXPLOG rParenthesis POP_STACK_OPERATORS
-			| VARCONSTAUX
-	"""
+    FACTOR : lParenthesis PUSH_STACK_OPERATORS EXPLOG rParenthesis POP_STACK_OPERATORS
+            | VARCONSTAUX
+    """
 
 
 # print("FACTOR")
@@ -180,368 +180,368 @@ def p_FACTOR(p):
 # Define numeros y accesos a indices de arreglos (sin string y boolean de VARCTE)
 def p_VARCONSTAUX(p):
     """
-	VARCONSTAUX : id PUSH_STACK_OPERANDS ISLIST
-		| cte_i PUSH_STACK_OPERANDS
-		| cte_f PUSH_STACK_OPERANDS
-	"""
+    VARCONSTAUX : id PUSH_STACK_OPERANDS ISLIST
+        | cte_i PUSH_STACK_OPERANDS
+        | cte_f PUSH_STACK_OPERANDS
+    """
 
 
 # print("VARCONSTAUX")
 
 def p_TYPE(p):
     """
-	TYPE : int SAVE_TYPE
-		| float SAVE_TYPE
-		| string SAVE_TYPE
-		| bool SAVE_TYPE
-	"""
+    TYPE : int SAVE_TYPE
+        | float SAVE_TYPE
+        | string SAVE_TYPE
+        | bool SAVE_TYPE
+    """
 
 
 def p_BLOCK(p):
     """
-	BLOCK : lCurlyBracket BLOCK_A rCurlyBracket
-	"""
+    BLOCK : lCurlyBracket BLOCK_A rCurlyBracket
+    """
 
 
 def p_BLOCK_A(p):
     """
-	BLOCK_A : STATEMENT BLOCK_A
-			| empty
-	"""
+    BLOCK_A : STATEMENT BLOCK_A
+            | empty
+    """
 
 
 def p_STATEMENT(p):
     """
-	STATEMENT : ASSIGNMENT
-			| CONDITION
-			| WRITE
-			| PRE_CONDITIONAL_LOOP
-			| POST_CONDITIONAL_LOOP
-			| METHODCALL
-			| READ
-			| STATMETHODS
-			| RETURN
-	"""
+    STATEMENT : ASSIGNMENT
+            | CONDITION
+            | WRITE
+            | PRE_CONDITIONAL_LOOP
+            | POST_CONDITIONAL_LOOP
+            | METHODCALL
+            | READ
+            | STATMETHODS
+            | RETURN
+    """
 
 
 def p_ASSIGNMENT(p):
     """
-	ASSIGNMENT : id PUSH_STACK_OPERANDS ISLIST assign PUSH_STACK_OPERATORS EXPLOG SOLVE_OPERATION_ASSIGNMENT semicolon
-	"""
+    ASSIGNMENT : id PUSH_STACK_OPERANDS ISLIST assign PUSH_STACK_OPERATORS EXPLOG SOLVE_OPERATION_ASSIGNMENT semicolon
+    """
 
 
 def p_READ(p):
     """
-	READ : scan lParenthesis VARCTE READ_A rParenthesis
-	"""
+    READ : scan lParenthesis VARCTE READ_A rParenthesis
+    """
 
 
 def p_READ_A(p):
     """
-	READ_A : comma
-		| empty
-	"""
+    READ_A : comma
+        | empty
+    """
 
 
 def p_ISLIST(p):
     """
-	ISLIST : lSqrBracket EXP rSqrBracket
-			| empty
-	"""
+    ISLIST : lSqrBracket EXP rSqrBracket
+            | empty
+    """
 
 
 def p_TYPEMETHOD(p):
     """
-	TYPEMETHOD : TYPE
-			| void
-	"""
+    TYPEMETHOD : TYPE
+            | void
+    """
 
 
 def p_CONDITION(p):
     """
-	CONDITION : if lParenthesis EXPLOG rParenthesis GENERATE_GOTOF_CONDITIONAL BLOCK CONDITION_A SOLVE_OPERATION_CONDITIONAL
-	"""
+    CONDITION : if lParenthesis EXPLOG rParenthesis GENERATE_GOTOF_CONDITIONAL BLOCK CONDITION_A SOLVE_OPERATION_CONDITIONAL
+    """
 
 
 def p_CONDITION_A(p):
     """
-	CONDITION_A : else GENERATE_GOTO_CONDITIONAL BLOCK
-				| empty
-	"""
+    CONDITION_A : else GENERATE_GOTO_CONDITIONAL BLOCK
+                | empty
+    """
 
 
 def p_WRITE(p):
     """
-	WRITE : print lParenthesis EXPRESSION GENERATE_QUAD_PRINT WRITE_A rParenthesis semicolon
-	"""
+    WRITE : print lParenthesis EXPRESSION GENERATE_QUAD_PRINT WRITE_A rParenthesis semicolon
+    """
 
 
 def p_WRITE_A(p):
     """
-	WRITE_A : comma EXPRESSION GENERATE_QUAD_PRINT WRITE_A
-		| empty
-	"""
+    WRITE_A : comma EXPRESSION GENERATE_QUAD_PRINT WRITE_A
+        | empty
+    """
 
 
 def p_VARCTE(p):
     """
-	VARCTE : id ISLIST
-		| cte_i
-		| cte_f
-		| cte_str
-		| BOOLEAN
-	"""
+    VARCTE : id ISLIST
+        | cte_i
+        | cte_f
+        | cte_str
+        | BOOLEAN
+    """
 
 
 def p_METHOD(p):
     """
-	METHOD : func TYPEMETHOD id lParenthesis PARAMS rParenthesis BLOCK semicolon
-	"""
+    METHOD : func TYPEMETHOD id lParenthesis PARAMS rParenthesis BLOCK semicolon
+    """
 
 
 def p_PARAMS(p):
     """
-	PARAMS : EXP PARAMS_A
-	"""
+    PARAMS : EXP PARAMS_A
+    """
 
 
 def p_PARAMS_A(p):
     """
-	PARAMS_A : comma EXP PARAMS_A
-		| empty
-	"""
+    PARAMS_A : comma EXP PARAMS_A
+        | empty
+    """
 
 
 def p_PRE_CONDITIONAL_LOOP(p):
     """
-	PRE_CONDITIONAL_LOOP : while PUSH_STACK_JUMPS lParenthesis EXPLOG rParenthesis GENERATE_GOTOF_CONDITIONAL BLOCK SOLVE_OPERATION_PRE_CONDITIONAL_LOOP
-	"""
+    PRE_CONDITIONAL_LOOP : while PUSH_STACK_JUMPS lParenthesis EXPLOG rParenthesis GENERATE_GOTOF_CONDITIONAL BLOCK SOLVE_OPERATION_PRE_CONDITIONAL_LOOP
+    """
 
 
 def p_POST_CONDITIONAL_LOOP(p):
     """
-	POST_CONDITIONAL_LOOP : do PUSH_STACK_JUMPS BLOCK while lParenthesis EXPLOG rParenthesis SOLVE_OPERATION_POST_CONDITIONAL_LOOP
-	"""
+    POST_CONDITIONAL_LOOP : do PUSH_STACK_JUMPS BLOCK while lParenthesis EXPLOG rParenthesis SOLVE_OPERATION_POST_CONDITIONAL_LOOP
+    """
 
 
 def p_METHODCALL(p):
     """
-	METHODCALL : id lParenthesis EXP METHODCALL_A rParenthesis semicolon
-	"""
+    METHODCALL : id lParenthesis EXP METHODCALL_A rParenthesis semicolon
+    """
 
 
 def p_METHODCALL_A(p):
     """
-	METHODCALL_A : comma EXP
-				| empty
-	"""
+    METHODCALL_A : comma EXP
+                | empty
+    """
 
 
 def p_RETURN(p):
     """
-	RETURN : return EXPLOG semicolon
-	"""
+    RETURN : return EXPLOG semicolon
+    """
 
 
 def p_BOOLEAN(p):
     """
-	BOOLEAN : FALSE
-			| TRUE
-	"""
+    BOOLEAN : FALSE
+            | TRUE
+    """
 
 
 def p_STATMETHODS(p):
     """
-	STATMETHODS : ORDINARY_LEAST_SQUARES
-				| LASSO
-				| RIDGE
-				| K_MEANS
-				| MINI_BATCH_MEANS
-				| TIME_SERIES_SPLIT
-				| MEAN_ABSOLUTE_ERROR
-				| MEAN_SQUARED_ERROR
-				| MEDIAN_ABSOLUTE_ERROR
-				| MEAN
-				| MODE
-				| MEDIAN
-				| PROBABILITY
-				| FREQUENCY
-				| VARIANCE
-				| STANDARD_DEVIATION
-				| SKEWNESS
-				| KURTOSI
-	"""
+    STATMETHODS : ORDINARY_LEAST_SQUARES
+                | LASSO
+                | RIDGE
+                | K_MEANS
+                | MINI_BATCH_MEANS
+                | TIME_SERIES_SPLIT
+                | MEAN_ABSOLUTE_ERROR
+                | MEAN_SQUARED_ERROR
+                | MEDIAN_ABSOLUTE_ERROR
+                | MEAN
+                | MODE
+                | MEDIAN
+                | PROBABILITY
+                | FREQUENCY
+                | VARIANCE
+                | STANDARD_DEVIATION
+                | SKEWNESS
+                | KURTOSI
+    """
 
 
 def p_ORDINARY_LEAST_SQUARES(p):
     """
-	ORDINARY_LEAST_SQUARES : ols lParenthesis id comma id comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma BOOLEAN rParenthesis semicolon
-	"""
+    ORDINARY_LEAST_SQUARES : ols lParenthesis id comma id comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma BOOLEAN rParenthesis semicolon
+    """
 
 
 def p_LASSO(p):
     """
-	LASSO : las lParenthesis id comma id comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma string comma float comma BOOLEAN rParenthesis semicolon
-	"""
+    LASSO : las lParenthesis id comma id comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma string comma float comma BOOLEAN rParenthesis semicolon
+    """
 
 
 def p_RIDGE(p):
     """
-	RIDGE : rid lParenthesis id comma id comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma VARCONSTAUX comma string comma VARCONSTAUX rParenthesis semicolon
-	"""
+    RIDGE : rid lParenthesis id comma id comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma VARCONSTAUX comma string comma VARCONSTAUX rParenthesis semicolon
+    """
 
 
 def p_K_MEANS(p):
     """
-	K_MEANS : kmeans lParenthesis VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma VARCONSTAUX comma string rParenthesis semicolon
-	"""
+    K_MEANS : kmeans lParenthesis VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma VARCONSTAUX comma string rParenthesis semicolon
+    """
 
 
 def p_MINI_BATCH_MEANS(p):
     """
-	MINI_BATCH_MEANS : mbm lParenthesis VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX rParenthesis semicolon
-	"""
+    MINI_BATCH_MEANS : mbm lParenthesis VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX rParenthesis semicolon
+    """
 
 
 def p_TIME_SERIES_SPLIT(p):
     """
-	TIME_SERIES_SPLIT : tseries lParenthesis VARCONSTAUX comma VARCONSTAUX rParenthesis semicolon
-	"""
+    TIME_SERIES_SPLIT : tseries lParenthesis VARCONSTAUX comma VARCONSTAUX rParenthesis semicolon
+    """
 
 
 def p_MEAN_ABSOLUTE_ERROR(p):
     """
-	MEAN_ABSOLUTE_ERROR : mean_abs_err lParenthesis id comma id rParenthesis semicolon
-	"""
+    MEAN_ABSOLUTE_ERROR : mean_abs_err lParenthesis id comma id rParenthesis semicolon
+    """
 
 
 def p_MEAN_SQUARED_ERROR(p):
     """
-	MEAN_SQUARED_ERROR : mean_sqr_err lParenthesis id comma id rParenthesis semicolon
-	"""
+    MEAN_SQUARED_ERROR : mean_sqr_err lParenthesis id comma id rParenthesis semicolon
+    """
 
 
 def p_MEDIAN_ABSOLUTE_ERROR(p):
     """
-	MEDIAN_ABSOLUTE_ERROR : median_abs_err lParenthesis id comma id rParenthesis semicolon
-	"""
+    MEDIAN_ABSOLUTE_ERROR : median_abs_err lParenthesis id comma id rParenthesis semicolon
+    """
 
 
 def p_MEAN(p):
     """
-	MEAN : mean lParenthesis id MEAN_A rParenthesis semicolon
-	"""
+    MEAN : mean lParenthesis id MEAN_A rParenthesis semicolon
+    """
 
 
 def p_MEAN_A(p):
     """
-	MEAN_A : comma id MEAN_A
-		| empty
-	"""
+    MEAN_A : comma id MEAN_A
+        | empty
+    """
 
 
 def p_MODE(p):
     """
-	MODE : mode lParenthesis id MODE_A rParenthesis semicolon
-	"""
+    MODE : mode lParenthesis id MODE_A rParenthesis semicolon
+    """
 
 
 def p_MODE_A(p):
     """
-	MODE_A : comma id MODE_A
-		| empty
-	"""
+    MODE_A : comma id MODE_A
+        | empty
+    """
 
 
 def p_MEDIAN(p):
     """
-	MEDIAN : median lParenthesis id MEDIAN_A rParenthesis semicolon
-	"""
+    MEDIAN : median lParenthesis id MEDIAN_A rParenthesis semicolon
+    """
 
 
 def p_MEDIAN_A(p):
     """
-	MEDIAN_A : comma id MEDIAN_A
-		| empty
-	"""
+    MEDIAN_A : comma id MEDIAN_A
+        | empty
+    """
 
 
 def p_PROBABILITY(p):
     """
-	PROBABILITY : prob lParenthesis id PROBABILITY_A rParenthesis semicolon
-	"""
+    PROBABILITY : prob lParenthesis id PROBABILITY_A rParenthesis semicolon
+    """
 
 
 def p_PROBABILITY_A(p):
     """
-	PROBABILITY_A : comma id PROBABILITY_A
-		| empty
-	"""
+    PROBABILITY_A : comma id PROBABILITY_A
+        | empty
+    """
 
 
 def p_FREQUENCY(p):
     """
-	FREQUENCY : freq lParenthesis id FREQUENCY_A rParenthesis semicolon
-	"""
+    FREQUENCY : freq lParenthesis id FREQUENCY_A rParenthesis semicolon
+    """
 
 
 def p_FREQUENCY_A(p):
     """
-	FREQUENCY_A : comma id FREQUENCY_A
-		| empty
-	"""
+    FREQUENCY_A : comma id FREQUENCY_A
+        | empty
+    """
 
 
 def p_VARIANCE(p):
     """
-	VARIANCE : variance lParenthesis id VARIANCE_A rParenthesis semicolon
-	"""
+    VARIANCE : variance lParenthesis id VARIANCE_A rParenthesis semicolon
+    """
 
 
 def p_VARIANCE_A(p):
     """
-	VARIANCE_A : comma id VARIANCE_A
-		| empty
-	"""
+    VARIANCE_A : comma id VARIANCE_A
+        | empty
+    """
 
 
 def p_STANDARD_DEVIATION(p):
     """
-	STANDARD_DEVIATION : stddev lParenthesis id STANDARD_DEVIATION_A rParenthesis semicolon
-	"""
+    STANDARD_DEVIATION : stddev lParenthesis id STANDARD_DEVIATION_A rParenthesis semicolon
+    """
 
 
 def p_STANDARD_DEVIATION_A(p):
     """
-	STANDARD_DEVIATION_A : comma id STANDARD_DEVIATION_A
-		| empty
-	"""
+    STANDARD_DEVIATION_A : comma id STANDARD_DEVIATION_A
+        | empty
+    """
 
 
 def p_SKEWNESS(p):
     """
-	SKEWNESS : skew lParenthesis id SKEWNESS_A rParenthesis semicolon
-	"""
+    SKEWNESS : skew lParenthesis id SKEWNESS_A rParenthesis semicolon
+    """
 
 
 def p_SKEWNESS_A(p):
     """
-	SKEWNESS_A : comma id SKEWNESS_A
-		| empty
-	"""
+    SKEWNESS_A : comma id SKEWNESS_A
+        | empty
+    """
 
 
 def p_KURTOSI(p):
     """
-	KURTOSI : kurt  lParenthesis id KURTOSI_A rParenthesis semicolon
-	"""
+    KURTOSI : kurt  lParenthesis id KURTOSI_A rParenthesis semicolon
+    """
 
 
 def p_KURTOSI_A(p):
     """
-	KURTOSI_A : comma id KURTOSI_A
-		| empty
-	"""
+    KURTOSI_A : comma id KURTOSI_A
+        | empty
+    """
 
 
 def p_empty(p):
@@ -577,8 +577,8 @@ def imprimirError(error):
 # Crea el directorio de funciones y agrega la función global
 def p_START_GLOBAL_FUNCTION(p):
     """
-	START_GLOBAL_FUNCTION : empty
-	"""
+    START_GLOBAL_FUNCTION : empty
+    """
     global currentFunction
     global dicDirectorioFunciones
 
@@ -589,8 +589,8 @@ def p_START_GLOBAL_FUNCTION(p):
 # Guarda el último tipo de variable leido en una variable global lastReadType
 def p_SAVE_TYPE(p):
     """
-	SAVE_TYPE : empty
-	"""
+    SAVE_TYPE : empty
+    """
     global lastReadType
 
     lastReadType = p[-1]
@@ -599,8 +599,8 @@ def p_SAVE_TYPE(p):
 # Guardar nombre de variable en directorio de variables de la función
 def p_SAVE_VAR(p):
     """
-	SAVE_VAR : empty
-	"""
+    SAVE_VAR : empty
+    """
     global dicDirectorioFunciones
     global currentFunction
     global lastReadType
@@ -615,8 +615,8 @@ def p_SAVE_VAR(p):
 # Todavia no se debe hacer nada de arreglos (esperar a elda)
 def p_SAVE_ARRAY(p):
     """
-	SAVE_ARRAY : empty
-	"""
+    SAVE_ARRAY : empty
+    """
     global dicDirectorioFunciones
     global currentFunction
     global lastReadType
@@ -660,21 +660,19 @@ def p_PUSH_STACK_OPERANDS(p):
 # Insertar operador en stack de operadores
 def p_PUSH_STACK_OPERATORS(p):
     """
-	PUSH_STACK_OPERATORS : empty
-	"""
+    PUSH_STACK_OPERATORS : empty
+    """
     global sOperators
     sOperators.push(p[-1])
-
-
-# print(str(sOperators.top())+ " PUSH_STACK_OPERATORS")
+    # print(str(sOperators.top()) + " PUSH_STACK_OPERATORS")
 
 
 # Se ejecuta cuando se topa con un closing parenthesis ')'
 # Genera cuadruplos hasta encontrar el opening parenthesis '('
 def p_POP_STACK_OPERATORS(p):
     """
-	POP_STACK_OPERATORS : empty
-	"""
+    POP_STACK_OPERATORS : empty
+    """
 
     # Generar cuadruplos con los operadores pendientes
     # Hasta encontrarte con el fondo falso
@@ -722,7 +720,7 @@ def solveOperationHelper():
         iQuadCounter = iQuadCounter + 1
         qQuads.append(quad)
         sOperands.push("t" + str(varTemp))
-        # print(str(sOperands.top())+ " solveOperationHelper")
+        # print(str(sOperands.top()) + " solveOperationHelper")
         # print("sTypes: " + str(resultType) )
         sTypes.push(dicReturnValuesCube[resultType])
     else:
@@ -733,8 +731,8 @@ def solveOperationHelper():
 # Se consulta el cubo semántico para saber si la operación es valida
 def p_SOLVE_OPERATION_SUM_MINUS(p):
     """
-	SOLVE_OPERATION_SUM_MINUS : empty
-	"""
+    SOLVE_OPERATION_SUM_MINUS : empty
+    """
     # print("+ || -")
     global sOperators
 
@@ -747,8 +745,8 @@ def p_SOLVE_OPERATION_SUM_MINUS(p):
 # Se consulta el cubo semántico para saber si la operación es valida
 def p_SOLVE_OPERATION_TIMES_DIVIDE(p):
     """
-	SOLVE_OPERATION_TIMES_DIVIDE : empty
-	"""
+    SOLVE_OPERATION_TIMES_DIVIDE : empty
+    """
     # print("* || /")
     global sOperators
 
@@ -761,8 +759,8 @@ def p_SOLVE_OPERATION_TIMES_DIVIDE(p):
 # Se consulta el cubo semántico para saber si la operación es valida
 def p_SOLVE_OPERATION_RELATIONSHIP(p):
     """
-	SOLVE_OPERATION_RELATIONSHIP : empty
-	"""
+    SOLVE_OPERATION_RELATIONSHIP : empty
+    """
     global sOperators
 
     if sOperators.size() > 0:
@@ -774,8 +772,8 @@ def p_SOLVE_OPERATION_RELATIONSHIP(p):
 # Se consulta el cubo semántico para saber si la operación es valida
 def p_SOLVE_OPERATION_LOGIC(p):
     """
-	SOLVE_OPERATION_LOGIC : empty
-	"""
+    SOLVE_OPERATION_LOGIC : empty
+    """
     global sOperators
 
     if sOperators.size() > 0:
@@ -821,8 +819,8 @@ def solveOperationHelperAssignment():
 # El cuadruplo de la asignación solo debe tener 2 espacios llenos, no 4 como el de las operaciones
 def p_SOLVE_OPERATION_ASSIGNMENT(p):
     """
-	SOLVE_OPERATION_ASSIGNMENT : empty
-	"""
+    SOLVE_OPERATION_ASSIGNMENT : empty
+    """
     global sOperators
 
     if sOperators.size() > 0:
@@ -843,8 +841,8 @@ def fill(end):
 # Genera cuadruplo con salto pendiente después de haber leido un if condicional
 def p_GENERATE_GOTOF_CONDITIONAL(p):
     """
-	GENERATE_GOTOF_CONDITIONAL : empty
-	"""
+    GENERATE_GOTOF_CONDITIONAL : empty
+    """
 
     global sTypes
     global sOperands
@@ -864,7 +862,7 @@ def p_GENERATE_GOTOF_CONDITIONAL(p):
         qQuads.append(quad)
         sOperands.push(result)
         sJumps.push(iQuadCounter - 1)
-    # print(str(sOperands.top()) +" solveOperationHelper")
+        # print(str(sOperands.top()) + " solveOperationHelper")
     else:
         imprimirError(4)
 
@@ -872,8 +870,8 @@ def p_GENERATE_GOTOF_CONDITIONAL(p):
 # Indica el fin de un if condicional y resuelve su cuadruplo con el salto pendiente
 def p_SOLVE_OPERATION_CONDITIONAL(p):
     """
-	SOLVE_OPERATION_CONDITIONAL : empty
-	"""
+    SOLVE_OPERATION_CONDITIONAL : empty
+    """
     global sJumps
 
     end = sJumps.pop()
@@ -883,8 +881,8 @@ def p_SOLVE_OPERATION_CONDITIONAL(p):
 # Indica el salto que tiene que hacer la condición en caso de que el bloque verdadero se cumpla (para que no entre al else)
 def p_GENERATE_GOTO_CONDITIONAL(p):
     """
-	GENERATE_GOTO_CONDITIONAL : empty
-	"""
+    GENERATE_GOTO_CONDITIONAL : empty
+    """
 
     global sJumps
     global iQuadCounter
@@ -903,8 +901,8 @@ def p_GENERATE_GOTO_CONDITIONAL(p):
 # El contador debe apuntar al cuadruplo donde se evalua la expresión del while
 def p_PUSH_STACK_JUMPS(p):
     """
-	PUSH_STACK_JUMPS : empty
-	"""
+    PUSH_STACK_JUMPS : empty
+    """
     global sJumps
     global iQuadCounter
 
@@ -915,8 +913,8 @@ def p_PUSH_STACK_JUMPS(p):
 # Resuelve los saltos de regreso a la expresión y el salto que indica el final del loop
 def p_SOLVE_OPERATION_PRE_CONDITIONAL_LOOP(p):
     """
-	SOLVE_OPERATION_PRE_CONDITIONAL_LOOP : empty
-	"""
+    SOLVE_OPERATION_PRE_CONDITIONAL_LOOP : empty
+    """
 
     global sJumps
     global iQuadCounter
@@ -942,8 +940,8 @@ def p_SOLVE_OPERATION_PRE_CONDITIONAL_LOOP(p):
 # Resuelve el salto de regreso a la ejecución de los statements del do while (en caso de que sea verdadera la expresión)
 def p_SOLVE_OPERATION_POST_CONDITIONAL_LOOP(p):
     """
-	SOLVE_OPERATION_POST_CONDITIONAL_LOOP : empty
-	"""
+    SOLVE_OPERATION_POST_CONDITIONAL_LOOP : empty
+    """
     global sJumps
     global sOperands
     global iQuadCounter
@@ -961,8 +959,8 @@ def p_SOLVE_OPERATION_POST_CONDITIONAL_LOOP(p):
 # Utiliza a la pila de operandos para obtener el resultado de la expresión que va a imprimir el print
 def p_GENERATE_QUAD_PRINT(p):
     """
-	GENERATE_QUAD_PRINT : empty
-	"""
+    GENERATE_QUAD_PRINT : empty
+    """
 
     global qQuads
     global iQuadCounter
@@ -978,8 +976,8 @@ def p_GENERATE_QUAD_PRINT(p):
 # helper para saber los cuadruplos que se generan
 def p_PRINTQUADS(p):
     """
-	PRINTQUADS : empty
-	"""
+    PRINTQUADS : empty
+    """
 
     global qQuads
     cont = 0
@@ -998,6 +996,3 @@ parser = yacc.yacc()
 #	if not s: continue
 #	result = parser.parse(s)
 #	print(result)
-
-
-

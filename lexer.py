@@ -19,6 +19,7 @@ reserved = {
     'return': 'return',
     'and': 'and',
     'or': 'or',
+    'do': 'do',
 
     # Data Types
     'int': 'int',
