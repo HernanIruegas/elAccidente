@@ -762,6 +762,8 @@ def p_GENERATE_GOTOF_CONDITIONAL(p):
 		result = sOperands.pop()
 
 		quad = [ 'GotoF', result, '', '' ]
+		print("iQuadCounter_goto_F")
+		print(iQuadCounter)
 		iQuadCounter = iQuadCounter + 1
 		qQuads.append( quad )
 		sOperands.push( result )
@@ -826,10 +828,16 @@ def p_SOLVE_OPERATION_PRE_CONDITIONAL_LOOP(p):
 	global qQuads
 
 	end = sJumps.pop()
+	print("end")
+	print(end)
 	returnTo = sJumps.pop()
+	print("returnTo")
+	print(returnTo)
 
 	quad = [ 'GOTO', '', '', returnTo ] 
 	iQuadCounter = iQuadCounter + 1
+	print("iQuadCounter")
+	print(iQuadCounter)
 	qQuads.append( quad )
 
 	fill( end )
@@ -879,7 +887,7 @@ def p_PRINTQUADS(p):
 	"""
 
 	global qQuads
-	cont = 1 
+	cont = 0
 	for i in qQuads:
 		print( str(cont) + ": " + str(i) )
 		cont = cont + 1;
