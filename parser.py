@@ -16,6 +16,7 @@ sTypes = Stack()
 sJumps = Stack()
 qQuads = []
 iQuadCounter = 0
+varTemp = 0
 
 # VarConstAux puro numero y acceder a arreglo
 
@@ -172,7 +173,7 @@ def p_BLOCK(p):
 
 def p_BLOCK_A(p):
 	"""
-	BLOCK_A : STATEMENT
+	BLOCK_A : STATEMENT BLOCK_A
 			| empty
 	"""
 
@@ -181,7 +182,8 @@ def p_STATEMENT(p):
 	STATEMENT : ASSIGNMENT
 			| CONDITION
 			| WRITE
-			| LOOP
+			| PRE_CONDITIONAL_LOOP
+			| POST_CONDITIONAL_LOOP
 			| METHODCALL
 			| READ
 			| STATMETHODS
@@ -190,7 +192,7 @@ def p_STATEMENT(p):
 
 def p_ASSIGNMENT(p):
 	"""
-	ASSIGNMENT : id ISLIST assign EXPLOG semicolon 
+	ASSIGNMENT : id PUSH_STACK_OPERANDS ISLIST assign PUSH_STACK_OPERATORS EXPLOG SOLVE_OPERATION_ASSIGNMENT semicolon 
 	"""
 
 def p_READ(p):
@@ -218,7 +220,7 @@ def p_TYPEMETHOD(p):
 
 def p_CONDITION(p):
 	"""
-	CONDITION : if lParenthesis EXPLOG rParenthesis GENERATE_GOTOF_CONDITIONAL BLOCK CONDITION_A semicolon SOLVE_OPERATION_CONDITIONAL
+	CONDITION : if lParenthesis EXPLOG rParenthesis GENERATE_GOTOF_CONDITIONAL BLOCK CONDITION_A SOLVE_OPERATION_CONDITIONAL
 	"""
 
 def p_CONDITION_A(p):
@@ -229,12 +231,12 @@ def p_CONDITION_A(p):
 
 def p_WRITE(p):
 	"""
-	WRITE : print lParenthesis EXPRESSION WRITE_A rParenthesis semicolon
+	WRITE : print lParenthesis EXPRESSION GENERATE_QUAD_PRINT WRITE_A rParenthesis semicolon
 	"""
 
 def p_WRITE_A(p):
 	"""
-	WRITE_A : comma EXPRESSION WRITE_A
+	WRITE_A : comma EXPRESSION GENERATE_QUAD_PRINT WRITE_A
 		| empty
 	"""
 
@@ -263,9 +265,14 @@ def p_PARAMS_A(p):
 		| empty
 	"""
 
-def p_LOOP(p):
+def p_PRE_CONDITIONAL_LOOP(p):
 	"""
-	LOOP : while lParenthesis EXPLOG rParenthesis BLOCK
+	PRE_CONDITIONAL_LOOP : while PUSH_STACK_JUMPS lParenthesis EXPLOG rParenthesis GENERATE_GOTOF_CONDITIONAL BLOCK SOLVE_OPERATION_PRE_CONDITIONAL_LOOP
+	"""
+
+def p_POST_CONDITIONAL_LOOP(p):
+	"""
+	POST_CONDITIONAL_LOOP : do PUSH_STACK_JUMPS BLOCK while lParenthesis EXPLOG rParenthesis SOLVE_OPERATION_POST_CONDITIONAL_LOOP
 	"""
 
 def p_METHODCALL(p):
@@ -590,6 +597,7 @@ def solveOperationHelper():
 	global sTypes
 	global qQuads
 	global iQuadCounter
+	global varTemp # para contar vars temporales creadas (solucion por mientras)
 
 	rightOperand = sOperands.pop()
 	rightType = sTypes.pop()
@@ -599,8 +607,11 @@ def solveOperationHelper():
 
 	operator = sOperators.pop()
 
+	#print( "resultType")
+	#print("leftOperand: " + str(leftOperand))
 	#print("leftType: " + str(leftType))
 	#print(dicOperandIndexCube[ leftType ])
+	#print("rightOperand: " + str(rightOperand))
 	#print("rightType: " + str(rightType))
 	#print(dicOperandIndexCube[ rightType ])
 	#print("operator: " + str(operator))
@@ -611,10 +622,11 @@ def solveOperationHelper():
 	if resultType != 0: # 0 = error en subo semantico
 		#result <- AVAIL.next() No sabemos que es pero viene en la hoja
 		result = 'result' # es un valor dummy por mientras, solo para ver que se generen los quads
-		quad = [ operator, leftOperand, rightOperand, result + str(iQuadCounter+1) ]
+		varTemp = varTemp + 1
+		quad = [ operator, leftOperand, rightOperand, "t" + str(varTemp) ]
 		iQuadCounter = iQuadCounter + 1
 		qQuads.append( quad )
-		sOperands.push( result + str(iQuadCounter) )
+		sOperands.push( "t" + str(varTemp) )
 		print(str(sOperands.top())+ " solveOperationHelper")
 		#print("sTypes: " + str(resultType) )
 		sTypes.push( dicReturnValuesCube[ resultType ] )
@@ -676,6 +688,52 @@ def p_SOLVE_OPERATION_LOGIC(p):
 			solveOperationHelper()
 
 
+# Genera cuadruplo para la asignación
+def solveOperationHelperAssignment():
+	global sOperands
+	global sOperators
+	global sTypes
+	global qQuads
+	global iQuadCounter
+
+	rightOperand = sOperands.pop()
+	rightType = sTypes.pop()
+
+	leftOperand = sOperands.pop()
+	leftType = sTypes.pop()
+
+	operator = sOperators.pop()
+
+	resultType = semanticCube[ dicOperandIndexCube[ leftType ] ][ dicOperandIndexCube[ rightType ] ][ dicOperatorIndexCube[ operator ] ]
+
+	if resultType != 0: # 0 = error en subo semantico
+		#result <- AVAIL.next() No sabemos que es pero viene en la hoja
+		#result = 'result' # es un valor dummy por mientras, solo para ver que se generen los quads
+		quad = [ operator, rightOperand, '', leftOperand ]
+		iQuadCounter = iQuadCounter + 1
+		qQuads.append( quad )
+		#sOperands.push( result + str(iQuadCounter) )
+		#print(str(sOperands.top())+ " solveOperationHelper")
+		#print("sTypes: " + str(resultType) )
+		#sTypes.push( dicReturnValuesCube[ resultType ] )
+	else:
+		imprimirError(2)
+
+
+# Indica que se tiene que generar cuadruplo para una asignación
+# Utiliza otra función helper porque su cuadruplo es distinto al que genera la función de SOLVE_OPERATION
+# El cuadruplo de la asignación solo debe tener 2 espacios llenos, no 4 como el de las operaciones
+def p_SOLVE_OPERATION_ASSIGNMENT(p):
+	"""
+	SOLVE_OPERATION_ASSIGNMENT : empty
+	"""
+	global sOperators
+
+	if sOperators.size() > 0:
+		if sOperators.top() == '=':
+			solveOperationHelperAssignment()
+
+
 # Resuelve cuadruplo con salto pendiente
 def fill( end ):
 	global iQuadCounter
@@ -696,6 +754,7 @@ def p_GENERATE_GOTOF_CONDITIONAL(p):
 	global sOperands
 	global sJumps
 	global iQuadCounter
+	global qQuads
 
 	expType = sTypes.pop()
 
@@ -723,31 +782,107 @@ def p_SOLVE_OPERATION_CONDITIONAL(p):
 	fill( end )
 
 
+# Indica el salto que tiene que hacer la condición en caso de que el bloque verdadero se cumpla (para que no entre al else)
 def p_GENERATE_GOTO_CONDITIONAL(p):
 	"""
 	GENERATE_GOTO_CONDITIONAL : empty
 	"""
 
 	global sJumps
+	global iQuadCounter
+	global qQuads
 
 	quad = [ 'GOTO', '', '', '' ]
 	iQuadCounter = iQuadCounter + 1
+	qQuads.append( quad )
+
 
 	false = sJumps.pop()
 	sJumps.push( iQuadCounter - 1 )
 	fill( false )
 
 
-#
+# Inserta en la pila de saltos el cuadruplo breadcrumb para regresar a evaluar la expresión 
+# El contador debe apuntar al cuadruplo donde se evalua la expresión del while
+def p_PUSH_STACK_JUMPS(p):
+	"""
+	PUSH_STACK_JUMPS : empty
+	"""
+	global sJumps
+	global iQuadCounter
+
+	sJumps.push( iQuadCounter )
+
+
+# Resuelve cuadruplos con saltos pendientes para el while
+# Resuelve los saltos de regreso a la expresión y el salto que indica el final del loop
+def p_SOLVE_OPERATION_PRE_CONDITIONAL_LOOP(p):
+	"""
+	SOLVE_OPERATION_PRE_CONDITIONAL_LOOP : empty
+	"""
+
+	global sJumps
+	global iQuadCounter
+	global qQuads
+
+	end = sJumps.pop()
+	returnTo = sJumps.pop()
+
+	quad = [ 'GOTO', '', '', returnTo ] 
+	iQuadCounter = iQuadCounter + 1
+	qQuads.append( quad )
+
+	fill( end )
+
+
+# Resuelve cuadruplo con salto pendiente para el do while
+# Resuelve el salto de regreso a la ejecución de los statements del do while (en caso de que sea verdadera la expresión)
+def p_SOLVE_OPERATION_POST_CONDITIONAL_LOOP(p):
+	"""
+	SOLVE_OPERATION_POST_CONDITIONAL_LOOP : empty
+	"""
+	global sJumps
+	global sOperands
+	global iQuadCounter
+	global qQuads
+
+	result = sOperands.pop()
+	returnTo = sJumps.pop()
+
+	quad = [ 'GOTOT', result, '', returnTo ] 
+	iQuadCounter = iQuadCounter + 1
+	qQuads.append( quad )
+
+
+# Genera le cuadruplo para los prints
+# Utiliza a la pila de operandos para obtener el resultado de la expresión que va a imprimir el print
+def p_GENERATE_QUAD_PRINT(p):
+	"""
+	GENERATE_QUAD_PRINT : empty
+	"""
+
+	global qQuads
+	global iQuadCounter
+	global sOperands
+
+	result = sOperands.pop()
+
+	quad = [ 'PRINT', '', '', result ] 
+	iQuadCounter = iQuadCounter + 1
+	qQuads.append( quad )
+
+
+# helper para saber los cuadruplos que se generan
 def p_PRINTQUADS(p):
 	"""
 	PRINTQUADS : empty
 	"""
 
 	global qQuads
-
+	cont = 1 
 	for i in qQuads:
-		print( i )
+		print( str(cont) + ": " + str(i) )
+		cont = cont + 1;
 
 
 parser = yacc.yacc()
