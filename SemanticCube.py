@@ -49,19 +49,6 @@ dicOperatorIndexCube = {
     "!" : 13
 }
 
-
-dicReturnValuesCube = {
-  0 : "error",
-  1 : "int",
-  2 : "float",
-  3 : "string",
-  4 : "bool",
-  5 : "list_int",
-  6 : "list_float",
-  7 : "list_string",
-  8 : "list_bool"
-}
-
 semanticCube = [
         # int
         [

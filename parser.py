@@ -3,26 +3,80 @@ from lexer import lexer, tokens
 from Stack import Stack
 from SemanticCube import dicOperandIndexCube, semanticCube, dicOperatorIndexCube, dicReturnValuesCube
 
+#############################
+# VARIABLES GLOBALES
+#############################
 
-dicDirectorioFunciones = {} # "nombreFuncion" : { "Type": void/TYPE/null, "dicDirectorioVariables": {} }
-# dicDirectorioVariables = "VarName" : { "Type": ..., "Value": ...}
+dicDirectorioFunciones = {} # "nombreFuncion" : { "Type": void/TYPE, "dicDirectorioVariables": {}, "ParamCounter": ..., "QuadCounter": ..., "TempCounter": ..., ParamTypes: [] }
+# dicDirectorioVariables = "VarName" : { "Type": ..., "Value": ..., "Scope": ..., "Address": ...}
 
-lastReadType = ""
-currentFunction = ""
+lastReadType = "" # Sirve para conocer el tipo de dato más recientemente leído ( de funciones y de variables )
+currentFunction = "" # Sirve para conocer el nombre de la función más recientemente leida
+currentScope =  "" # Sirve para conocer el scope de la función actual
 
-sOperators = Stack()
-sOperands = Stack()
-sTypes = Stack()
-sJumps = Stack()
-qQuads = []
-iQuadCounter = 0
-varTemp = 0
+sOperators = Stack() # Pila de operadores
+sOperands = Stack() # Pila de operandos
+sTypes = Stack() # Pila de tipos
+sJumps = Stack() # Pila de saltos
+qQuads = [] # Lista de quadruplos
+qQuadRecursiveCalls = [] # Lista de cuadruplos de llamadas recursivas
+iQuadCounter = 0 # Contador de cuadruplos, apunta al siguiente
+iTemporalVariableCounter = 0 # Contador de variables temporales para los cuadruplos
+iParametersCounter = 0 # Contador para saber cuántos parametros tiene una función (se usa cuando se lee la declaración de una función) y también sirve como indice para la lista de tipos ParamTypes de la función
 
-# VarConstAux puro numero y acceder a arreglo
+#############################
+# RANGOS DE MEMORIA
+#############################
+# Rangos para variables globales
+index_gInt = 1000
+gIntStart = 1000
+gIntEnd = 1999
+index_gFloat = 2000
+gFloatStart = 2000
+gFloatEnd = 2999
+index_gBool = 3000
+gBoolStart = 3000
+gBoolEnd = 3999
+index_gString = 4000
+gStringStart = 4000
+gStringEnd = 4999
+
+# Rangos para variables locales
+index_lInt = 5000
+lIntStart = 5000
+lIntEnd = 5999
+index_lFloat = 6000
+lFloatStart = 6000
+lFloatEnd = 6999
+index_lBool = 7000
+lBoolStart = 7000
+lBoolEnd = 7999
+index_lString = 8000
+lStringStart = 8000
+lStringEnd = 8999
+
+# Rangos para variables temporales
+index_tInt = 9000
+tIntStart = 9000
+tIntEnd = 9999
+index_tFloat = 10000
+tFloatStart = 10000
+tFloatEnd = 10999
+index_tBool = 11000
+tBoolStart = 11000
+tBoolEnd = 11999
+index_tString = 12000
+tStringStart = 12000
+tStringEnd = 12999
+
+
+#############################
+# REGLAS DE PARSER
+#############################
 
 def p_PROGRAM(p):
 	"""
-	PROGRAM : program globalFunc START_GLOBAL_FUNCTION semicolon PROGRAM_A start BLOCK PRINTQUADS
+	PROGRAM : program void globalFunc START_FUNCTION semicolon PROGRAM_A start BLOCK PRINTQUADS
 	"""
 
 def p_PROGRAM_A(p):
@@ -251,17 +305,23 @@ def p_VARCTE(p):
 
 def p_METHOD(p):
 	"""
-	METHOD : func TYPEMETHOD id lParenthesis PARAMS rParenthesis BLOCK semicolon
+	METHOD : func TYPEMETHOD SAVE_TYPE id START_FUNCTION lParenthesis METHOD_A SAVE_COUNTER_PARAM rParenthesis SAVE_COUNTER_QUAD BLOCK END_FUNCTION
+	"""
+
+def p_METHOD_A(p):
+	"""
+	METHOD_A : PARAMS
+			| empty		
 	"""
 
 def p_PARAMS(p):
 	"""
-	PARAMS : EXP PARAMS_A
+	PARAMS : TYPE id SAVE_VAR SAVE_PARAM_TYPE INCREMENT_PARAM_COUNTER PARAMS_A 
 	"""
 
 def p_PARAMS_A(p):
 	"""
-	PARAMS_A : comma EXP PARAMS_A
+	PARAMS_A : comma PARAMS
 		| empty
 	"""
 
@@ -277,7 +337,7 @@ def p_POST_CONDITIONAL_LOOP(p):
 
 def p_METHODCALL(p):
 	"""
-	METHODCALL : id lParenthesis EXP METHODCALL_A rParenthesis semicolon
+	METHODCALL : id VALIDATE_FUNCTION_NAME ERA lParenthesis EXP METHODCALL_A rParenthesis semicolon
 	"""
 
 def p_METHODCALL_A(p):
@@ -474,8 +534,6 @@ def p_error(p):
     exit(1)
 
 
-# ACCIONES SEMANTICAS
-
 # Función manejadora de errores
 def imprimirError(error):
 	if error == 0:
@@ -488,20 +546,33 @@ def imprimirError(error):
 		print( "Error: Variable sin declarar" )
 	elif error == 4:
 		print( "Error: Type-mismatch" )
+	elif error == 5:
+		print( "Error: Función duplicada" )
+	elif error == 6:
+		print( "Error: Función no declarada previamente" )
 
 	exit(1)
 
 
-# Crea el directorio de funciones y agrega la función global
-def p_START_GLOBAL_FUNCTION(p):
+#############################
+# ACCIONES SEMANTICAS 
+#############################
+
+# Guarda la función en el directorio de funciones
+def p_START_FUNCTION(p):
 	"""
-	START_GLOBAL_FUNCTION : empty
+	START_FUNCTION : empty
 	"""
 	global currentFunction 
 	global dicDirectorioFunciones
 
 	currentFunction = p[ -1 ]
-	dicDirectorioFunciones[ currentFunction ]  = { "Type": "null", "dicDirectorioVariables": {} }
+
+	# Validar que la función no esté previamente declarada
+	if currentFunction not in dicDirectorioFunciones:
+		dicDirectorioFunciones[ currentFunction ]  = { "Type": lastReadType, "dicDirectorioVariables": {}, "ParamCounter": 0, "QuadCounter": 0, "TempCounter": 0, "ParamTypes": [ ] }
+	else:
+		imprimirError( 5 )
 
 
 # Guarda el último tipo de variable leido en una variable global lastReadType
@@ -514,7 +585,7 @@ def p_SAVE_TYPE(p):
 	lastReadType = p[-1]
 	
 
-# Guardar nombre de variable en directorio de variables de la función
+# Guardar nombre de variable, tipo, scope y dirección de memoria en directorio de variables de la función
 def p_SAVE_VAR(p):
 	"""
 	SAVE_VAR : empty
@@ -527,7 +598,15 @@ def p_SAVE_VAR(p):
 	if p[-1] in dicDirectorioFunciones[currentFunction]["dicDirectorioVariables"]:
 		imprimirError(0)
 	else:
-	    dicDirectorioFunciones[currentFunction]["dicDirectorioVariables"][ p[-1] ] = {"Type": lastReadType, "Value": ""}
+		# Definir espacio de memoria y scope de variable
+		address = set_address( lastReadType )
+
+		if currentFunction == "globalFunc":
+			currentScope = "global"
+		else:
+			currentScope = "local"
+		
+		dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[-1] ] = {"Type": lastReadType, "Value": "", "Scope": currentScope, "Address": address }
 
 
 # Todavia no se debe hacer nada de arreglos (esperar a elda)
@@ -545,6 +624,105 @@ def p_SAVE_ARRAY(p):
 	else:
 	    dicDirectorioFunciones[currentFunction]["dicDirectorioVariables"][ p[-4] ] = {"Type": lastReadType, "Value": p[-2]}
 
+
+#############################
+# ACCIONES SEMANTICAS DE FUNCIONES
+#############################
+
+
+# Guarda el tipo de parametro en la lista de tipos de parametros de la función
+# Incrementa el contador de parametros
+def p_INCREMENT_PARAM_COUNTER(p):
+	"""
+	INCREMENT_PARAM_COUNTER : empty
+	"""
+	global iParametersCounter
+
+	iParametersCounter =  iParametersCounter + 1
+
+
+# Guardar el número de parametros de la función
+# Hacer reset del contador de parametros para una función
+def p_SAVE_COUNTER_PARAM(p):
+	"""
+	SAVE_COUNTER_PARAM : empty
+	"""
+	global iParametersCounter
+
+	dicDirectorioFunciones[currentFunction][ "ParamCounter" ] = iParametersCounter
+	iParametersCounter = 0
+
+
+# Guardar contador de queadruplos en propiedades de la función
+# Sirve como breadcrumb para cuando se llame a la función desde otro lado del programa, para saber donde empieza su ejecución
+def p_SAVE_COUNTER_QUAD(p):
+	"""
+	SAVE_COUNTER_QUAD : empty
+	"""
+
+	global QuadCounter
+	dicDirectorioFunciones[currentFunction][ "QuadCounter" ] = QuadCounter
+
+
+# Acciones en la terminación de una función
+# Reset de contadores para rangos de memoria 
+def p_END_FUNCTION(p):
+	"""
+	END_FUNCTION : empty
+	"""
+	reset_local_vars()
+
+
+# Guardar el tipo de dato del parametro leido de la función
+def p_SAVE_PARAM_TYPE(p):
+	"""
+	SAVE_PARAM_TYPE : empty
+	"""
+	global dicDirectorioFunciones
+	global currentFunction
+	global lastReadType
+
+	dicDirectorioFunciones[ currentFunction ][ "ParamTypes" ][ iParametersCounter ] = lastReadType
+
+
+# Valida que el nombre de la función a la que se está llamando haya sido previamente declarada
+def p_VALIDATE_FUNCTION_NAME(p):
+	"""
+	VALIDATE_FUNCTION_NAME : empty
+	"""
+	global dicDirectorioFunciones
+
+	if p[ -1 ] not in dicDirectorioFunciones:
+		imprimirError( 6 )
+
+
+# Generar accion ERA
+def p_ERA(t):
+    """
+    ERA : empty
+    """
+    global qQuads;
+    global iQuadCounter;
+    global currentFunction;
+    global qQuadRecursiveCalls;
+    global dicDirectorioFunciones
+    global iArgumentCounter
+
+    # p[ -1 ] =  nombre de la función a la que se está llamando
+    quad = [ "ERA", p[ -1 ], dicDirectorioFunciones[ p[ -1 ] ][ "ParamCounter" ], dicDirectorioFunciones[ p[ -1 ] ][ "TempCounter" ] ]
+
+    # Validar si es una llamada recursiva
+    if(currentFunction == p[ -1 ]):
+        qQuadRecursiveCalls.append( iQuadCounter );
+
+    qQuads.append(quad);
+    iQuadCounter = iQuadCounter + 1;
+    iArgumentCounter = 1
+
+
+#############################
+# ACCIONES SEMANTICAS DE EXPRESIONES
+#############################
 
 # Insertar operando en stack de operandos y su tipo en stack de tipos
 # Necesitas consultar el tipo de la variable con el diccioanrio de variables de la función
@@ -597,7 +775,7 @@ def solveOperationHelper():
 	global sTypes
 	global qQuads
 	global iQuadCounter
-	global varTemp # para contar vars temporales creadas (solucion por mientras)
+	global iTemporalVariableCounter # para contar vars temporales creadas (solucion por mientras)
 
 	rightOperand = sOperands.pop()
 	rightType = sTypes.pop()
@@ -622,11 +800,11 @@ def solveOperationHelper():
 	if resultType != 0: # 0 = error en subo semantico
 		#result <- AVAIL.next() No sabemos que es pero viene en la hoja
 		result = 'result' # es un valor dummy por mientras, solo para ver que se generen los quads
-		varTemp = varTemp + 1
-		quad = [ operator, leftOperand, rightOperand, "t" + str(varTemp) ]
+		iTemporalVariableCounter = iTemporalVariableCounter + 1
+		quad = [ operator, leftOperand, rightOperand, "t" + str(iTemporalVariableCounter) ]
 		iQuadCounter = iQuadCounter + 1
 		qQuads.append( quad )
-		sOperands.push( "t" + str(varTemp) )
+		sOperands.push( "t" + str(iTemporalVariableCounter) )
 		print(str(sOperands.top())+ " solveOperationHelper")
 		#print("sTypes: " + str(resultType) )
 		sTypes.push( dicReturnValuesCube[ resultType ] )
@@ -744,6 +922,10 @@ def fill( end ):
 	qQuads[ end ] = aux # Reemplazar breadcrumb por cuadruplo con salto a fin de ciclo
 
 
+#############################
+# ACCIONES SEMANTICAS DE ESTATUTOS DE DECISIÓN
+#############################
+
 # Genera cuadruplo con salto pendiente después de haber leido un if condicional
 def p_GENERATE_GOTOF_CONDITIONAL(p):
 	"""
@@ -816,6 +998,10 @@ def p_PUSH_STACK_JUMPS(p):
 	sJumps.push( iQuadCounter )
 
 
+#############################
+# ACCIONES SEMANTICAS DE CICLOS
+#############################
+
 # Resuelve cuadruplos con saltos pendientes para el while
 # Resuelve los saltos de regreso a la expresión y el salto que indica el final del loop
 def p_SOLVE_OPERATION_PRE_CONDITIONAL_LOOP(p):
@@ -862,6 +1048,10 @@ def p_SOLVE_OPERATION_POST_CONDITIONAL_LOOP(p):
 	qQuads.append( quad )
 
 
+#############################
+# ACCIONES SEMANTICAS GENERALES PARA VISUALIZACIÓN Y GENERACIÓN
+#############################
+
 # Genera le cuadruplo para los prints
 # Utiliza a la pila de operandos para obtener el resultado de la expresión que va a imprimir el print
 def p_GENERATE_QUAD_PRINT(p):
@@ -880,7 +1070,7 @@ def p_GENERATE_QUAD_PRINT(p):
 	qQuads.append( quad )
 
 
-# helper para saber los cuadruplos que se generan
+# Helper para saber los cuadruplos que se generan
 def p_PRINTQUADS(p):
 	"""
 	PRINTQUADS : empty
@@ -891,6 +1081,91 @@ def p_PRINTQUADS(p):
 	for i in qQuads:
 		print( str(cont) + ": " + str(i) )
 		cont = cont + 1;
+
+
+#############################
+# ACCIONES MEMORIA
+#############################
+
+
+# Asignar memoria a variable
+# Se busca primero en el directorio de variables de la función global y si no está entonces se confirma que es una variable local
+# Regresa la dirección de memoria asignada a la variable
+def set_address( varName ):
+    if varName in dicDirectorioFunciones[ "globalFunc" ]: # Es una variable global
+        return set_address_global( dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ varName ][ "Type" ] ) # Le pasamos el tipo de la variable
+    else:
+        return set_address_local( dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ varName ][ "Type" ] ) # Le pasamos el tipo de la variable
+
+
+# Asignar memoria a variable global
+# Incrementa el contador del rango para la memoria global
+def set_address_global( type ):
+    assigned_address = None
+    if type == "int":
+        assigned_address = index_gInt
+        index_gInt += 1
+    elif type == "float":
+        assigned_address = index_gFloat
+        index_gFloat += 1
+    elif type == "bool":
+        assigned_address = index_gBool
+        index_gBool += 1
+    elif type == "string":
+        assigned_address = index_gString
+        index_gString += 1
+
+    return assigned_address
+
+
+# Asignar memoria a variable local
+# Incrementa el contador del rango para la memoria local
+def set_address_local( type ):
+
+    assigned_address = None
+    if type == "int":
+        assigned_address = index_lInt
+        index_lInt += 1
+    elif type == "float":
+        assigned_address = index_lFloat
+        index_lFloat += 1
+    elif type == "bool":
+        assigned_address = index_lBool
+        index_lBool += 1
+    elif type == "string":
+        assigned_address = index_lString
+        index_lString += 1
+
+    return assigned_address
+
+
+# Asignar memoria a variable temporal
+# Incrementa el contador del rango para la memoria temporal
+def set_address_temp( type ):
+    if type == "int":
+        assigned_address = index_tInt
+        index_tInt += 1
+    elif type == "float":
+        assigned_address = index_tFloat
+        index_tFloat += 1
+    elif type == "bool":
+        assigned_address = index_tBool
+        index_tBool += 1
+    elif type == "string":
+        assigned_address = index_tString
+        index_tString += 1
+
+    #assigned_address = "(" + str(assigned_address)  # TODO: what is this??
+    return assigned_address
+
+
+# Reset a los contadores de los rangos de las memorias
+# Cada función tiene su propio rango de memoria local
+def reset_local_vars():
+	index_lInt = 5000
+	index_tFloat = 6000
+	index_tBool = 7000
+	index_tString = 8000
 
 
 parser = yacc.yacc()
