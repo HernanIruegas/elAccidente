@@ -91,7 +91,7 @@ cStringEnd = 16999
 
 def p_PROGRAM(p):
 	"""
-	PROGRAM : program void SAVE_TYPE globalFunc START_FUNCTION semicolon PROGRAM_A start BLOCK PRINTQUADS
+	PROGRAM : program void SAVE_TYPE globalFunc START_FUNCTION semicolon PROGRAM_A void SAVE_TYPE start START_FUNCTION BLOCK PRINTQUADS
 	"""
 
 def p_PROGRAM_A(p):
@@ -862,6 +862,8 @@ def solveOperationHelper():
 	global qQuads
 	global iQuadCounter
 	global iTemporalVariableCounter # para contar vars temporales creadas (solucion por mientras)
+	global dicDirectorioFunciones
+	global currentFunction
 
 	rightOperand = sOperands.pop()
 	rightType = sTypes.pop()
@@ -871,28 +873,25 @@ def solveOperationHelper():
 
 	operator = sOperators.pop()
 
-	#print( "resultType")
-	#print("leftOperand: " + str(leftOperand))
-	#print("leftType: " + str(leftType))
-	#print(dicOperandIndexCube[ leftType ])
-	#print("rightOperand: " + str(rightOperand))
-	#print("rightType: " + str(rightType))
-	#print(dicOperandIndexCube[ rightType ])
-	#print("operator: " + str(operator))
-	#print(dicOperatorIndexCube[ operator ])
-
 	resultType = semanticCube[ dicOperandIndexCube[ leftType ] ][ dicOperandIndexCube[ rightType ] ][ dicOperatorIndexCube[ operator ] ]
 
 	if resultType != 0: # 0 = error en subo semantico
-		#result <- AVAIL.next() No sabemos que es pero viene en la hoja
 		result = 'result' # es un valor dummy por mientras, solo para ver que se generen los quads
+
+		dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ "t" + str(iTemporalVariableCounter) ] = {"Type": resultType, "Value": "", "Scope": "local", "Address": "" }
+
+		# Definir espacio de memoria de variable
+		address = set_address_temp( dicReturnValuesCube[ resultType ] )
+
+		# Actualizar campo de memory address en la variable
+		dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ "t" + str(iTemporalVariableCounter) ][ "Address" ] = address
+
 		iTemporalVariableCounter = iTemporalVariableCounter + 1
-		quad = [ operator, leftOperand, rightOperand, "t" + str(iTemporalVariableCounter) ]
+		quad = [ operator, leftOperand, rightOperand, address ]
 		iQuadCounter = iQuadCounter + 1
 		qQuads.append( quad )
-		sOperands.push( "t" + str(iTemporalVariableCounter) )
+		sOperands.push( address )
 		print(str(sOperands.top())+ " solveOperationHelper")
-		#print("sTypes: " + str(resultType) )
 		sTypes.push( dicReturnValuesCube[ resultType ] )
 	else:
 		imprimirError(2)
@@ -1135,7 +1134,7 @@ def p_SOLVE_OPERATION_POST_CONDITIONAL_LOOP(p):
 
 
 #############################
-# ACCIONES SEMANTICAS GENERALES PARA VISUALIZACIÓN Y GENERACIÓN
+# ACCIONES SEMANTICAS GENERALES PARA VISUALIZACIÓN Y GENERACIÓN DE QUADRUPLOS
 #############################
 
 # Genera le cuadruplo para los prints
@@ -1268,7 +1267,8 @@ def set_address_temp( varType ):
 		assigned_address = index_tString
 		index_tString += 1
 
-	#assigned_address = "(" + str(assigned_address)  # TODO: what is this??
+	print("assigned_address")
+	print(assigned_address)
 	return assigned_address
 
 
@@ -1300,7 +1300,7 @@ def set_address_const( varType ):
 	return assigned_address
 
 
-# Reset a los contadores de los rangos de las memorias
+# Reset a los contadores de los rangos de las memorias 
 # Cada función tiene su propio rango de memoria local
 def reset_local_vars():
 
@@ -1308,11 +1308,19 @@ def reset_local_vars():
 	global index_lFloat
 	global index_lBool
 	global index_lString
+	global index_tInt
+	global index_tFloat
+	global index_tBool
+	global index_tString
 
 	index_lInt = 5000
 	index_lFloat = 6000
 	index_lBool = 7000
 	index_lString = 8000
+	index_tInt = 9000
+	index_tFloat = 10000
+	index_tBool = 11000
+	index_tString = 12000
 
 
 parser = yacc.yacc()

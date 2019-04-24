@@ -139,25 +139,3 @@ semanticCube = [
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4]
         ]
     ];
-
-
-#print( dicReturnValuesCube[ semanticCube[ 0 ][ 0 ][ 0 ] ] ) 
-
-# Consulta con el cubo semántico para validar si una expresión se puede realizar
-# Regresar el tipo del resultado de la expresión
-#def validateExpression( operand1, operand2, operator ):
-
-#    if dicReturnValuesCube[ semanticCube[ operand1 ][ operand2 ][ operator] ] != "error" :
-#        return dicReturnValuesCube[ semanticCube[ operand1 ][ operand2 ][ operator] ]
-#    else:
-#        return "error"
-
-
-
-
-
-
-
-
-
-

@@ -1,25 +1,27 @@
 program void globalFunc;
 
-var int : i,j;
+var int : A, B, C, D,E,F,K,H,J,G,L; 
 
-func void uno( int a ){
+void start{
 	
-	i = a * 2;
-	if( i < a + 4 ){
-		uno(a + 1);
+	A = B + C * ( D - E / F ) * H;
+	B = E - F;
+
+	while(A * B - C >= D * E / ( G + H) ){
+		H = J * K + B;
+		if( B < H ){
+			B = H + J;
+			while( B > A + C ){
+				print( A + B * C, D - E );
+				B = B - J;
+			}
+		}else{
+			do{
+				A = A + B;
+				print( B - D );
+			}while( A - D < C + B )
+		}
 	}
-	print(i);
-} 
 
-func void dos( int b ){
-	b = b * i + j;
-	return( b * 2 )
-}
-
-start{
-	i = 2;
-	j = i * 2 - 1;
-	uno(j);
-	print( i + dos( i + j) );
-
+	F = A + B;
 }
