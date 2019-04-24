@@ -27,6 +27,7 @@ iParametersCounter = 0 # Contador para saber cuántos parametros tiene una funci
 #############################
 # RANGOS DE MEMORIA
 #############################
+
 # Rangos para variables globales
 index_gInt = 1000
 gIntStart = 1000
@@ -69,6 +70,20 @@ index_tString = 12000
 tStringStart = 12000
 tStringEnd = 12999
 
+# Rangos para constantes
+index_cInt = 13000
+cIntStart = 13000
+cIntEnd = 13999
+index_cFloat = 14000
+cFloatStart = 14000
+cFloatEnd = 14999
+index_cBool = 15000
+cBoolStart = 15000
+cBoolEnd = 15999
+index_cString = 16000
+cStringStart = 16000
+cStringEnd = 16999
+
 
 #############################
 # REGLAS DE PARSER
@@ -76,7 +91,7 @@ tStringEnd = 12999
 
 def p_PROGRAM(p):
 	"""
-	PROGRAM : program void globalFunc START_FUNCTION semicolon PROGRAM_A start BLOCK PRINTQUADS
+	PROGRAM : program void SAVE_TYPE globalFunc START_FUNCTION semicolon PROGRAM_A start BLOCK PRINTQUADS
 	"""
 
 def p_PROGRAM_A(p):
@@ -269,7 +284,7 @@ def p_ISLIST(p):
 def p_TYPEMETHOD(p):
 	"""
 	TYPEMETHOD : TYPE
-			| void 
+			| void SAVE_TYPE
 	"""
 
 def p_CONDITION(p):
@@ -305,7 +320,7 @@ def p_VARCTE(p):
 
 def p_METHOD(p):
 	"""
-	METHOD : func TYPEMETHOD SAVE_TYPE id START_FUNCTION lParenthesis METHOD_A SAVE_COUNTER_PARAM rParenthesis SAVE_COUNTER_QUAD BLOCK END_FUNCTION
+	METHOD : func TYPEMETHOD id START_FUNCTION lParenthesis METHOD_A SAVE_COUNTER_PARAM rParenthesis SAVE_COUNTER_QUAD BLOCK END_PROCEDURE
 	"""
 
 def p_METHOD_A(p):
@@ -337,7 +352,7 @@ def p_POST_CONDITIONAL_LOOP(p):
 
 def p_METHODCALL(p):
 	"""
-	METHODCALL : id VALIDATE_FUNCTION_NAME ERA lParenthesis EXP METHODCALL_A rParenthesis semicolon
+	METHODCALL : id VALIDATE_FUNCTION_NAME ERA lParenthesis EXP VALIDATE_PARAMETER METHODCALL_A rParenthesis semicolon VALIDATE_METHOD_CALL
 	"""
 
 def p_METHODCALL_A(p):
@@ -550,6 +565,8 @@ def imprimirError(error):
 		print( "Error: Función duplicada" )
 	elif error == 6:
 		print( "Error: Función no declarada previamente" )
+	elif error == 7:
+		print( "Error: Número de argumentos no equivale a número de parametros" )
 
 	exit(1)
 
@@ -581,7 +598,8 @@ def p_SAVE_TYPE(p):
 	SAVE_TYPE : empty
 	"""
 	global lastReadType
-
+	print(p[-1])
+	print(currentFunction)
 	lastReadType = p[-1]
 	
 
@@ -598,15 +616,22 @@ def p_SAVE_VAR(p):
 	if p[-1] in dicDirectorioFunciones[currentFunction]["dicDirectorioVariables"]:
 		imprimirError(0)
 	else:
-		# Definir espacio de memoria y scope de variable
-		address = set_address( lastReadType )
 
+		currentScope = " "
 		if currentFunction == "globalFunc":
 			currentScope = "global"
 		else:
 			currentScope = "local"
 		
-		dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[-1] ] = {"Type": lastReadType, "Value": "", "Scope": currentScope, "Address": address }
+		print("currentScope")
+		print(currentScope)
+		dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[-1] ] = {"Type": lastReadType, "Value": "", "Scope": currentScope, "Address": "" }
+
+		# Definir espacio de memoria y scope de variable
+		address = set_address( p[-1], currentScope )
+
+		# Actualizar campo de memory address en la variable
+		dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[-1] ][ "Address" ] = address
 
 
 # Todavia no se debe hacer nada de arreglos (esperar a elda)
@@ -653,23 +678,33 @@ def p_SAVE_COUNTER_PARAM(p):
 	iParametersCounter = 0
 
 
-# Guardar contador de queadruplos en propiedades de la función
+# Guardar contador de quadruplos en propiedades de la función
 # Sirve como breadcrumb para cuando se llame a la función desde otro lado del programa, para saber donde empieza su ejecución
 def p_SAVE_COUNTER_QUAD(p):
 	"""
 	SAVE_COUNTER_QUAD : empty
 	"""
 
-	global QuadCounter
-	dicDirectorioFunciones[currentFunction][ "QuadCounter" ] = QuadCounter
+	global iQuadCounter
+	global currentFunction
+	global dicDirectorioFunciones
+
+	dicDirectorioFunciones[currentFunction][ "QuadCounter" ] = iQuadCounter
 
 
 # Acciones en la terminación de una función
-# Reset de contadores para rangos de memoria 
-def p_END_FUNCTION(p):
+# Reset de contadores para rangos de memoria
+def p_END_PROCEDURE(p):
 	"""
-	END_FUNCTION : empty
+	END_PROCEDURE : empty
 	"""
+	global qQuads
+	global iQuadCounter
+
+	quad = [ "ENDPROC", "", "", "" ]
+	qQuads.append( quad )
+	iQuadCounter = iQuadCounter + 1
+
 	reset_local_vars()
 
 
@@ -682,7 +717,7 @@ def p_SAVE_PARAM_TYPE(p):
 	global currentFunction
 	global lastReadType
 
-	dicDirectorioFunciones[ currentFunction ][ "ParamTypes" ][ iParametersCounter ] = lastReadType
+	dicDirectorioFunciones[ currentFunction ][ "ParamTypes" ].append( lastReadType )
 
 
 # Valida que el nombre de la función a la que se está llamando haya sido previamente declarada
@@ -697,7 +732,8 @@ def p_VALIDATE_FUNCTION_NAME(p):
 
 
 # Generar accion ERA
-def p_ERA(t):
+# Manejar recursividad en funciones
+def p_ERA(p):
     """
     ERA : empty
     """
@@ -706,7 +742,6 @@ def p_ERA(t):
     global currentFunction;
     global qQuadRecursiveCalls;
     global dicDirectorioFunciones
-    global iArgumentCounter
 
     # p[ -1 ] =  nombre de la función a la que se está llamando
     quad = [ "ERA", p[ -1 ], dicDirectorioFunciones[ p[ -1 ] ][ "ParamCounter" ], dicDirectorioFunciones[ p[ -1 ] ][ "TempCounter" ] ]
@@ -717,7 +752,52 @@ def p_ERA(t):
 
     qQuads.append(quad);
     iQuadCounter = iQuadCounter + 1;
-    iArgumentCounter = 1
+
+
+# Se lee el argumento y se valida contra la lista de tipos de parametros de la función a la que se quiere llamar
+def p_VALIDATE_PARAMETER(p):
+    """
+    VALIDATE_PARAMETER : empty
+    """
+    global sOperands
+    global sTypes
+    global iParametersCounter
+    global qQuads
+    global iQuadCounter
+    global dicDirectorioFunciones
+
+    argument = sOperands.pop()
+    argumentType = sTypes.pop()
+
+    if argumentType != dicDirectorioFunciones[ currentFunction ][ "ParamTypes" ][ iParametersCounter ]:
+    	imprimirError( 4 )
+    else:
+    	iParametersCounter = iParametersCounter + 1
+    	quad = [ "PARAMETER", argument, '', iParametersCounter ]
+    	iQuadCounter = iQuadCounter + 1
+    	qQuads.append( quad )
+
+
+# Se valida que el número de argumentos coincida con el número de parametros de la función
+# Se manejan los valores de retorno de las funciones
+def p_VALIDATE_METHOD_CALL(p):
+	"""
+	VALIDATE_METHOD_CALL : empty
+	"""
+	global iParametersCounter
+	global dicDirectorioFunciones
+	global qQuads
+	global iQuadCounter
+
+	if iParametersCounter != dicDirectorioFunciones[ currentFunction ][ "ParamCounter" ]:
+		imprimirError( 7 )
+	else:
+		quad = [ "GOSUB", currentFunction, '', "dirección de memoria pendiente" ]
+		qQuads.append( quad )
+		iQuadCounter = iQuadCounter + 1
+
+	# Falta manejar cosas para cuando la función tiene valor de retorno
+	# empieza en línea 1711 en apollo
 
 
 #############################
@@ -726,6 +806,7 @@ def p_ERA(t):
 
 # Insertar operando en stack de operandos y su tipo en stack de tipos
 # Necesitas consultar el tipo de la variable con el diccioanrio de variables de la función
+# Si no se encuentra en la función actual, tienes que buscar en la función global
 def p_PUSH_STACK_OPERANDS(p):
 	"""
 	PUSH_STACK_OPERANDS : empty
@@ -738,6 +819,11 @@ def p_PUSH_STACK_OPERANDS(p):
 		print(str(sOperands.top())+ " PUSH_STACK_OPERANDS")
 		#print("sTypes: " + str( dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[-1] ][ "Type" ] ) )
 		sTypes.push( dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[-1] ][ "Type" ] )
+	elif p[-1] in dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ]:
+		sOperands.push( p[-1] )
+		print(str(sOperands.top())+ " PUSH_STACK_OPERANDS")
+		#print("sTypes: " + str( dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[-1] ][ "Type" ] ) )
+		sTypes.push( dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ p[-1] ][ "Type" ] )
 	else:
 		imprimirError(3)
 
@@ -1091,94 +1177,146 @@ def p_PRINTQUADS(p):
 # Asignar memoria a variable
 # Se busca primero en el directorio de variables de la función global y si no está entonces se confirma que es una variable local
 # Regresa la dirección de memoria asignada a la variable
-def set_address( varName ):
-    if varName in dicDirectorioFunciones[ "globalFunc" ]: # Es una variable global
+def set_address( varName, varScope ):
+
+    if varScope == "global": # Es una variable global
         return set_address_global( dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ varName ][ "Type" ] ) # Le pasamos el tipo de la variable
-    else:
-        return set_address_local( dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ varName ][ "Type" ] ) # Le pasamos el tipo de la variable
+    else: # Es una variable local 
+    	return set_address_local( dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ varName ][ "Type" ] ) # Le pasamos el tipo de la variable
 
 
 # Asignar memoria a variable global
 # Incrementa el contador del rango para la memoria global
-def set_address_global( type ):
-    assigned_address = None
-    if type == "int":
-        assigned_address = index_gInt
-        index_gInt += 1
-    elif type == "float":
-        assigned_address = index_gFloat
-        index_gFloat += 1
-    elif type == "bool":
-        assigned_address = index_gBool
-        index_gBool += 1
-    elif type == "string":
-        assigned_address = index_gString
-        index_gString += 1
+def set_address_global( varType ):
 
-    return assigned_address
+	global index_gInt
+	global index_gFloat
+	global index_gBool
+	global index_gString
+
+	assigned_address = None
+
+	if varType == "int":
+		assigned_address = index_gInt
+		index_gInt += 1
+	elif varType == "float":
+		assigned_address = index_gFloat
+		index_gFloat += 1
+	elif varType == "bool":
+		assigned_address = index_gBool
+		index_gBool += 1
+	elif varType == "string":
+		assigned_address = index_gString
+		index_gString += 1
+
+
+	print("assigned_address")
+	print(assigned_address)
+	return assigned_address
 
 
 # Asignar memoria a variable local
 # Incrementa el contador del rango para la memoria local
-def set_address_local( type ):
+def set_address_local( varType ):
 
-    assigned_address = None
-    if type == "int":
-        assigned_address = index_lInt
-        index_lInt += 1
-    elif type == "float":
-        assigned_address = index_lFloat
-        index_lFloat += 1
-    elif type == "bool":
-        assigned_address = index_lBool
-        index_lBool += 1
-    elif type == "string":
-        assigned_address = index_lString
-        index_lString += 1
+	global index_lInt
+	global index_lFloat
+	global index_lBool
+	global index_lString
 
-    return assigned_address
+	assigned_address = None
+
+	if varType == "int":
+		assigned_address = index_lInt
+		index_lInt += 1
+	elif varType == "float":
+		assigned_address = index_lFloat
+		index_lFloat += 1
+	elif varType == "bool":
+		assigned_address = index_lBool
+		index_lBool += 1
+	elif varType == "string":
+		assigned_address = index_lString
+		index_lString += 1
+
+	print("assigned_address")
+	print(assigned_address)
+	return assigned_address
 
 
 # Asignar memoria a variable temporal
 # Incrementa el contador del rango para la memoria temporal
-def set_address_temp( type ):
-    if type == "int":
-        assigned_address = index_tInt
-        index_tInt += 1
-    elif type == "float":
-        assigned_address = index_tFloat
-        index_tFloat += 1
-    elif type == "bool":
-        assigned_address = index_tBool
-        index_tBool += 1
-    elif type == "string":
-        assigned_address = index_tString
-        index_tString += 1
+def set_address_temp( varType ):
 
-    #assigned_address = "(" + str(assigned_address)  # TODO: what is this??
-    return assigned_address
+	global index_tInt
+	global index_tFloat
+	global index_tBool
+	global index_tString
+
+	assigned_address = None
+
+	if varType == "int":
+		assigned_address = index_tInt
+		index_tInt += 1
+	elif varType == "float":
+		assigned_address = index_tFloat
+		index_tFloat += 1
+	elif varType == "bool":
+		assigned_address = index_tBool
+		index_tBool += 1
+	elif varType == "string":
+		assigned_address = index_tString
+		index_tString += 1
+
+	#assigned_address = "(" + str(assigned_address)  # TODO: what is this??
+	return assigned_address
+
+
+# Asignar memoria a constante
+# Incrementa el contador del rango para la memoria de constantes
+def set_address_const( varType ):
+
+	global index_cInt
+	global index_cFloat
+	global index_cBool
+	global index_cString
+
+	assigned_address = None
+
+	if varType == "int":
+		assigned_address = index_cInt
+		index_cInt += 1
+	elif varType == "float":
+		assigned_address = index_cFloat
+		index_cFloat += 1
+	elif varType == "bool":
+		assigned_address = index_cBool
+		index_cBool += 1
+	elif varType == "string":
+		assigned_address = index_cString
+		index_cString += 1
+
+	#assigned_address = "(" + str(assigned_address)  # TODO: what is this??
+	return assigned_address
 
 
 # Reset a los contadores de los rangos de las memorias
 # Cada función tiene su propio rango de memoria local
 def reset_local_vars():
+
+	global index_lInt
+	global index_lFloat
+	global index_lBool
+	global index_lString
+
 	index_lInt = 5000
-	index_tFloat = 6000
-	index_tBool = 7000
-	index_tString = 8000
+	index_lFloat = 6000
+	index_lBool = 7000
+	index_lString = 8000
 
 
 parser = yacc.yacc()
 
-
-#while True:
-#	try:
-#	    s = input('program globalFunc; start{ varuno = 2 * 3; }')
-#	except EOFError:
-#	    break
-#	if not s: continue
-#	result = parser.parse(s)
-#	print(result)
 
 
 
