@@ -12,7 +12,6 @@ dicDirectorioFunciones = {} # "nombreFuncion" : { "Type": void/TYPE, "dicDirecto
 
 lastReadType = "" # Sirve para conocer el tipo de dato más recientemente leído ( de funciones y de variables )
 currentFunction = "" # Sirve para conocer el nombre de la función más recientemente leida
-currentScope =  "" # Sirve para conocer el scope de la función actual
 
 sOperators = Stack() # Pila de operadores
 sOperands = Stack() # Pila de operandos
@@ -23,6 +22,9 @@ qQuadRecursiveCalls = [] # Lista de cuadruplos de llamadas recursivas
 iQuadCounter = 0 # Contador de cuadruplos, apunta al siguiente
 iTemporalVariableCounter = 0 # Contador de variables temporales para los cuadruplos
 iParametersCounter = 0 # Contador para saber cuántos parametros tiene una función (se usa cuando se lee la declaración de una función) y también sirve como indice para la lista de tipos ParamTypes de la función
+dicConstants = {} # Sirve para almacenar las constantes del programa { "valorConstante" : memoryAddress }
+dicConstantsInverted = {} # Lo mismo que dicConstants pero invertido para la máquina virtual { "memoryAddress" : valorConstante }
+methodCall =  "" # Sirve para guardar el nombre de la función a la cual se quiere llamar en METHODCALL
 
 #############################
 # RANGOS DE MEMORIA
@@ -222,8 +224,8 @@ def p_FACTOR(p):
 def p_VARCONSTAUX(p):
 	"""
 	VARCONSTAUX : id PUSH_STACK_OPERANDS ISLIST 
-		| cte_i PUSH_STACK_OPERANDS
-		| cte_f PUSH_STACK_OPERANDS
+		| cte_i PUSH_STACK_OPERANDS_CONSTANT
+		| cte_f PUSH_STACK_OPERANDS_CONSTANT
 	"""
 	#print("VARCONSTAUX")
 
@@ -617,18 +619,17 @@ def p_SAVE_VAR(p):
 		imprimirError(0)
 	else:
 
-		currentScope = " "
-		if currentFunction == "globalFunc":
-			currentScope = "global"
-		else:
-			currentScope = "local"
+		currentScope = getScope()
 		
-		print("currentScope")
-		print(currentScope)
+		#print("currentScope")
+		#print(currentScope)
+		#print(p[-1])
+		#print( "currentFunction" )
+		#print( currentFunction )
 		dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[-1] ] = {"Type": lastReadType, "Value": "", "Scope": currentScope, "Address": "" }
 
 		# Definir espacio de memoria y scope de variable
-		address = set_address( p[-1], currentScope )
+		address = set_address( p[-1] )
 
 		# Actualizar campo de memory address en la variable
 		dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[-1] ][ "Address" ] = address
@@ -717,6 +718,8 @@ def p_SAVE_PARAM_TYPE(p):
 	global currentFunction
 	global lastReadType
 
+	print( "WAAAAAAAAAA" )
+	print(currentFunction)
 	dicDirectorioFunciones[ currentFunction ][ "ParamTypes" ].append( lastReadType )
 
 
@@ -726,9 +729,12 @@ def p_VALIDATE_FUNCTION_NAME(p):
 	VALIDATE_FUNCTION_NAME : empty
 	"""
 	global dicDirectorioFunciones
+	global methodCall
 
 	if p[ -1 ] not in dicDirectorioFunciones:
 		imprimirError( 6 )
+	else:
+		methodCall = p[ -1 ]
 
 
 # Generar accion ERA
@@ -743,11 +749,18 @@ def p_ERA(p):
     global qQuadRecursiveCalls;
     global dicDirectorioFunciones
 
-    # p[ -1 ] =  nombre de la función a la que se está llamando
-    quad = [ "ERA", p[ -1 ], dicDirectorioFunciones[ p[ -1 ] ][ "ParamCounter" ], dicDirectorioFunciones[ p[ -1 ] ][ "TempCounter" ] ]
+    #print( "p[ -2 ]" )
+    #print( p[ -2 ] )
+    #print( "ParamCounter")
+    #print( dicDirectorioFunciones[ p[ -2 ] ][ "ParamCounter" ] )
+    #print( "TempCounter" )
+    #print( dicDirectorioFunciones[ p[ -2 ] ][ "TempCounter" ] )
+
+    # p[ -2 ] =  nombre de la función a la que se está llamando
+    quad = [ "ERA", p[ -2 ], dicDirectorioFunciones[ p[ -2 ] ][ "ParamCounter" ], dicDirectorioFunciones[ p[ -2 ] ][ "TempCounter" ] ]
 
     # Validar si es una llamada recursiva
-    if(currentFunction == p[ -1 ]):
+    if(currentFunction == p[ -2 ]):
         qQuadRecursiveCalls.append( iQuadCounter );
 
     qQuads.append(quad);
@@ -765,11 +778,18 @@ def p_VALIDATE_PARAMETER(p):
     global qQuads
     global iQuadCounter
     global dicDirectorioFunciones
+    global methodCall
 
     argument = sOperands.pop()
     argumentType = sTypes.pop()
 
-    if argumentType != dicDirectorioFunciones[ currentFunction ][ "ParamTypes" ][ iParametersCounter ]:
+    print( "iParametersCounter")
+    print( iParametersCounter )
+    print( "paramtypes" )
+    print( currentFunction)
+    print( dicDirectorioFunciones[ methodCall ][ "ParamTypes" ] )
+
+    if argumentType != dicDirectorioFunciones[ methodCall ][ "ParamTypes" ][ iParametersCounter ]:
     	imprimirError( 4 )
     else:
     	iParametersCounter = iParametersCounter + 1
@@ -789,12 +809,14 @@ def p_VALIDATE_METHOD_CALL(p):
 	global qQuads
 	global iQuadCounter
 
-	if iParametersCounter != dicDirectorioFunciones[ currentFunction ][ "ParamCounter" ]:
+	if iParametersCounter != dicDirectorioFunciones[ methodCall ][ "ParamCounter" ]:
 		imprimirError( 7 )
 	else:
 		quad = [ "GOSUB", currentFunction, '', "dirección de memoria pendiente" ]
 		qQuads.append( quad )
 		iQuadCounter = iQuadCounter + 1
+
+	iParametersCounter = 0
 
 	# Falta manejar cosas para cuando la función tiene valor de retorno
 	# empieza en línea 1711 en apollo
@@ -805,27 +827,71 @@ def p_VALIDATE_METHOD_CALL(p):
 #############################
 
 # Insertar operando en stack de operandos y su tipo en stack de tipos
-# Necesitas consultar el tipo de la variable con el diccioanrio de variables de la función
+# Necesitas consultar el tipo de la variable con el diccionario de variables de la función
 # Si no se encuentra en la función actual, tienes que buscar en la función global
 def p_PUSH_STACK_OPERANDS(p):
 	"""
 	PUSH_STACK_OPERANDS : empty
 	"""
 	global sOperands
+	global dicDirectorioFunciones
 
 	# Validar que la variable leida haya sido previamente declarada, que exista en el diccionario de variables de la función
 	if p[-1] in dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ]:
-		sOperands.push( p[-1] )
+
+		# Conseguir la dirección de memoria de variable previamente guardada en directorio
+		address = dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[ -1 ] ][ "Address" ] 
+
+		sOperands.push( address )
 		print(str(sOperands.top())+ " PUSH_STACK_OPERANDS")
-		#print("sTypes: " + str( dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[-1] ][ "Type" ] ) )
-		sTypes.push( dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[-1] ][ "Type" ] )
+		print(p[-1])
+		sTypes.push( dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[ -1 ] ][ "Type" ] )
 	elif p[-1] in dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ]:
-		sOperands.push( p[-1] )
+
+		# Conseguir la dirección de memoria de variable previamente guardada en directorio
+		address = dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ p[ -1 ] ][ "Address" ] 
+		sOperands.push( address )
 		print(str(sOperands.top())+ " PUSH_STACK_OPERANDS")
-		#print("sTypes: " + str( dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[-1] ][ "Type" ] ) )
+		print(p[-1])
 		sTypes.push( dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ p[-1] ][ "Type" ] )
 	else:
 		imprimirError(3)
+
+
+# Funciona igual que PUSH_STACK_OPERANDS, solo que aquí manejamos constantes
+# Se agrega la constante al diccionario global de constantes
+def p_PUSH_STACK_OPERANDS_CONSTANT(p):
+	"""
+	PUSH_STACK_OPERANDS_CONSTANT : empty
+	"""
+
+	global sOperands
+	global dicConstants
+	global dicConstantsInverted
+
+	constantType = ""
+	# Si la constante no existe, se debe asignar una dirección de memoria
+	# También se debe agregar a la pila de operandos y a la pila de tipos la info correspondiente
+	if p[ -1 ] not in dicConstants:
+
+		# conseguir el tipo de dato de la constante
+		if type( p[ -1 ] ) is int:
+			constantType = 'int'
+		elif type( p[ -1 ] ) is float:
+			constantType = 'float'
+
+		print( "constantType" )
+		print( constantType )
+		print( p[ -1 ] )
+
+		address = set_address_const( constantType )
+		dicConstants[ p[ -1 ] ] = { "Address" : address, "Type": constantType }
+		dicConstantsInverted[ address ] = p[ -1 ]
+		sOperands.push( address )
+		sTypes.push( constantType )
+	else:
+		sOperands.push( dicConstants[ p[ -1 ] ][ "Address" ] ) # Se hace push del memory address
+		sTypes.push( dicConstants[ p[ -1 ] ][ "Type" ] )
 
 
 # Insertar operador en stack de operadores
@@ -866,21 +932,30 @@ def solveOperationHelper():
 	global currentFunction
 
 	rightOperand = sOperands.pop()
+	#print("rightOperand")
+	#print(rightOperand)
 	rightType = sTypes.pop()
 
 	leftOperand = sOperands.pop()
+	#print("leftOperand")
+	#print(leftOperand)
 	leftType = sTypes.pop()
 
 	operator = sOperators.pop()
+	#print("operator")
+	#print(operator)
 
+	# Esta es una variable temporal
 	resultType = semanticCube[ dicOperandIndexCube[ leftType ] ][ dicOperandIndexCube[ rightType ] ][ dicOperatorIndexCube[ operator ] ]
 
 	if resultType != 0: # 0 = error en subo semantico
 		result = 'result' # es un valor dummy por mientras, solo para ver que se generen los quads
 
-		dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ "t" + str(iTemporalVariableCounter) ] = {"Type": resultType, "Value": "", "Scope": "local", "Address": "" }
+		currentScope = getScope()
 
-		# Definir espacio de memoria de variable
+		dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ "t" + str(iTemporalVariableCounter) ] = {"Type": dicReturnValuesCube[ resultType ], "Value": "", "Scope": currentScope, "Address": "" }
+
+		# Definir espacio de memoria de variable temporal
 		address = set_address_temp( dicReturnValuesCube[ resultType ] )
 
 		# Actualizar campo de memory address en la variable
@@ -895,6 +970,17 @@ def solveOperationHelper():
 		sTypes.push( dicReturnValuesCube[ resultType ] )
 	else:
 		imprimirError(2)
+
+
+# Función helper para determinar el scope de una variable/constante
+def getScope():
+
+	global currentFunction
+
+	if currentFunction == "globalFunc":
+		return "global"
+	else:
+		return "local"
 
 
 # Resuelve operación de operadores '+' y '-'
@@ -1176,12 +1262,14 @@ def p_PRINTQUADS(p):
 # Asignar memoria a variable
 # Se busca primero en el directorio de variables de la función global y si no está entonces se confirma que es una variable local
 # Regresa la dirección de memoria asignada a la variable
-def set_address( varName, varScope ):
+def set_address( varName ):
 
-    if varScope == "global": # Es una variable global
-        return set_address_global( dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ varName ][ "Type" ] ) # Le pasamos el tipo de la variable
-    else: # Es una variable local 
-    	return set_address_local( dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ varName ][ "Type" ] ) # Le pasamos el tipo de la variable
+	global currentFunction
+
+	if varName in dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ] and currentFunction != "globalFunc": # Es una variable local
+		return set_address_local( dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ varName ][ "Type" ] ) # Le pasamos el tipo de la variable
+	else: # Es una variable global
+		return set_address_global( dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ varName ][ "Type" ] ) # Le pasamos el tipo de la variable
 
 
 # Asignar memoria a variable global
@@ -1296,7 +1384,8 @@ def set_address_const( varType ):
 		assigned_address = index_cString
 		index_cString += 1
 
-	#assigned_address = "(" + str(assigned_address)  # TODO: what is this??
+	print("assigned_address")
+	print(assigned_address)
 	return assigned_address
 
 
