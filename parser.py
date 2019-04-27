@@ -2,6 +2,7 @@ import ply.yacc as yacc
 from lexer import lexer, tokens
 from Stack import Stack
 from SemanticCube import dicOperandIndexCube, semanticCube, dicOperatorIndexCube, dicReturnValuesCube
+from tokenAndCodeConverter import tokenToCode, codeToToken
 
 #############################
 # VARIABLES GLOBALES
@@ -702,7 +703,7 @@ def p_END_PROCEDURE(p):
 	global qQuads
 	global iQuadCounter
 
-	quad = [ "ENDPROC", "", "", "" ]
+	quad = [ tokenToCode.get( "ENDPROC" ), "", "", "" ]
 	qQuads.append( quad )
 	iQuadCounter = iQuadCounter + 1
 
@@ -757,7 +758,7 @@ def p_ERA(p):
     #print( dicDirectorioFunciones[ p[ -2 ] ][ "TempCounter" ] )
 
     # p[ -2 ] =  nombre de la función a la que se está llamando
-    quad = [ "ERA", p[ -2 ], dicDirectorioFunciones[ p[ -2 ] ][ "ParamCounter" ], dicDirectorioFunciones[ p[ -2 ] ][ "TempCounter" ] ]
+    quad = [ tokenToCode.get( "ERA" ), p[ -2 ], dicDirectorioFunciones[ p[ -2 ] ][ "ParamCounter" ], dicDirectorioFunciones[ p[ -2 ] ][ "TempCounter" ] ]
 
     # Validar si es una llamada recursiva
     if(currentFunction == p[ -2 ]):
@@ -793,7 +794,7 @@ def p_VALIDATE_PARAMETER(p):
     	imprimirError( 4 )
     else:
     	iParametersCounter = iParametersCounter + 1
-    	quad = [ "PARAMETER", argument, '', iParametersCounter ]
+    	quad = [ tokenToCode.get( "PARAMETER" ), argument, '', iParametersCounter ]
     	iQuadCounter = iQuadCounter + 1
     	qQuads.append( quad )
 
@@ -812,7 +813,7 @@ def p_VALIDATE_METHOD_CALL(p):
 	if iParametersCounter != dicDirectorioFunciones[ methodCall ][ "ParamCounter" ]:
 		imprimirError( 7 )
 	else:
-		quad = [ "GOSUB", currentFunction, '', "dirección de memoria pendiente" ]
+		quad = [ tokenToCode.get( "GOSUB" ), currentFunction, '', "dirección de memoria pendiente" ]
 		qQuads.append( quad )
 		iQuadCounter = iQuadCounter + 1
 
@@ -886,7 +887,7 @@ def p_PUSH_STACK_OPERANDS_CONSTANT(p):
 
 		address = set_address_const( constantType )
 		dicConstants[ p[ -1 ] ] = { "Address" : address, "Type": constantType }
-		dicConstantsInverted[ address ] = p[ -1 ]
+		dicConstantsInverted[ address ] = { "Value" : p[ -1 ], "Type": constantType }
 		sOperands.push( address )
 		sTypes.push( constantType )
 	else:
@@ -1114,7 +1115,7 @@ def p_GENERATE_GOTOF_CONDITIONAL(p):
 	if expType == 'bool':
 		result = sOperands.pop()
 
-		quad = [ 'GotoF', result, '', '' ]
+		quad = [ tokenToCode.get( 'GOTOF' ), result, '', '' ]
 		print("iQuadCounter_goto_F")
 		print(iQuadCounter)
 		iQuadCounter = iQuadCounter + 1
@@ -1147,7 +1148,7 @@ def p_GENERATE_GOTO_CONDITIONAL(p):
 	global iQuadCounter
 	global qQuads
 
-	quad = [ 'GOTO', '', '', '' ]
+	quad = [ tokenToCode.get( 'GOTO' ), '', '', '' ]
 	iQuadCounter = iQuadCounter + 1
 	qQuads.append( quad )
 
@@ -1191,7 +1192,7 @@ def p_SOLVE_OPERATION_PRE_CONDITIONAL_LOOP(p):
 	print("returnTo")
 	print(returnTo)
 
-	quad = [ 'GOTO', '', '', returnTo ] 
+	quad = [ tokenToCode.get( 'GOTO' ), '', '', returnTo ] 
 	iQuadCounter = iQuadCounter + 1
 	print("iQuadCounter")
 	print(iQuadCounter)
@@ -1214,7 +1215,7 @@ def p_SOLVE_OPERATION_POST_CONDITIONAL_LOOP(p):
 	result = sOperands.pop()
 	returnTo = sJumps.pop()
 
-	quad = [ 'GOTOT', result, '', returnTo ] 
+	quad = [ tokenToCode.get( 'GOTOT' ), result, '', returnTo ] 
 	iQuadCounter = iQuadCounter + 1
 	qQuads.append( quad )
 
@@ -1236,7 +1237,7 @@ def p_GENERATE_QUAD_PRINT(p):
 
 	result = sOperands.pop()
 
-	quad = [ 'PRINT', '', '', result ] 
+	quad = [ tokenToCode.get( 'PRINT' ), '', '', result ] 
 	iQuadCounter = iQuadCounter + 1
 	qQuads.append( quad )
 

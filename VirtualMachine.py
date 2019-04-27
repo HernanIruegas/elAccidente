@@ -21,7 +21,7 @@ gMemory = RuntimeMemory( "global" )
 def getValueFromAddress( memoryAddress ):
 
     if memoryAddress >= gMemory.gIntStart and memoryAddress <= gMemory.gStringEnd: # Rango global
-        return getValueFromAddressHelper( memoryAddress )
+        return gMemory.getValueFromAddressHelper( memoryAddress )
     elif memoryAddress >= gMemory.lIntStart and memoryAddress <= gMemory.lStringEnd: # Rango local
         print("a")
         #return l_memory.getValueFromAddressHelper(memoryAddress)  # TODO: current memory context?
@@ -33,7 +33,7 @@ def getValueFromAddress( memoryAddress ):
         #)  # TODO: how to know if temp from local vs global
         
     else:  # Rango de constantes
-        return dicGlobalConstMemory[ memoryAddress ]
+        return dicGlobalConstMemory[ memoryAddress ][ "Value" ] 
 
 
 # Determinar si una dirección de memoria pertenece a un rango global, local, temporal o constante

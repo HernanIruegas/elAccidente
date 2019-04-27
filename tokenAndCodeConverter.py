@@ -1,11 +1,11 @@
 tokenToCode = {
     # Operaciones
-    "+": 0,
-    "-": 1,
-    "*": 2,
-    "/": 3,
+    "+" : 0,
+    "-" : 1,
+    "*" : 2,
+    "/" : 3,
     # Asignación
-    "=": 4,
+    "=" : 4,
 
     # Relacionales
     ">" : 5,
@@ -21,48 +21,50 @@ tokenToCode = {
     "!" : 13,
 
     # Jumps and special keywords
-    "GOTO": 14,
-    "GOTOF": 15,
-    "GOTOT": 16,
-    "GOSUB": 17,
-    "ERA": 18,
-    "PARAMETER": 19,
-    "ENDPROC": 20,
-    "RET": 21
+    "GOTO" : 14,
+    "GOTOF" : 15,
+    "GOTOT" : 16,
+    "GOSUB" : 17,
+    "ERA" : 18,
+    "PARAMETER" : 19,
+    "ENDPROC" : 20,
+    "PRINT" : 21,
+    "RET": 22
 }
 
 
 codeToToken = {
     # Operaciones
-    0: "+",
-    1: "-",
-    2: "*",
-    3: "/",
+    0 : "+",
+    1 : "-",
+    2 : "*",
+    3 : "/",
     # Asignación
-    4: "=",
+    4 : "=",
 
     # Relacionales
-    5: ">",
-    6: "<",
-    7: "<=",
-    8: ">=",
+    5 : ">",
+    6 : "<",
+    7 : "<=",
+    8 : ">=",
 
     # Lógicos
-    9: "==",
-    10: "!=",
-    11: "&&",
-    12: "||",
-    13: "!",
+    9 : "==",
+    10 : "!=",
+    11 : "&&",
+    12 : "||",
+    13 : "!",
 
     # Jumps and special keywords
-    14: "GOTO",
-    15: "GOTOF",
-    16: "GOTOT",
-    17: "GOSUB",
-    18: "ERA",
-    19: "PARAMETER",
-    20: "ENDPROC",
-    21: "RET"
+    14 : "GOTO",
+    15 : "GOTOF",
+    16 : "GOTOT",
+    17 : "GOSUB",
+    18 : "ERA",
+    19 : "PARAMETER",
+    20 : "ENDPROC",
+    21 : "PRINT", 
+    22 : "RET"
 }
 
 typeToCode = {"bool": 1, "str": 2, "double": 3, "error": 4, "int": 5, "void": 6}
