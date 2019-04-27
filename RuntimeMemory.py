@@ -6,49 +6,49 @@
 class RuntimeMemory( object ):
 	def __init__( self, scope ):
 
-	self.scope = scope
+		self.scope = scope
 
-	# Rangos para variables globales
-	
-	self.gIntStart = 1000
-	self.gIntEnd = 1999
-	self.gFloatStart = 2000
-	self.gFloatEnd = 2999
-	self.gBoolStart = 3000
-	self.gBoolEnd = 3999
-	self.gStringStart = 4000
-	self.gStringEnd = 4999
+		# Rangos para variables globales
+		
+		self.gIntStart = 1000
+		self.gIntEnd = 1999
+		self.gFloatStart = 2000
+		self.gFloatEnd = 2999
+		self.gBoolStart = 3000
+		self.gBoolEnd = 3999
+		self.gStringStart = 4000
+		self.gStringEnd = 4999
 
-	# Rangos para variables locales
-	
-	self.lIntStart = 5000
-	self.lIntEnd = 5999
-	self.lFloatStart = 6000
-	self.lFloatEnd = 6999
-	self.lBoolStart = 7000
-	self.lBoolEnd = 7999
-	self.lStringStart = 8000
-	self.lStringEnd = 8999
+		# Rangos para variables locales
+		
+		self.lIntStart = 5000
+		self.lIntEnd = 5999
+		self.lFloatStart = 6000
+		self.lFloatEnd = 6999
+		self.lBoolStart = 7000
+		self.lBoolEnd = 7999
+		self.lStringStart = 8000
+		self.lStringEnd = 8999
 
-	# Rangos para variables temporales
-	
-	self.tIntStart = 9000
-	self.tIntEnd = 9999
-	self.tFloatStart = 10000
-	self.tFloatEnd = 10999
-	self.tBoolStart = 11000
-	self.tBoolEnd = 11999
-	self.tStringStart = 12000
-	self.tStringEnd = 12999
+		# Rangos para variables temporales
+		
+		self.tIntStart = 9000
+		self.tIntEnd = 9999
+		self.tFloatStart = 10000
+		self.tFloatEnd = 10999
+		self.tBoolStart = 11000
+		self.tBoolEnd = 11999
+		self.tStringStart = 12000
+		self.tStringEnd = 12999
 
 
-	# Estructuras para memorias
+		# Estructuras para memorias
 
-	self.intMemory = {}
-	self.floatMemory = {}
-	self.boolMemory = {}
-	self.strMemory = {}
-	self.tempMemory = {}
+		self.intMemory = {}
+		self.floatMemory = {}
+		self.boolMemory = {}
+		self.strMemory = {}
+		self.tempMemory = {}
 
 
 	# Recibe una dirección de memoria de un rango conocido, pero se desconoce el tipo al que pertenece dentro de ese rango
@@ -89,9 +89,9 @@ class RuntimeMemory( object ):
 	def validateIntAddress( memoryAddress ):
 
 	    if scope == "global":
-	        return self.validateRange( memoryAddress, gIntStart, gIntEnd )
+	        return self.validateRange( memoryAddress, self.gIntStart, self.gIntEnd )
 	    else:
-	        return self.validateRange( memoryAddress, lIntStart, lIntEnd )
+	        return self.validateRange( memoryAddress, self.lIntStart, self.lIntEnd )
 	    return False
 
 
@@ -99,33 +99,33 @@ class RuntimeMemory( object ):
 	def validateFloatAddress( memoryAddress ):
 
 	    if scope == "global":
-	        return self.validateRange( memoryAddress, gFloatStart, gFloatEnd )
+	        return self.validateRange( memoryAddress, self.gFloatStart, self.gFloatEnd )
 	    else:
-	        return self.validateRange( memoryAddress, lFloatStart, lFloatEnd )
+	        return self.validateRange( memoryAddress, self.lFloatStart, self.lFloatEnd )
 
 
 	# Valida si una dirección de memoria pertenece al rango de los booleanos
 	def validateBoolAddress( memoryAddress ):
 
 	    if scope == "global":
-	        return self.validateRange( memoryAddress, gBoolStart, gBoolEnd )
+	        return self.validateRange( memoryAddress, self.gBoolStart, self.gBoolEnd )
 	    else:
-	        return self.validateRange( memoryAddress, lBoolStart, lBoolEnd )
+	        return self.validateRange( memoryAddress, self.lBoolStart, self.lBoolEnd )
 
 
 	# Valida si una dirección de memoria pertenece al rango de los strings
 	def validateStringAddress( memoryAddress ):
 
 	    if scope == "global":
-	        return self.validateRange( memoryAddress, gStringStart, gStringEnd )
+	        return self.validateRange( memoryAddress, self.gStringStart, self.gStringEnd )
 	    else:
-	        return self.validateRange( memoryAddress, lStringStart, lStringEnd ) 
+	        return self.validateRange( memoryAddress, self.lStringStart, self.lStringEnd ) 
 
 
 	# Valida si una dirección de memoria pertenece al rango de los temporales
 	def is_temp_addr( memoryAddress ):
 
-	    return self.validateRange( memoryAddress, tIntStart, tStringEnd )
+	    return self.validateRange( memoryAddress, self.tIntStart, self.tStringEnd )
 
 
 	# Helper para validar que una dirección de memoria esté dentro de un rango en específico

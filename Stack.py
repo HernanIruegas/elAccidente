@@ -19,4 +19,3 @@ class Stack(object):
         top = self.top()
         self.stack.pop()
         return top
-
