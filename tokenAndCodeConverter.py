@@ -28,8 +28,7 @@ tokenToCode = {
     "ERA" : 18,
     "PARAMETER" : 19,
     "ENDPROC" : 20,
-    "PRINT" : 21,
-    "RET": 22
+    "PRINT" : 21
 }
 
 
@@ -63,15 +62,14 @@ codeToToken = {
     18 : "ERA",
     19 : "PARAMETER",
     20 : "ENDPROC",
-    21 : "PRINT", 
-    22 : "RET"
+    21 : "PRINT" 
 }
 
 typeToCode = {"bool": 1, "str": 2, "double": 3, "error": 4, "int": 5, "void": 6}
 
 codeToType = {1: "bool", 2: "str", 3: "double", 4: "error", 5: "int", 6: "void"}
 
-#type_to_init_value = {"bool": "False", "str": '""', "double": "0.0", "int": "0"}
+initialValuesForVars = { "int": 0, "double": 0.0, "string": '""', "bool": "False" }
 
 scopeToCode = {"global": 1, "local": 2}
 
