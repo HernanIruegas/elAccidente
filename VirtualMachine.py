@@ -20,6 +20,9 @@ gMemory = RuntimeMemory( "global" )
 # # Regresa el valor almacenado que representa la dirección de memoria
 def getValueFromAddress( memoryAddress ):
 
+    print("memoryAddress")
+    print(memoryAddress)
+    print("----")
     if memoryAddress >= gMemory.gIntStart and memoryAddress <= gMemory.gStringEnd: # Rango global
         return gMemory.getValueFromAddressHelper( memoryAddress )
     elif memoryAddress >= gMemory.lIntStart and memoryAddress <= gMemory.lStringEnd: # Rango local
