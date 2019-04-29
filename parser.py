@@ -697,14 +697,12 @@ def saveVarHelper( varRead, constantValue ):
 	else: # El valor de la constante se recibe como parametro 
 		constValue = constantValue
 
-
 	if constValue not in dicConstants:
 
 		# Consigues una dirección de memoria para la constante y la insertas en los diccionarios de constantes globales
 		constAddress = setConstAddress( lastReadType )
 		dicConstants[ constValue ] = { "Address" : constAddress, "Type": lastReadType }
 		dicConstantsInverted[ constAddress ] = { "Value" : constValue, "Type": lastReadType }
-
 
 	dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ varRead ] = {"Type": lastReadType, "Value": constValue, "Scope": currentScope, "Address": "" }
 
@@ -719,12 +717,6 @@ def saveVarHelper( varRead, constantValue ):
 	quad = [ "=", dicConstants[ constValue ][ "Address" ], "", varAddress ]
 	iQuadCounter = iQuadCounter + 1
 	qQuads.append( quad )
-
-
-
-
-
-
 
 
 # Todavia no se debe hacer nada de arreglos (esperar a elda)
