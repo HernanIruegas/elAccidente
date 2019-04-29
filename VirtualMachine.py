@@ -22,9 +22,6 @@ def getValueFromAddress( memoryAddress ):
 
     print("memoryAddress")
     print(memoryAddress)
-    print("----")
-    print(type(gMemory.gIntStart))
-    print(type(gMemory.gStringEnd))
     if memoryAddress >= gMemory.gIntStart and memoryAddress <= gMemory.gStringEnd: # Rango global
         return gMemory.getValueFromAddressHelper( memoryAddress )
     elif memoryAddress >= gMemory.lIntStart and memoryAddress <= gMemory.lStringEnd: # Rango local
@@ -32,6 +29,7 @@ def getValueFromAddress( memoryAddress ):
         #return l_memory.getValueFromAddressHelper(memoryAddress)  # TODO: current memory context?
     elif memoryAddress >= gMemory.tIntStart and memoryAddress <= gMemory.tStringEnd: 
         print("temporal")
+        print(memoryAddress)
         # Rango temporal
         #return getValueFromAddressHelper(
         #    memoryAddress
@@ -50,8 +48,8 @@ def setValueToAddress( value, memoryAddress ):
     if memoryAddress >= gMemory.gIntStart and memoryAddress <= gMemory.gStringEnd:
         # Set GLOBAL variable address
         gMemory.setValueToAddressHelper( value, memoryAddress )
-    elif memoryAddress >= lIntStart and memoryAddress <= lStringEnd:
-        print("a")
+    elif memoryAddress >= gMemory.lIntStart and memoryAddress <= gMemory.lStringEnd:
+        print(value)
         # Set LOCAL variable address
         #l_memory.gMemory.setValueToAddressHelper(value, memoryAddress)  # TODO: current memory context?
     else:  # temp
@@ -80,6 +78,12 @@ def readQuads( qQuads, globalConstMemory ):
     while instructionPointer < len( qQuads ):
         solveQuad( qQuads[ instructionPointer ] )
         instructionPointer = instructionPointer + 1
+
+    print(gMemory.intMemory)
+    print(gMemory.floatMemory)
+    print(gMemory.boolMemory)
+    print(gMemory.strMemory)
+    print(gMemory.tempMemory)
 
 
 # quad = token operand1 operand2 operand3 

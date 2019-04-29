@@ -1,9 +1,8 @@
 program void globalFunc;
 
-var int : A, B, C, D,E,F,K,H,J,G,L;
+var int : A = 2, B = 2, C;
 
 void start{
 	
-	A = B + C * ( D - E / F ) * H;
-	B = E - F;
+	C = A + B;
 }

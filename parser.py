@@ -577,6 +577,9 @@ def imprimirError(error):
 		print( "Error: Función no declarada previamente" )
 	elif error == 7:
 		print( "Error: Número de argumentos no equivale a número de parametros" )
+	elif error == 8:
+		print( "Error: Se quiere asignar una constante de diferente tipo de dato a la variable" )
+
 
 	exit(1)
 
@@ -620,58 +623,22 @@ def p_SAVE_VAR(p):
 	global dicDirectorioFunciones
 	global currentFunction
 	global lastReadType
-	global iQuadCounter
-	global qQuadsc
-	global dicConstants
+
+	# p[ -1 ] = variable leída
 
 	# Validar que variable leida no esté previamente declarada
-	if p[-1] in dicDirectorioFunciones[currentFunction]["dicDirectorioVariables"]:
-		imprimirError(0)
+	if p[ -1 ] in dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ]:
+		imprimirError( 0 )
 	else:
-
-		currentScope = getScope()
-
-		# Conseguir valor default según el tipo de dato que se esté manejando
-		# Este valor es una constante
-		defaultValueForVar = initialValuesForVars.get( lastReadType )
-
-		if defaultValueForVar not in dicConstants:
-
-			constantType = ""
-			# conseguir el tipo de dato de la constante
-			if type( defaultValueForVar ) is int:
-				constantType = 'int'
-			elif type( defaultValueForVar ) is float:
-				constantType = 'float'
-			elif type( defaultValueForVar ) is str:
-				constantType = 'string'
-			elif type( defaultValueForVar ) is bool:
-				constantType = 'bool'
-
-			constAddress = setConstAddress( constantType )
-			dicConstants[ defaultValueForVar ] = { "Address" : constAddress, "Type": constantType }
-			dicConstantsInverted[ constAddress ] = { "Value" : defaultValueForVar, "Type": constantType }
-
-
-		dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[-1] ] = {"Type": lastReadType, "Value": defaultValueForVar, "Scope": currentScope, "Address": "" }
-
-		# Definir espacio de memoria y scope de variable
-		# Esto tiene que ir despues de insertar la variable en dicDirectorioFunciones porque se hace una consulta a su tipo de dato
-		address = setAddress( p[-1] )
-
-		# Actualizar campo de memory address en la variable
-		dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[-1] ][ "Address" ] = address
-
-		# Quadruplo de asignación para que la maquina virtual primero haga la asignación y luego la consulta sobre sus valores
-		quad = [ "=", dicConstants[ defaultValueForVar ][ "Address" ], "", address ]
-		iQuadCounter = iQuadCounter + 1
-		qQuads.append( quad )
+		# Le mando la variable leida y un valor de -1 que indica que la variable no fue inicializada
+		saveVarHelper( p[ -1 ], -1 )
 
 
 # Lógica para variables que son declaradas y asignadas un valor 
 # Guardar nombre de variable, tipo, scope y dirección de memoria en directorio de variables de la función
 # Guardar constante en diccionario de constantes
 # Para este paso ya se tiene la constante en el diccionario de constantes, su tipo de datos en el stack de tipos y su dirección de memoria asignada en el stack de operandos
+# Se tiene que validar que la constante sea del mismo tipo de dato que la variable
 def p_SAVE_ASSIGNED_VAR(p):
 	"""
 	SAVE_ASSIGNED_VAR : empty
@@ -679,21 +646,85 @@ def p_SAVE_ASSIGNED_VAR(p):
 
 	global dicDirectorioFunciones
 	global currentFunction
-	global sOperands
-	global sTypes
-	global iQuadCounter
-	global qQuads
+	global lastReadType
 
 	# p[ -2 ] = constante leida
-	# p[ -4 ] = variable a la cual se le asigna la constante 
-	
+	# p[ -4 ] = variable a la cual se le asigna la constante
+
+	# Validar que variable leida no esté previamente declarada
+	if p[ -4 ] in dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ]:
+		imprimirError( 0 )
+	else:
+		# Validar que el valor de la constante coincida con el tipo de dato de la variable
+
+		constantType = ""
+		# conseguir el tipo de dato de la constante
+		if type( p[ -2 ] ) is int:
+			constantType = 'int'
+		elif type( p[ -2 ] ) is float:
+			constantType = 'float'
+		elif type( p[ -2 ] ) is str:
+			constantType = 'string'
+		elif type( p[ -2 ] ) is bool:
+			constantType = 'bool'
+
+		if constantType != lastReadType:
+			imprimirError( 8 )
+		else:
+			# Le mando la variable leida y el valor de la constante, lo cual indica que la variable si fue inicializada
+			saveVarHelper( p[ -4 ], p[ -2 ] )
+
+
+# Lógica que comparten las funciones de p_SAVE_VAR y p_SAVE_ASSIGNED_VAR
+def saveVarHelper( varRead, constantValue ):
+
+	global initialValuesForVars
+	global lastReadType
+	global dicConstants
+	global dicConstantsInverted
+	global dicDirectorioFunciones
+	global currentFunction
+	global qQuads
+	global iQuadCounter
+
 	currentScope = getScope()
-	dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[ -4 ] ] = { "Type": sTypes.top(), "Value": p[ -2 ], "Scope": currentScope, "Address": sOperands.top() }
+	constValue = -1 # Guarda el valor de la constante (puede ser el valor default generado o bien el que recibe como parametro)
+
+	if constantValue == -1: # Se necesita generar un valor inicial default para la variable
+		# Conseguir valor default según el tipo de dato que se esté manejando
+		# Este valor es una constante
+		constValue = initialValuesForVars.get( lastReadType )
+	else: # El valor de la constante se recibe como parametro 
+		constValue = constantValue
+
+
+	if constValue not in dicConstants:
+
+		# Consigues una dirección de memoria para la constante y la insertas en los diccionarios de constantes globales
+		constAddress = setConstAddress( lastReadType )
+		dicConstants[ constValue ] = { "Address" : constAddress, "Type": lastReadType }
+		dicConstantsInverted[ constAddress ] = { "Value" : constValue, "Type": lastReadType }
+
+
+	dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ varRead ] = {"Type": lastReadType, "Value": constValue, "Scope": currentScope, "Address": "" }
+
+	# Definir espacio de memoria y scope de variable
+	# Esto tiene que ir despues de insertar la variable en dicDirectorioFunciones porque se hace una consulta a su tipo de dato
+	varAddress = setAddress( varRead )
+
+	# Actualizar campo de memory address en la variable
+	dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ varRead ][ "Address" ] = varAddress
 
 	# Quadruplo de asignación para que la maquina virtual primero haga la asignación y luego la consulta sobre sus valores
-	quad = [ "=", p[-2], '', p[-4] ]
+	quad = [ "=", dicConstants[ constValue ][ "Address" ], "", varAddress ]
 	iQuadCounter = iQuadCounter + 1
 	qQuads.append( quad )
+
+
+
+
+
+
 
 
 # Todavia no se debe hacer nada de arreglos (esperar a elda)
