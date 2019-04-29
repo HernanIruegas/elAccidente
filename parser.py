@@ -144,6 +144,7 @@ def p_SIMPLE_B(p):
 			| empty	
 	"""
 
+# Funcion auxiliar para la declaración de variables
 def p_VARCTE_AUX_VARS(p):
 	"""
 	VARCTE_AUX_VARS : id ISLIST 
@@ -153,6 +154,7 @@ def p_VARCTE_AUX_VARS(p):
 		| BOOLEAN_AUX_VARS
 	"""
 
+# Funcion auxiliar para la declaración de variables
 def p_BOOLEAN_AUX_VARS(p):
 	"""
 	BOOLEAN_AUX_VARS : FALSE SAVE_ASSIGNED_VAR

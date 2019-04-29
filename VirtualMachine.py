@@ -96,6 +96,10 @@ def solveQuad( quad ):
         # Conseguir valor desde la memoria
         resultVal = getValueFromAddress( quad[ 1 ] )
         # Guardar resultado en memoria
+        print("resultVal")
+        print(resultVal)
+        print("address")
+        print(quad[ 3 ])
         setValueToAddress(resultVal, quad[ 3 ])
         return
 
@@ -109,8 +113,10 @@ def solveQuad( quad ):
     # Realizar operación
 
     # Resolver operación aritmética
-    if quad[ 0 ] == tokenToCode.get("+"):    # Add
+    if quad[ 0 ] == "+":    # Add
         resultVal = leftOperand + rightOperand
+        print("aaa")
+        print(resultVal)
     elif quad[ 0 ] == tokenToCode.get("-"):  # Subtract
         resultVal = leftOperand - rightOperand
     elif quad[ 0 ] == tokenToCode.get("*"):  # Multiply
