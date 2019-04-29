@@ -23,19 +23,23 @@ def getValueFromAddress( memoryAddress ):
     print("memoryAddress")
     print(memoryAddress)
     print("----")
+    print(type(gMemory.gIntStart))
+    print(type(gMemory.gStringEnd))
     if memoryAddress >= gMemory.gIntStart and memoryAddress <= gMemory.gStringEnd: # Rango global
         return gMemory.getValueFromAddressHelper( memoryAddress )
     elif memoryAddress >= gMemory.lIntStart and memoryAddress <= gMemory.lStringEnd: # Rango local
-        print("a")
+        print("local")
         #return l_memory.getValueFromAddressHelper(memoryAddress)  # TODO: current memory context?
     elif memoryAddress >= gMemory.tIntStart and memoryAddress <= gMemory.tStringEnd: 
-        print("a")
+        print("temporal")
         # Rango temporal
         #return getValueFromAddressHelper(
         #    memoryAddress
         #)  # TODO: how to know if temp from local vs global
         
     else:  # Rango de constantes
+        print( "getValueFromAddress")
+        print( dicGlobalConstMemory[ memoryAddress ][ "Value" ]  )
         return dicGlobalConstMemory[ memoryAddress ][ "Value" ] 
 
 
@@ -45,14 +49,14 @@ def setValueToAddress( value, memoryAddress ):
 
     if memoryAddress >= gMemory.gIntStart and memoryAddress <= gMemory.gStringEnd:
         # Set GLOBAL variable address
-        setValueToAddressHelper( value, memoryAddress )
+        gMemory.setValueToAddressHelper( value, memoryAddress )
     elif memoryAddress >= lIntStart and memoryAddress <= lStringEnd:
         print("a")
         # Set LOCAL variable address
-        #l_memory.setValueToAddressHelper(value, memoryAddress)  # TODO: current memory context?
+        #l_memory.gMemory.setValueToAddressHelper(value, memoryAddress)  # TODO: current memory context?
     else:  # temp
         # Set TEMP variable address
-        setValueToAddressHelper(
+        gMemory.setValueToAddressHelper(
             value, memoryAddress
         )  # TODO: how to know if temp from local vs global
 
@@ -84,6 +88,13 @@ def solveQuad( quad ):
 
     global instructionPointer
 
+    if quad[ 0 ] == "=":#tokenToCode.get("="):  # Assign
+        # Conseguir valor desde la memoria
+        resultVal = getValueFromAddress( quad[ 1 ] )
+        # Guardar resultado en memoria
+        setValueToAddress(resultVal, quad[ 3 ])
+        return
+
     resultVal = -1 # Variable auxiliar para guardar resultado de una operación
 
     # Conseguir valores de la memoria
@@ -105,9 +116,6 @@ def solveQuad( quad ):
             #imprimirError(??) # TODO
             print("imprimirError")
         resultVal = leftOperand / rightOperand
-    elif quad[ 0 ] == tokenToCode.get("="):  # Assign
-        # Conseguir valor desde la memoria
-        resultVal = getValueFromAddress( quad[ 1 ] )
     # Resolver operación relacional
     elif quad[ 0 ] == tokenToCode.get(">="): # Mayor que
         resultVal = leftOperand >= rightOperand

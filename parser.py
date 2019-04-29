@@ -159,46 +159,6 @@ def p_BOOLEAN_AUX_VARS(p):
 					| TRUE SAVE_ASSIGNED_VAR
 	"""
 
-
-"""
-version anterior de vars...estoy probando con la nueva version
-def p_VARS(p):
-	
-	VARS : var VARS_A
-	
-
-def p_VARS_A(p):
-	
-	VARS_A : TYPE colon VARS_B semicolon VARS_C
-	
-
-def p_VARS_B(p):
-	
-	VARS_B : SIMPLE
-		| LIST
-	
-
-def p_VARS_C(p):
-	
-	VARS_C : VARS_A
-			| empty
-	
-
-"""
-
-"""
-def p_SIMPLE(p):
-	
-	SIMPLE : id SAVE_VAR SIMPLE_A
-	
-
-def p_SIMPLE_A(p):
-	
-	SIMPLE_A : comma SIMPLE
-			| empty
-
-"""
-
 def p_LIST(p):
 	"""
 	LIST : id lSqrBracket VARCONSTAUX rSqrBracket SAVE_ARRAY LIST_A
@@ -662,6 +622,7 @@ def p_SAVE_VAR(p):
 	global lastReadType
 	global iQuadCounter
 	global qQuadsc
+	global dicConstants
 
 	# Validar que variable leida no esté previamente declarada
 	if p[-1] in dicDirectorioFunciones[currentFunction]["dicDirectorioVariables"]:
@@ -670,7 +631,27 @@ def p_SAVE_VAR(p):
 
 		currentScope = getScope()
 
+		# Conseguir valor default según el tipo de dato que se esté manejando
+		# Este valor es una constante
 		defaultValueForVar = initialValuesForVars.get( lastReadType )
+
+		if defaultValueForVar not in dicConstants:
+
+			constantType = ""
+			# conseguir el tipo de dato de la constante
+			if type( defaultValueForVar ) is int:
+				constantType = 'int'
+			elif type( defaultValueForVar ) is float:
+				constantType = 'float'
+			elif type( defaultValueForVar ) is str:
+				constantType = 'string'
+			elif type( defaultValueForVar ) is bool:
+				constantType = 'bool'
+
+			constAddress = setConstAddress( constantType )
+			dicConstants[ defaultValueForVar ] = { "Address" : constAddress, "Type": constantType }
+			dicConstantsInverted[ constAddress ] = { "Value" : defaultValueForVar, "Type": constantType }
+
 
 		dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[-1] ] = {"Type": lastReadType, "Value": defaultValueForVar, "Scope": currentScope, "Address": "" }
 
@@ -682,7 +663,7 @@ def p_SAVE_VAR(p):
 		dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[-1] ][ "Address" ] = address
 
 		# Quadruplo de asignación para que la maquina virtual primero haga la asignación y luego la consulta sobre sus valores
-		quad = [ "=", defaultValueForVar, '', address ]
+		quad = [ "=", dicConstants[ defaultValueForVar ][ "Address" ], "", address ]
 		iQuadCounter = iQuadCounter + 1
 		qQuads.append( quad )
 
@@ -702,10 +683,6 @@ def p_SAVE_ASSIGNED_VAR(p):
 	global sTypes
 	global iQuadCounter
 	global qQuads
-
-	print("SAVE_ASSIGNED_VAR")
-	print( p[-2] )
-	print( p[-4] )
 
 	# p[ -2 ] = constante leida
 	# p[ -4 ] = variable a la cual se le asigna la constante 

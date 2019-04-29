@@ -6,22 +6,4 @@ void start{
 	
 	A = B + C * ( D - E / F ) * H;
 	B = E - F;
-
-	while(A * B - C >= D * E / ( G + H) ){
-		H = J * K + B;
-		if( B < H ){
-			B = H + J;
-			while( B > A + C ){
-				print( A + B * C, D - E );
-				B = B - J;
-			}
-		}else{
-			do{
-				A = A + B;
-				print( B - D );
-			}while( A - D < C + B )
-		}
-	}
-
-	F = A + B;
 }

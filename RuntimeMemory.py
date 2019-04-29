@@ -74,7 +74,7 @@ class RuntimeMemory( object ):
 	# Asigna un valor a una dirección de memoria dependiendo del tipo al que pertenezca
 	def setValueToAddressHelper( self, value, memoryAddress ):
 
-	    if self.validateAddress( memoryAddress, self.gIntStart, self.gIntEnd, self.lIntStart. self.lIntEnd ):
+	    if self.validateAddress( memoryAddress, self.gIntStart, self.gIntEnd, self.lIntStart, self.lIntEnd ):
 	        self.intMemory[ memoryAddress ] = value
 	    elif self.validateAddress( memoryAddress, self.gFloatStart, self.gFloatEnd, self.lFloatStart, self.lFloatEnd ): 
 	        self.floatMemory[ memoryAddress ] = value
