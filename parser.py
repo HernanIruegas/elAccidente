@@ -8,7 +8,7 @@ from tokenAndCodeConverter import tokenToCode, codeToToken, initialValuesForVars
 # VARIABLES GLOBALES
 #############################
 
-dicDirectorioFunciones = {} # "nombreFuncion" : { "Type": void/TYPE, "dicDirectorioVariables": {}, "ParamCounter": ..., "QuadCounter": ..., "TempCounter": ..., ParamTypes: [] }
+dicDirectorioFunciones = {} # "nombreFuncion" : { "Type": void/TYPE, "dicDirectorioVariables": {}, "ParamCounter": ..., "QuadCounter": ..., "TempCounter": ..., "ParamTypes": [], "Parameters": [] }
 # dicDirectorioVariables = "VarName" : { "Type": ..., "Value": ..., "Scope": ..., "Address": ...}
 
 lastReadType = "" # Sirve para conocer el tipo de dato más recientemente leído ( de funciones y de variables )
@@ -163,7 +163,7 @@ def p_BOOLEAN_AUX_VARS(p):
 
 def p_LIST(p):
 	"""
-	LIST : id lSqrBracket VARCONSTAUX rSqrBracket SAVE_ARRAY LIST_A
+	LIST : id lSqrBracket cte_i rSqrBracket SAVE_ARRAY LIST_A
 	"""
 
 def p_LIST_A(p):
@@ -343,7 +343,7 @@ def p_METHOD_A(p):
 
 def p_PARAMS(p):
 	"""
-	PARAMS : TYPE id SAVE_VAR SAVE_PARAM_TYPE INCREMENT_PARAM_COUNTER PARAMS_A 
+	PARAMS : TYPE id SAVE_PARAM SAVE_PARAM_TYPE INCREMENT_PARAM_COUNTER PARAMS_A 
 	"""
 
 def p_PARAMS_A(p):
@@ -602,7 +602,7 @@ def p_START_FUNCTION(p):
 
 	# Validar que la función no esté previamente declarada
 	if currentFunction not in dicDirectorioFunciones:
-		dicDirectorioFunciones[ currentFunction ]  = { "Type": lastReadType, "dicDirectorioVariables": {}, "ParamCounter": 0, "QuadCounter": 0, "TempCounter": 0, "ParamTypes": [ ] }
+		dicDirectorioFunciones[ currentFunction ]  = { "Type": lastReadType, "dicDirectorioVariables": {}, "ParamCounter": 0, "QuadCounter": 0, "TempCounter": 0, "ParamTypes": [ ], "Parameters" : [ ] }
 	else:
 		imprimirError( 5 )
 
@@ -677,7 +677,40 @@ def p_SAVE_ASSIGNED_VAR(p):
 			saveVarHelper( p[ -4 ], p[ -2 ] )
 
 
+# Sirve para guardar los parametros de una función
+# No tengo que validar que estos parametros estén previamente declarados
+# Estos parametros van a ser locales a la función
+# Cuando se hace la llamada a la función y se pasan argumentos es cuando tengo que validar que las variables existan ( si se pasan variables )
+# Los parametros los tengo que guardar en una lista, así como sus tipos están guardados (mismo orden)
+def p_SAVE_PARAM(p):
+	"""
+	SAVE_PARAM : empty
+	"""
+
+	global dicDirectorioFunciones
+	global currentFunction
+	global lastReadType
+
+	currentScope = getScope()
+
+	# Se agrega el parametro a la lista de parametros de la función
+	dicDirectorioFunciones[ currentFunction ][ "Parameters" ].append( p[ -1 ] )
+
+	dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[ -1 ] ] = { "Type": lastReadType, "Value": "", "Scope": currentScope, "Address": "" }
+
+	varAddress = setAddress( p[ -1 ] )
+
+	# Actualizar campo de memory address en la variable
+	dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[ -1 ] ][ "Address" ] = varAddress
+
+	# TODO: ¿ talvez ni siquiera tengo que inicializar los parametros ?
+	# p[ -1 ] = variable leída
+	#saveVarHelper( p[ -1 ], -1 )
+
+
 # Lógica que comparten las funciones de p_SAVE_VAR y p_SAVE_ASSIGNED_VAR
+# Se guarda una variable ya sea con un valor default inicial o bien con el valor que le asignaron
+# Se genera cuadruplo de asignación en ambos casos para que la máquina virtual primero asigne y luego lea
 def saveVarHelper( varRead, constantValue ):
 
 	global initialValuesForVars
@@ -699,6 +732,7 @@ def saveVarHelper( varRead, constantValue ):
 	else: # El valor de la constante se recibe como parametro 
 		constValue = constantValue
 
+	# Se valida si el valor default o bien el asignado ya existen en el diccionario de constantes
 	if constValue not in dicConstants:
 
 		# Consigues una dirección de memoria para la constante y la insertas en los diccionarios de constantes globales
@@ -730,12 +764,30 @@ def p_SAVE_ARRAY(p):
 	global currentFunction
 	global lastReadType
 
-	# Validar que arreglo leido no esté previamente declarado
-	if p[-4] in dicDirectorioFunciones[currentFunction]["dicDirectorioVariables"]:
-	    imprimirError(1)
-	else:
-	    dicDirectorioFunciones[currentFunction]["dicDirectorioVariables"][ p[-4] ] = {"Type": lastReadType, "Value": p[-2]}
+	# p[-4] = variable leída
+	# p[-2] = dimensión de la variable
 
+	currentScope = getScope()
+
+	# Validar que arreglo leido no esté previamente declarado
+	if p[ -4 ] in dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ]:
+	    imprimirError( 1 )
+	else:
+		# Definir espacio de memoria y scope de variable
+		# Esto tiene que ir despues de insertar la variable en dicDirectorioFunciones porque se hace una consulta a su tipo de dato
+		varAddress = setAddress( p[ -4 ] )
+	    dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[ -4 ] ] = { "Type": lastReadType, "Value": p[ -2 ], "Scope": currentScope, "Address": "" }
+
+
+	
+
+	# Actualizar campo de memory address en la variable
+	dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ varRead ][ "Address" ] = varAddress
+
+	# Quadruplo de asignación para que la maquina virtual primero haga la asignación y luego la consulta sobre sus valores
+	quad = [ "=", dicConstants[ constValue ][ "Address" ], "", varAddress ]
+	iQuadCounter = iQuadCounter + 1
+	qQuads.append( quad )
 
 #############################
 # ACCIONES SEMANTICAS DE FUNCIONES
@@ -776,7 +828,7 @@ def p_SAVE_COUNTER_QUAD(p):
 	global currentFunction
 	global dicDirectorioFunciones
 
-	dicDirectorioFunciones[currentFunction][ "QuadCounter" ] = iQuadCounter
+	dicDirectorioFunciones[ currentFunction ][ "QuadCounter" ] = iQuadCounter
 
 
 # Acciones en la terminación de una función
@@ -788,7 +840,7 @@ def p_END_PROCEDURE(p):
 	global qQuads
 	global iQuadCounter
 
-	quad = [ tokenToCode.get( "ENDPROC" ), "", "", "" ]
+	quad = [ "ENDPROC", "", "", "" ]
 	qQuads.append( quad )
 	iQuadCounter = iQuadCounter + 1
 
@@ -815,6 +867,7 @@ def p_VALIDATE_FUNCTION_NAME(p):
 	global dicDirectorioFunciones
 	global methodCall
 
+	# p[ -1 ] = function name
 	if p[ -1 ] not in dicDirectorioFunciones:
 		imprimirError( 6 )
 	else:
@@ -834,10 +887,10 @@ def p_ERA(p):
     global dicDirectorioFunciones
 
     # p[ -2 ] =  nombre de la función a la que se está llamando
-    quad = [ tokenToCode.get( "ERA" ), p[ -2 ], dicDirectorioFunciones[ p[ -2 ] ][ "ParamCounter" ], dicDirectorioFunciones[ p[ -2 ] ][ "TempCounter" ] ]
+    quad = [ "ERA", p[ -2 ], dicDirectorioFunciones[ p[ -2 ] ][ "ParamCounter" ], dicDirectorioFunciones[ p[ -2 ] ][ "TempCounter" ] ]
 
     # Validar si es una llamada recursiva
-    if(currentFunction == p[ -2 ]):
+    if( currentFunction == p[ -2 ] ):
         qQuadRecursiveCalls.append( iQuadCounter );
 
     qQuads.append(quad);
@@ -860,11 +913,12 @@ def p_VALIDATE_PARAMETER(p):
     argument = sOperands.pop()
     argumentType = sTypes.pop()
 
+    # ParamTypes es una lista de tipos de los parametros de la función
     if argumentType != dicDirectorioFunciones[ methodCall ][ "ParamTypes" ][ iParametersCounter ]:
     	imprimirError( 4 )
     else:
+    	quad = [ "PARAMETER", argument, '', dicDirectorioFunciones[ methodCall ][ "Parameters" ][ iParametersCounter ] ]
     	iParametersCounter = iParametersCounter + 1
-    	quad = [ tokenToCode.get( "PARAMETER" ), argument, '', iParametersCounter ]
     	iQuadCounter = iQuadCounter + 1
     	qQuads.append( quad )
 
@@ -883,7 +937,7 @@ def p_VALIDATE_METHOD_CALL(p):
 	if iParametersCounter != dicDirectorioFunciones[ methodCall ][ "ParamCounter" ]:
 		imprimirError( 7 )
 	else:
-		quad = [ tokenToCode.get( "GOSUB" ), currentFunction, '', "dirección de memoria pendiente" ]
+		quad = [ "GOSUB", currentFunction, '', "dirección de memoria pendiente" ]
 		qQuads.append( quad )
 		iQuadCounter = iQuadCounter + 1
 
@@ -922,6 +976,9 @@ def p_PUSH_STACK_OPERANDS(p):
 		sOperands.push( address )
 		sTypes.push( dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ p[-1] ][ "Type" ] )
 	else:
+		print(currentFunction)
+		print(dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ])
+		print(p[-1])
 		imprimirError(3)
 
 
@@ -1171,7 +1228,7 @@ def p_GENERATE_GOTOF_CONDITIONAL(p):
 	if expType == 'bool':
 		result = sOperands.pop()
 
-		quad = [ tokenToCode.get( 'GOTOF' ), result, '', '' ]
+		quad = [ 'GOTOF', result, '', '' ]
 		iQuadCounter = iQuadCounter + 1
 		qQuads.append( quad )
 		sOperands.push( result )
@@ -1201,7 +1258,7 @@ def p_GENERATE_GOTO_CONDITIONAL(p):
 	global iQuadCounter
 	global qQuads
 
-	quad = [ tokenToCode.get( 'GOTO' ), '', '', '' ]
+	quad = [ 'GOTO', '', '', '' ]
 	iQuadCounter = iQuadCounter + 1
 	qQuads.append( quad )
 
@@ -1241,7 +1298,7 @@ def p_SOLVE_OPERATION_PRE_CONDITIONAL_LOOP(p):
 	end = sJumps.pop()
 	returnTo = sJumps.pop()
 
-	quad = [ tokenToCode.get( 'GOTO' ), '', '', returnTo ] 
+	quad = [ 'GOTO', '', '', returnTo ] 
 	iQuadCounter = iQuadCounter + 1
 	qQuads.append( quad )
 
@@ -1262,7 +1319,7 @@ def p_SOLVE_OPERATION_POST_CONDITIONAL_LOOP(p):
 	result = sOperands.pop()
 	returnTo = sJumps.pop()
 
-	quad = [ tokenToCode.get( 'GOTOT' ), result, '', returnTo ] 
+	quad = [ 'GOTOT', result, '', returnTo ] 
 	iQuadCounter = iQuadCounter + 1
 	qQuads.append( quad )
 
@@ -1284,7 +1341,7 @@ def p_GENERATE_QUAD_PRINT(p):
 
 	result = sOperands.pop()
 
-	quad = [ tokenToCode.get( 'PRINT' ), '', '', result ] 
+	quad = [ 'PRINT', '', '', result ] 
 	iQuadCounter = iQuadCounter + 1
 	qQuads.append( quad )
 
@@ -1318,6 +1375,17 @@ def setAddress( varName ):
 		return setLocalAddress( dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ varName ][ "Type" ] ) # Le pasamos el tipo de la variable
 	else: # Es una variable global
 		return setGlobalAddress( dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ varName ][ "Type" ] ) # Le pasamos el tipo de la variable
+
+
+# 
+#def setAddressArray( varName, lengthArray ):
+
+#	global currentFunction
+
+#	if varName in dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ] and currentFunction != "globalFunc": # Es una variable local
+#		return setLocalAddress( dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ varName ][ "Type" ] ) # Le pasamos el tipo de la variable
+#	else: # Es una variable global
+#		return setGlobalAddress( dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ varName ][ "Type" ] ) # Le pasamos el tipo de la variable
 
 
 # Asignar memoria a variable global

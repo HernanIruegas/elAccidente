@@ -1,8 +1,22 @@
 program void globalFunc;
 
-var int : A = 2, B = 2, C;
+var int : i,j;
+
+func void uno( int a ){
+	
+	i = a * 2;
+	if( i < a + 4 ){
+		uno(a + 1);
+	}
+} 
+
+func void dos( int b ){
+	b = b * i + j;
+}
 
 void start{
-	
-	C = A + B;
+	i = 2;
+	j = i * 2 - 1;
+	uno(j);
+
 }
