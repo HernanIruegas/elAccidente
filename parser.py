@@ -2,7 +2,7 @@ import ply.yacc as yacc
 from lexer import lexer, tokens
 from Stack import Stack
 from SemanticCube import dicOperandIndexCube, semanticCube, dicOperatorIndexCube, dicReturnValuesCube
-from tokenAndCodeConverter import tokenToCode, codeToToken, initialValuesForVars
+from tokenAndCodeConverter import initialValuesForVars
 
 #############################
 # VARIABLES GLOBALES
@@ -26,6 +26,7 @@ iParametersCounter = 0 # Contador para saber cuántos parametros tiene una funci
 dicConstants = {} # { "Address" : address, "Type": constantType } Sirve para almacenar las constantes del programa { "valorConstante" : memoryAddress }
 dicConstantsInverted = {} # { "Value" : p[ -1 ], "Type": constantType } Lo mismo que dicConstants pero invertido para la máquina virtual { "memoryAddress" : valorConstante }
 methodCall =  "" # Sirve para guardar el nombre de la función a la cual se quiere llamar en METHODCALL
+varWithDimensions = "" # Sirve para guardar el id de la variable dimensionada que se está declarando
 
 #############################
 # RANGOS DE MEMORIA
@@ -117,8 +118,10 @@ def p_VARS(p):
 
 def p_VARS_A(p):
 	"""
-	VARS_A : SIMPLE
-			| LIST
+	VARS_A : id assign VARCTE_AUX_VARS SIMPLE
+			| id SAVE_VAR SIMPLE
+			| id VALIDATE_NAME_ARRAY lSqrBracket cte_i ACUMULATE_R LIST rSqrBracket CALCULATE_ARRAY LIST_A
+			| empty
 	"""
 
 def p_VARS_B(p):
@@ -129,19 +132,20 @@ def p_VARS_B(p):
 
 def p_SIMPLE(p):
 	"""
-	SIMPLE : id SIMPLE_A 
+	SIMPLE : comma VARS_A
+			| empty
 	"""
 
-def p_SIMPLE_A(p):
+def p_LIST(p):
 	"""
-	SIMPLE_A : assign VARCTE_AUX_VARS SIMPLE_B
-			| SAVE_VAR SIMPLE_B	
+	LIST : comma cte_i ACUMULATE_R LIST
+			| empty
 	"""
 
-def p_SIMPLE_B(p):
+def p_LIST_A(p):
 	"""
-	SIMPLE_B : comma SIMPLE
-			| empty	
+	LIST_A : comma VARS_A
+		| empty
 	"""
 
 # Funcion auxiliar para la declaración de variables
@@ -161,16 +165,123 @@ def p_BOOLEAN_AUX_VARS(p):
 					| TRUE SAVE_ASSIGNED_VAR
 	"""
 
-def p_LIST(p):
+
+# TODO ARRAY
+
+iCounterDimensions = 0
+
+
+# Validar nombre del arreglo
+def p_VALIDATE_NAME_ARRAY(p):
 	"""
-	LIST : id lSqrBracket cte_i rSqrBracket SAVE_ARRAY LIST_A
+	VALIDATE_NAME_ARRAY : empty	
 	"""
 
-def p_LIST_A(p):
+	global dicDirectorioFunciones
+	global currentFunction
+	global lastReadType
+	global varWithDimensions
+
+	# p[ -1 ] = variable leída
+
+	varWithDimensions = p[ -1 ]
+	currentScope = getScope()
+
+	# Validar que arreglo leido no esté previamente declarado
+	if p[ -1 ] in dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ]:
+		imprimirError( 0 )
+	else:
+		dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[ -1 ] ] = { "Type": lastReadType, "Value": "", "Scope": currentScope, "Address": "", "Dimensiones" : [ ] }
+
+
+# Calcular R para la dimensión leída
+def p_ACUMULATE_R(p):
 	"""
-	LIST_A : comma LIST
-		| empty
+	ACUMULATE_R : empty
 	"""
+
+	global dicDirectorioFunciones
+	global currentFunction
+	global lastReadType
+	global iCounterDimensions
+	global varWithDimensions
+
+	# varWithDimensions = variable leída 
+	# p[ -1 ] = tamaño de la dimensión
+
+	#print("iCounterDimensions")
+	#print(iCounterDimensions)
+
+	# Conseguir el valor de R acumulada, es 0 para la primera vez
+	rAcum = 1
+	print( "a" )
+	print( varWithDimensions )
+	length = len( dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ varWithDimensions ][ "Dimensiones" ] )
+	if length > 0:
+		rAcum = dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ varWithDimensions ][ "Dimensiones" ][ length - 1 ][ "R" ]
+
+	# ( LsDim - LiDim + 1 ) * R acumulada
+	rAcum = ( p[ -1 ] - 0  + 1 ) * rAcum
+
+	print("rAcum")
+	print(rAcum)
+	dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ varWithDimensions ][ "Dimensiones" ].append( { "LiDim" : 0, "LsDim" : p[ -1 ], "R" : rAcum } )
+
+	iCounterDimensions = iCounterDimensions + 1
+
+
+# Calcular m para cada dimensión
+# Asignar dirección de memoria base al arreglo y ajustar contador de la memoria
+def p_CALCULATE_ARRAY(p):
+	"""
+	CALCULATE_ARRAY : empty
+	"""
+
+	global dicDirectorioFunciones
+	global currentFunction
+	global lastReadType
+	global iCounterDimensions
+	global iQuadCounter
+	global qQuads
+
+	# falta manejar direcciones de memoria, tengo que hacer otro setAdress para pasarle el acumulado de R
+
+	# p[ -7 ] = nombre de arreglo leído
+
+	aux = 0
+	# Calcular m's para cada dimensión
+	while iCounterDimensions > 0:
+
+		R = dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[ -7 ] ][ "Dimensiones" ][ aux ][ "R" ]
+		LsDim = dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[ -7 ] ][ "Dimensiones" ][ aux ][ "LsDim" ]
+		LiDim = dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[ -7 ] ][ "Dimensiones" ][ aux ][ "LiDim" ]
+
+		mDim = R / ( LsDim - LiDim + 1 ) * R
+
+		print("mDim")
+		print(mDim)
+
+		dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[ -7 ] ][ "Dimensiones" ][ aux ][ "mDim" ] = mDim
+
+		iCounterDimensions = iCounterDimensions - 1
+
+
+	# Definir espacio de memoria y scope de variable
+	# Esto tiene que ir despues de insertar la variable en dicDirectorioFunciones porque se hace una consulta a su tipo de dato
+	varAddress = setAddress( p[ -7 ] )
+
+	# Actualizar campo de memory address en la variable
+	dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[ -7 ] ][ "Address" ] = varAddress
+
+	# Quadruplo de asignación para que la maquina virtual primero haga la asignación y luego la consulta sobre sus valores
+	#quad = [ "=", dicConstants[ constValue ][ "Address" ], "", varAddress ]
+	#iQuadCounter = iQuadCounter + 1
+	#qQuads.append( quad )
+
+
+
+# TODO ARRAY
+
 
 def p_EXPLOG(p):
 	"""
@@ -754,40 +865,6 @@ def saveVarHelper( varRead, constantValue ):
 	iQuadCounter = iQuadCounter + 1
 	qQuads.append( quad )
 
-
-# Todavia no se debe hacer nada de arreglos (esperar a elda)
-def p_SAVE_ARRAY(p): 
-	"""
-	SAVE_ARRAY : empty
-	"""
-	global dicDirectorioFunciones
-	global currentFunction
-	global lastReadType
-
-	# p[-4] = variable leída
-	# p[-2] = dimensión de la variable
-
-	currentScope = getScope()
-
-	# Validar que arreglo leido no esté previamente declarado
-	if p[ -4 ] in dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ]:
-	    imprimirError( 1 )
-	else:
-		# Definir espacio de memoria y scope de variable
-		# Esto tiene que ir despues de insertar la variable en dicDirectorioFunciones porque se hace una consulta a su tipo de dato
-		varAddress = setAddress( p[ -4 ] )
-	    dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[ -4 ] ] = { "Type": lastReadType, "Value": p[ -2 ], "Scope": currentScope, "Address": "" }
-
-
-	
-
-	# Actualizar campo de memory address en la variable
-	dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ varRead ][ "Address" ] = varAddress
-
-	# Quadruplo de asignación para que la maquina virtual primero haga la asignación y luego la consulta sobre sus valores
-	quad = [ "=", dicConstants[ constValue ][ "Address" ], "", varAddress ]
-	iQuadCounter = iQuadCounter + 1
-	qQuads.append( quad )
 
 #############################
 # ACCIONES SEMANTICAS DE FUNCIONES
