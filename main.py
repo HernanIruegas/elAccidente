@@ -21,5 +21,3 @@ if __name__ == "__main__":
             print("EOFError")
     else:
         print("File missing")
-
-        #{4: {'Address': 13000, 'Type': 'int'}, 1: {'Address': 13001, 'Type': 'int'}, 2: {'Address': 13002, 'Type': 'int'}}

@@ -207,9 +207,18 @@ def p_ACUMULATE_R(p):
 	global lastReadType
 	global iCounterDimensions
 	global varWithDimensions
+	global dicConstantsInverted
+	global dicConstants
 
 	# varWithDimensions = variable leída 
 	# p[ -1 ] = tamaño de la dimensión
+
+	# Validar si la constante ya había sido leída previamente
+	if p[ -1 ] not in dicConstants:
+		# Consigues una dirección de memoria para la constante y la insertas en los diccionarios de constantes globales
+		constAddress = setConstAddress( lastReadType )
+		dicConstants[ p[ -1 ] ] = { "Address" : constAddress, "Type": lastReadType }
+		dicConstantsInverted[ constAddress ] = { "Value" : p[ -1 ], "Type": lastReadType }
 
 	# Conseguir el valor de R acumulada, es 1 para la primera vez
 	rAcum = 1
@@ -495,6 +504,7 @@ def p_ISLIST(p):
 iDimensionCounter = 1 # valor default. Ayuda a seguir track de en que dimensión estamos para las variables dimensionadas
 lastReadIndex = -1 # valor default. Esta variable ayuda a la función p_SOLVE_OFFSETS a recordar el último índice leído
 
+
 # Generar cuadruplo para validar indice dentro de rango de variable dimensionada
 # Generar cuadruplo opcional para multiplicar Sn * Mn
 def p_VALIDATE_INDEX(p):
@@ -510,14 +520,12 @@ def p_VALIDATE_INDEX(p):
 	global varDimensionadaLastRead
 	global iDimensionCounter
 	global lastReadIndex
+	global dicConstants
 
 	# p[ -4 ] = nombre de arreglo
 
 	# Esta variable ayuda a la función p_SOLVE_OFFSETS a recordar el último índice leído
 	lastReadIndex = sOperands.top()
-
-	#print("dim")
-	#print(varDimensionadaLastRead)
 
 	# Conseguir toda la info de la variable dimensionada
 	varDim = ""	
@@ -525,12 +533,11 @@ def p_VALIDATE_INDEX(p):
 		varDim = dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ varDimensionadaLastRead ]
 	else:
 		varDim = dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ varDimensionadaLastRead ]
-	#print( varDim )
-
 
 	# TODO: convertir las constantes de los rangos a direcciones
-
-	quad = [ "VER", sOperands.top(), varDim[ "Dimensiones" ][ iDimensionCounter - 1 ][ "LiDim" ], varDim[ "Dimensiones" ][ iDimensionCounter - 1 ][ "LsDim" ] ]
+	LiDim = varDim[ "Dimensiones" ][ iDimensionCounter - 1 ][ "LiDim" ]
+	LsDim = varDim[ "Dimensiones" ][ iDimensionCounter - 1 ][ "LsDim" ]
+	quad = [ "VER", sOperands.top(), dicConstants[ LiDim ][ "Address" ], dicConstants[ LsDim ][ "Address" ] ]
 	iQuadCounter = iQuadCounter + 1
 	qQuads.append( quad )
 
@@ -538,10 +545,20 @@ def p_VALIDATE_INDEX(p):
 	dimensiones = len( varDim[ "Dimensiones" ] )
 	if( iDimensionCounter < dimensiones ): # Significa que todavia falta de procesar al menos una dimensión más
 		
+
+		# Conseguir dirección de memoria para constante mDim
+		mDim = varDim[ "Dimensiones" ][ iDimensionCounter - 1 ][ "mDim" ]
+		if mDim not in dicConstants:
+			# Consigues una dirección de memoria para la constante y la insertas en los diccionarios de constantes globales
+			constAddress = setConstAddress( "int" )
+			dicConstants[ mDim ] = { "Address" : constAddress, "Type": "int" }
+			dicConstantsInverted[ constAddress ] = { "Value" : mDim, "Type": "int" }
+
+
 		# Generar cuadruplo para Sn * Mn
 		temporal = setTempAddress( varDim[ "Type" ] )
 		Sn = sOperands.pop()
-		quad = [ "*", Sn, varDim[ "Dimensiones" ][ iDimensionCounter - 1 ][ "mDim" ], temporal ]
+		quad = [ "*", Sn, dicConstants[ mDim ][ "Address" ], temporal ]
 		iQuadCounter = iQuadCounter + 1
 		qQuads.append( quad )
 		sOperands.push( temporal )
@@ -600,9 +617,16 @@ def p_SOLVE_OFFSETS(p):
 
 	length = len( varDim[ "Dimensiones" ] )
 	# Cuadruplo para sumar -K
-	K = varDim[ "Dimensiones" ][ length - 1 ][ "mDim" ]
+	#K = varDim[ "Dimensiones" ][ length - 1 ][ "mDim" ] # K siempre va a ser 0
+	# Conseguir/Asignar dirección de memoria a constante 0
+	if 0 not in dicConstants:
+			# Consigues una dirección de memoria para la constante y la insertas en los diccionarios de constantes globales
+			constAddress = setConstAddress( "int" )
+			dicConstants[ 0 ] = { "Address" : constAddress, "Type": "int" }
+			dicConstantsInverted[ constAddress ] = { "Value" : 0, "Type": "int" }
+
 	temporal = setTempAddress( varDim[ "Type" ] )
-	quad = [ "+", sOperands.top(), K , temporal]
+	quad = [ "+", sOperands.top(), dicConstants[ 0 ][ "Address" ] , temporal]
 	iQuadCounter = iQuadCounter + 1
 	qQuads.append( quad )
 	sOperands.push( temporal )
