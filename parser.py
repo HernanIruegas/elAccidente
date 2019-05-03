@@ -9,7 +9,7 @@ from tokenAndCodeConverter import initialValuesForVars
 #############################
 
 dicDirectorioFunciones = {} # "nombreFuncion" : { "Type": void/TYPE, "dicDirectorioVariables": {}, "ParamCounter": ..., "QuadCounter": ..., "TempCounter": ..., "ParamTypes": [], "Parameters": [] }
-# dicDirectorioVariables = "VarName" : { "Type": ..., "Value": ..., "Scope": ..., "Address": ...}
+# dicDirectorioVariables = "VarName" : { "Type": ..., "Value": ..., "Scope": ..., "Address": ..., "Dimensiones": [ {}, ... ] }
 
 lastReadType = "" # Sirve para conocer el tipo de dato más recientemente leído ( de funciones y de variables )
 currentFunction = "" # Sirve para conocer el nombre de la función más recientemente leida
@@ -27,6 +27,7 @@ dicConstants = {} # { "Address" : address, "Type": constantType } Sirve para alm
 dicConstantsInverted = {} # { "Value" : p[ -1 ], "Type": constantType } Lo mismo que dicConstants pero invertido para la máquina virtual { "memoryAddress" : valorConstante }
 methodCall =  "" # Sirve para guardar el nombre de la función a la cual se quiere llamar en METHODCALL
 varWithDimensions = "" # Sirve para guardar el id de la variable dimensionada que se está declarando
+varDimensionadaLastRead = "" # Sirve para guardar el id de la variable dimensionada que se está leyendo (queriendo acceder a una casilla)
 
 #############################
 # RANGOS DE MEMORIA
@@ -120,7 +121,7 @@ def p_VARS_A(p):
 	"""
 	VARS_A : id assign VARCTE_AUX_VARS SIMPLE
 			| id SAVE_VAR SIMPLE
-			| id VALIDATE_NAME_ARRAY lSqrBracket cte_i ACUMULATE_R LIST rSqrBracket CALCULATE_ARRAY LIST_A
+			| id VALIDATE_NAME_ARRAY lSqrBracket cte_i ACUMULATE_R rSqrBracket LIST CALCULATE_ARRAY LIST_A
 			| empty
 	"""
 
@@ -138,7 +139,7 @@ def p_SIMPLE(p):
 
 def p_LIST(p):
 	"""
-	LIST : comma cte_i ACUMULATE_R LIST
+	LIST : lSqrBracket cte_i ACUMULATE_R rSqrBracket LIST
 			| empty
 	"""
 
@@ -147,6 +148,7 @@ def p_LIST_A(p):
 	LIST_A : comma VARS_A
 		| empty
 	"""
+
 
 # Funcion auxiliar para la declaración de variables
 def p_VARCTE_AUX_VARS(p):
@@ -191,7 +193,7 @@ def p_VALIDATE_NAME_ARRAY(p):
 	if p[ -1 ] in dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ]:
 		imprimirError( 0 )
 	else:
-		dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[ -1 ] ] = { "Type": lastReadType, "Value": "", "Scope": currentScope, "Address": "", "Dimensiones" : [ ] }
+		dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[ -1 ] ] = { "Type": lastReadType, "Value": "", "Scope": currentScope, "Address": "", "Dimensionada" : 1, "Dimensiones" : [ ] }
 
 
 # Calcular R para la dimensión leída
@@ -478,11 +480,146 @@ def p_READ_A(p):
 		| empty
 	"""
 
+
+
+
+
+
 def p_ISLIST(p):
 	"""
-	ISLIST : lSqrBracket EXP rSqrBracket
-			| empty 
+	ISLIST : lSqrBracket EXP VALIDATE_INDEX rSqrBracket ISLIST
+			| empty SOLVE_OFFSETS
 	"""
+
+
+iDimensionCounter = 1 # valor default. Ayuda a seguir track de en que dimensión estamos para las variables dimensionadas
+lastReadIndex = -1 # valor default. Esta variable ayuda a la función p_SOLVE_OFFSETS a recordar el último índice leído
+
+# Generar cuadruplo para validar indice dentro de rango de variable dimensionada
+# Generar cuadruplo opcional para multiplicar Sn * Mn
+def p_VALIDATE_INDEX(p):
+	"""
+	VALIDATE_INDEX : empty
+	"""
+
+	global sOperands
+	global iQuadCounter
+	global qQuads
+	global currentFunction
+	global dicDirectorioFunciones
+	global varDimensionadaLastRead
+	global iDimensionCounter
+	global lastReadIndex
+
+	# p[ -4 ] = nombre de arreglo
+
+	# Esta variable ayuda a la función p_SOLVE_OFFSETS a recordar el último índice leído
+	lastReadIndex = sOperands.top()
+
+	#print("dim")
+	#print(varDimensionadaLastRead)
+
+	# Conseguir toda la info de la variable dimensionada
+	varDim = ""	
+	if varDimensionadaLastRead in dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ]:
+		varDim = dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ varDimensionadaLastRead ]
+	else:
+		varDim = dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ varDimensionadaLastRead ]
+	#print( varDim )
+
+
+	# TODO: convertir las constantes de los rangos a direcciones
+
+	quad = [ "VER", sOperands.top(), varDim[ "Dimensiones" ][ iDimensionCounter - 1 ][ "LiDim" ], varDim[ "Dimensiones" ][ iDimensionCounter - 1 ][ "LsDim" ] ]
+	iQuadCounter = iQuadCounter + 1
+	qQuads.append( quad )
+
+	# Calcular todas las multiplicaciones Sn * Mn (Dependiendo de cuantas dimensiones tenga la variable)
+	dimensiones = len( varDim[ "Dimensiones" ] )
+	if( iDimensionCounter < dimensiones ): # Significa que todavia falta de procesar al menos una dimensión más
+		
+		# Generar cuadruplo para Sn * Mn
+		temporal = setTempAddress( varDim[ "Type" ] )
+		Sn = sOperands.pop()
+		quad = [ "*", Sn, varDim[ "Dimensiones" ][ iDimensionCounter - 1 ][ "mDim" ], temporal ]
+		iQuadCounter = iQuadCounter + 1
+		qQuads.append( quad )
+		sOperands.push( temporal )
+
+		# Para manejar el cubo, se tienen que sumar las multiplicaciones de Sn * Mn + Sn * Mn
+		#if iDimensionCounter >= 2:
+		#	temporal = setTempAddress( varDim[ "Type" ] )
+		#	aux = sOperands.pop()
+		#	aux2 = sOperands.pop()
+		#	quad = [ "+", aux, aux2, temporal ]
+		#	iQuadCounter = iQuadCounter + 1
+		#	qQuads.append( quad )
+		#	sOperands.push( temporal )
+
+	iDimensionCounter = iDimensionCounter + 1
+
+
+# Sumar -k y dirección Base de la variable dimensionada
+def p_SOLVE_OFFSETS(p):
+	"""
+	SOLVE_OFFSETS : empty
+	"""
+
+	global iQuadCounter
+	global qQuads
+	global sOperands
+	global dicDirectorioFunciones
+	global varDimensionadaLastRead
+	global currentFunction
+	global iDimensionCounter
+	global lastReadIndex
+
+	# TODO arreglar esto con reglas gramaticales
+	# Nacada para poder asignar variables
+	if p[-2] == None:
+		return
+	
+	varDim = ""	
+	if varDimensionadaLastRead in dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ]:
+		varDim = dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ varDimensionadaLastRead ]
+	else:
+		varDim = dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ varDimensionadaLastRead ]
+
+
+	if iDimensionCounter - 1 > 1: # Se tiene que sumar Sn-1 * Mn-1 + Sn
+
+		temporal = setTempAddress( varDim[ "Type" ] )
+		# Generar cuadruplo para Sn-1 * Mn-1 + Sn
+		sOperands.pop()
+		aux = sOperands.pop()
+		quad = [ "+", aux, lastReadIndex, temporal ]
+		iQuadCounter = iQuadCounter + 1
+		qQuads.append( quad )
+		sOperands.push( temporal )
+
+
+	length = len( varDim[ "Dimensiones" ] )
+	# Cuadruplo para sumar -K
+	K = varDim[ "Dimensiones" ][ length - 1 ][ "mDim" ]
+	temporal = setTempAddress( varDim[ "Type" ] )
+	quad = [ "+", sOperands.top(), K , temporal]
+	iQuadCounter = iQuadCounter + 1
+	qQuads.append( quad )
+	sOperands.push( temporal )
+
+
+	# Cuadruplo para sumar dirección base 
+	# Se tiene que poner un identificador para indicar que el temporal es un apuntador a un contenido TODO
+	temporal = setTempAddress( varDim[ "Type" ] )
+	quad = [ "+", sOperands.top(), varDim[ "Address" ] , temporal ]
+	iQuadCounter = iQuadCounter + 1
+	qQuads.append( quad )
+	sOperands.push( temporal )
+
+	# Reset de variables auxiliares
+	iDimensionCounter = 1
+	lastReadIndex = -1
+
 
 def p_TYPEMETHOD(p):
 	"""
@@ -931,7 +1068,7 @@ def saveVarHelper( varRead, constantValue ):
 		dicConstants[ constValue ] = { "Address" : constAddress, "Type": lastReadType }
 		dicConstantsInverted[ constAddress ] = { "Value" : constValue, "Type": lastReadType }
 
-	dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ varRead ] = {"Type": lastReadType, "Value": constValue, "Scope": currentScope, "Address": "" }
+	dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ varRead ] = {"Type": lastReadType, "Value": constValue, "Scope": currentScope, "Address": "", "Dimensionada": 0 }
 
 	# Definir espacio de memoria y scope de variable
 	# Esto tiene que ir despues de insertar la variable en dicDirectorioFunciones porque se hace una consulta a su tipo de dato
@@ -1117,9 +1254,14 @@ def p_PUSH_STACK_OPERANDS(p):
 	"""
 	global sOperands
 	global dicDirectorioFunciones
+	global varDimensionadaLastRead
 
 	# Validar que la variable leida haya sido previamente declarada, que exista en el diccionario de variables de la función
-	if p[-1] in dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ]:
+	if p[ -1 ] in dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ]:
+
+		# Validar si es una variable dimensionada o no
+		if dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[ -1 ] ][ "Dimensionada" ] == 1:
+			varDimensionadaLastRead = p[ -1 ]
 
 		# Conseguir la dirección de memoria de variable previamente guardada en directorio
 		address = dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[ -1 ] ][ "Address" ] 
@@ -1128,14 +1270,15 @@ def p_PUSH_STACK_OPERANDS(p):
 		sTypes.push( dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[ -1 ] ][ "Type" ] )
 	elif p[-1] in dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ]:
 
+		# Validar si es una variable dimensionada o no
+		if dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ p[ -1 ] ][ "Dimensionada" ] == 1:
+			varDimensionadaLastRead = p[ -1 ]
+
 		# Conseguir la dirección de memoria de variable previamente guardada en directorio
 		address = dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ p[ -1 ] ][ "Address" ] 
 		sOperands.push( address )
 		sTypes.push( dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ p[-1] ][ "Type" ] )
 	else:
-		#print(currentFunction)
-		#print(dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ])
-		#print(p[-1])
 		imprimirError(3)
 
 
@@ -1329,7 +1472,7 @@ def solveOperationHelperAssignment():
 
 	if resultType != 0: # 0 = error en subo semantico
 
-		quad = [ operator, rightOperand, '', leftOperand ]
+		quad = [ operator, rightOperand, '', leftOperand]
 		iQuadCounter = iQuadCounter + 1
 		qQuads.append( quad )
 		#sOperands.push( result + str(iQuadCounter) )
