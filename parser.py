@@ -168,7 +168,9 @@ def p_BOOLEAN_AUX_VARS(p):
 	"""
 
 
-# TODO ARRAY
+#############################
+# ACCIONES SEMANTICAS PARA LEER VARIABLES DIMENSIONADAS
+#############################
 
 iCounterDimensions = 0
 
@@ -283,7 +285,7 @@ def p_CALCULATE_ARRAY(p):
 
 	# numero de direcciones de memoria que ocupa la variable dimensionada
 	m0 = dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[ -7 ] ][ "Dimensiones" ][ iCounterDimensions - 1 ][ "R" ] 
-	varAddress = setAddressVarWithDimensions( p[ -7 ], m0 )
+	varAddress = setAddress( p[ -7 ], m0 )
 
 	# Actualizar campo de memory address en la variable
 	dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[ -7 ] ][ "Address" ] = varAddress
@@ -306,73 +308,7 @@ def p_CALCULATE_ARRAY(p):
 		iQuadCounter = iQuadCounter + 1
 		qQuads.append( quad )
 		aux = aux + 1
-
-
-def setAddressVarWithDimensions( varName, totalMemoryAddresses ):
-
-	global currentFunction
-
-	if varName in dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ] and currentFunction != "globalFunc": # Es una variable local
-		return setLocalAddressVarWithDimensions( dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ varName ][ "Type" ], totalMemoryAddresses ) # Le pasamos el tipo de la variable
-	else: # Es una variable global
-		return setGlobalAddressVarWithDimensions( dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ varName ][ "Type" ], totalMemoryAddresses ) # Le pasamos el tipo de la variable
-
-
-# Asignar memoria a variable global
-# Incrementa el contador del rango para la memoria global
-def setGlobalAddressVarWithDimensions( varType, totalMemoryAddresses ):
-
-	global gIntIndex
-	global gFloatIndex
-	global gBoolIndex
-	global gStringIndex
-
-	addressAsigned = None
-
-	if varType == "int":
-		addressAsigned = gIntIndex
-		gIntIndex += totalMemoryAddresses
-	elif varType == "float":
-		addressAsigned = gFloatIndex
-		gFloatIndex += totalMemoryAddresses
-	elif varType == "bool":
-		addressAsigned = gBoolIndex
-		gBoolIndex += totalMemoryAddresses
-	elif varType == "string":
-		addressAsigned = gStringIndex
-		gStringIndex += totalMemoryAddresses
-
-	return addressAsigned
-
-
-# Asignar memoria a variable local
-# Incrementa el contador del rango para la memoria local
-def setLocalAddressVarWithDimensions( varType, totalMemoryAddresses ):
-
-	global lIntIndex
-	global lFloatIndex
-	global lBoolIndex
-	global lStringIndex
-
-	addressAsigned = None
-
-	if varType == "int":
-		addressAsigned = lIntIndex
-		lIntIndex += totalMemoryAddresses
-	elif varType == "float":
-		addressAsigned = lFloatIndex
-		lFloatIndex += totalMemoryAddresses
-	elif varType == "bool":
-		addressAsigned = lBoolIndex
-		lBoolIndex += totalMemoryAddresses
-	elif varType == "string":
-		addressAsigned = lStringIndex
-		lStringIndex += totalMemoryAddresses
-
-	return addressAsigned
-
-# TODO ARRAY
-
+		
 
 def p_EXPLOG(p):
 	"""
@@ -939,7 +875,7 @@ def imprimirError(error):
 
 
 #############################
-# ACCIONES SEMANTICAS 
+# ACCIONES SEMANTICAS DE VARIABLES 
 #############################
 
 # Guarda la función en el directorio de funciones
@@ -1050,7 +986,7 @@ def p_SAVE_PARAM(p):
 
 	dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[ -1 ] ] = { "Type": lastReadType, "Value": "", "Scope": currentScope, "Address": "" }
 
-	varAddress = setAddress( p[ -1 ] )
+	varAddress = setAddress( p[ -1 ], 1 )
 
 	# Actualizar campo de memory address en la variable
 	dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[ -1 ] ][ "Address" ] = varAddress
@@ -1096,7 +1032,7 @@ def saveVarHelper( varRead, constantValue ):
 
 	# Definir espacio de memoria y scope de variable
 	# Esto tiene que ir despues de insertar la variable en dicDirectorioFunciones porque se hace una consulta a su tipo de dato
-	varAddress = setAddress( varRead )
+	varAddress = setAddress( varRead, 1 )
 
 	# Actualizar campo de memory address en la variable
 	dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ varRead ][ "Address" ] = varAddress
@@ -1684,26 +1620,26 @@ def p_PRINTQUADS(p):
 
 
 #############################
-# ACCIONES MEMORIA
+# MANEJO DE MEMORIA
 #############################
 
 
 # Asignar memoria a variable
 # Se busca primero en el directorio de variables de la función global y si no está entonces se confirma que es una variable local
 # Regresa la dirección de memoria asignada a la variable
-def setAddress( varName ):
+def setAddress( varName, totalMemoryAddresses ):
 
 	global currentFunction
 
 	if varName in dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ] and currentFunction != "globalFunc": # Es una variable local
-		return setLocalAddress( dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ varName ][ "Type" ] ) # Le pasamos el tipo de la variable
+		return setLocalAddress( dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ varName ][ "Type" ], totalMemoryAddresses ) # Le pasamos el tipo de la variable
 	else: # Es una variable global
-		return setGlobalAddress( dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ varName ][ "Type" ] ) # Le pasamos el tipo de la variable
+		return setGlobalAddress( dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ varName ][ "Type" ], totalMemoryAddresses ) # Le pasamos el tipo de la variable
 
 
 # Asignar memoria a variable global
 # Incrementa el contador del rango para la memoria global
-def setGlobalAddress( varType ):
+def setGlobalAddress( varType, totalMemoryAddresses ):
 
 	global gIntIndex
 	global gFloatIndex
@@ -1714,23 +1650,23 @@ def setGlobalAddress( varType ):
 
 	if varType == "int":
 		addressAsigned = gIntIndex
-		gIntIndex += 1
+		gIntIndex += totalMemoryAddresses
 	elif varType == "float":
 		addressAsigned = gFloatIndex
-		gFloatIndex += 1
+		gFloatIndex += totalMemoryAddresses
 	elif varType == "bool":
 		addressAsigned = gBoolIndex
-		gBoolIndex += 1
+		gBoolIndex += totalMemoryAddresses
 	elif varType == "string":
 		addressAsigned = gStringIndex
-		gStringIndex += 1
+		gStringIndex += totalMemoryAddresses
 
 	return addressAsigned
 
 
 # Asignar memoria a variable local
 # Incrementa el contador del rango para la memoria local
-def setLocalAddress( varType ):
+def setLocalAddress( varType, totalMemoryAddresses ):
 
 	global lIntIndex
 	global lFloatIndex
@@ -1741,16 +1677,16 @@ def setLocalAddress( varType ):
 
 	if varType == "int":
 		addressAsigned = lIntIndex
-		lIntIndex += 1
+		lIntIndex += totalMemoryAddresses
 	elif varType == "float":
 		addressAsigned = lFloatIndex
-		lFloatIndex += 1
+		lFloatIndex += totalMemoryAddresses
 	elif varType == "bool":
 		addressAsigned = lBoolIndex
-		lBoolIndex += 1
+		lBoolIndex += totalMemoryAddresses
 	elif varType == "string":
 		addressAsigned = lStringIndex
-		lStringIndex += 1
+		lStringIndex += totalMemoryAddresses
 
 	return addressAsigned
 

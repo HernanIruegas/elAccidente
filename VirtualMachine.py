@@ -84,20 +84,28 @@ def readQuads( qQuads, globalConstMemory ):
     print(gMemory.tempMemory)
 
 
+
+# Regresa el tipo de dato de una dirección de memoria
+#def determineTypeOfAddress( memoryAddress ):
+
+
+
+
 # quad = token operand1 operand2 operand3 
 # Determinar cómo resolver el quad dependiendo de su operador
 def solveQuad( quad ):
 
     global instructionPointer
 
+    #leftAddress = quad[ 1 ]
+    #rightAddress = quad[ 2 ]
+    #typeLeftAddress = determineTypeOfAddress( leftAddress )
+    #typeRightAddress = determineTypeOfAddress( typeRightAddress )
+
     if quad[ 0 ] == "=":#"="):  # Assign
         # Conseguir valor desde la memoria
         resultVal = getValueFromAddress( quad[ 1 ] )
         # Guardar resultado en memoria
-        #print("resultVal")
-        #print(resultVal)
-        #print("address")
-        #print(quad[ 3 ])
         setValueToAddress(resultVal, quad[ 3 ])
         return
 
@@ -113,8 +121,6 @@ def solveQuad( quad ):
     # Resolver operación aritmética
     if quad[ 0 ] == "+":    # Add
         resultVal = leftOperand + rightOperand
-        #print("aaa")
-        #print(resultVal)
     elif quad[ 0 ] == "-":  # Subtract
         resultVal = leftOperand - rightOperand
     elif quad[ 0 ] == "*":  # Multiply
