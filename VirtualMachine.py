@@ -4,7 +4,6 @@
 # TODO'S
 
 from RuntimeMemory import RuntimeMemory
-from tokenAndCodeConverter import tokenToCode, codeToToken
 
 instructionPointer = 0 # Apunta al siguiente quad a resolver
 dicGlobalConstMemory = {} # Recibe el diccionario de constantes resultado de cuando se compila el código fuente
@@ -20,8 +19,8 @@ gMemory = RuntimeMemory( "global" )
 # # Regresa el valor almacenado que representa la dirección de memoria
 def getValueFromAddress( memoryAddress ):
 
-    print("memoryAddress")
-    print(memoryAddress)
+    #print("memoryAddress")
+    #print(memoryAddress)
     if memoryAddress >= gMemory.gIntStart and memoryAddress <= gMemory.gStringEnd: # Rango global
         return gMemory.getValueFromAddressHelper( memoryAddress )
     elif memoryAddress >= gMemory.lIntStart and memoryAddress <= gMemory.lStringEnd: # Rango local
@@ -34,10 +33,9 @@ def getValueFromAddress( memoryAddress ):
         #return getValueFromAddressHelper(
         #    memoryAddress
         #)  # TODO: how to know if temp from local vs global
-        
     else:  # Rango de constantes
-        print( "getValueFromAddress")
-        print( dicGlobalConstMemory[ memoryAddress ][ "Value" ]  )
+        #print( "getValueFromAddress")
+        #print( dicGlobalConstMemory[ memoryAddress ][ "Value" ]  )
         return dicGlobalConstMemory[ memoryAddress ][ "Value" ] 
 
 
@@ -92,14 +90,14 @@ def solveQuad( quad ):
 
     global instructionPointer
 
-    if quad[ 0 ] == "=":#tokenToCode.get("="):  # Assign
+    if quad[ 0 ] == "=":#"="):  # Assign
         # Conseguir valor desde la memoria
         resultVal = getValueFromAddress( quad[ 1 ] )
         # Guardar resultado en memoria
-        print("resultVal")
-        print(resultVal)
-        print("address")
-        print(quad[ 3 ])
+        #print("resultVal")
+        #print(resultVal)
+        #print("address")
+        #print(quad[ 3 ])
         setValueToAddress(resultVal, quad[ 3 ])
         return
 
@@ -115,44 +113,44 @@ def solveQuad( quad ):
     # Resolver operación aritmética
     if quad[ 0 ] == "+":    # Add
         resultVal = leftOperand + rightOperand
-        print("aaa")
-        print(resultVal)
-    elif quad[ 0 ] == tokenToCode.get("-"):  # Subtract
+        #print("aaa")
+        #print(resultVal)
+    elif quad[ 0 ] == "-":  # Subtract
         resultVal = leftOperand - rightOperand
-    elif quad[ 0 ] == tokenToCode.get("*"):  # Multiply
+    elif quad[ 0 ] == "*":  # Multiply
         resultVal = leftOperand * rightOperand
-    elif quad[ 0 ] == tokenToCode.get("/"):  # Divide
+    elif quad[ 0 ] == "/":  # Divide
         if rightOperand == 0:
             #imprimirError(??) # TODO
             print("imprimirError")
         resultVal = leftOperand / rightOperand
     # Resolver operación relacional
-    elif quad[ 0 ] == tokenToCode.get(">="): # Mayor que
+    elif quad[ 0 ] == ">=": # Mayor que
         resultVal = leftOperand >= rightOperand
-    elif quad[ 0 ] == tokenToCode.get("<="): # Menor que
+    elif quad[ 0 ] == "<=": # Menor que
         resultVal = leftOperand <= rightOperand
-    elif quad[ 0 ] == tokenToCode.get(">"): # Mayor
+    elif quad[ 0 ] == ">": # Mayor
         resultVal = leftOperand > rightOperand
-    elif quad[ 0 ] == tokenToCode.get("<"): # Menor
+    elif quad[ 0 ] == "<": # Menor
         resultVal = leftOperand < rightOperand
     # Resolver operación lógica
-    if quad[ 0 ] == tokenToCode.get("=="): # equals 
+    if quad[ 0 ] == "==": # equals 
         resultVal = leftOperand == rightOperand
-    elif quad[ 0 ] == tokenToCode.get("!="): # different
+    elif quad[ 0 ] == "!=": # different
         resultVal = leftOperand != rightOperand
-    elif quad[ 0 ] == tokenToCode.get("&&"): # and
+    elif quad[ 0 ] == "&&": # and
         resultVal = leftOperand and rightOperand 
-    elif quad[ 0 ] == tokenToCode.get("||"): # or 
+    elif quad[ 0 ] == "||": # or 
         resultVal = leftOperand or rightOperand
-    elif quad[ 0 ] == tokenToCode.get("!"): # not
+    elif quad[ 0 ] == "!": # not
         print("!") 
         #resultVal =  !rightOperand # TODO
     # Resolver operación de saltos
-    elif quad[ 0 ] == tokenToCode.get("GOTO"):
+    elif quad[ 0 ] == "GOTO":
         # GOTO, -1, -1, destination
         # Change inst pointer to point to destination quad
         instructionPointer = quad[ 3 ] - 1
-    elif quad[ 0 ] == tokenToCode.get("GOTOF"):
+    elif quad[ 0 ] == "GOTOF":
         # GOTOF, trigger, -1, destination
         # Get trigger (result of condition)
         trigger = getValueFromAddress(quad[ 1 ])
@@ -160,7 +158,7 @@ def solveQuad( quad ):
         # Change inst = destination quad IF trigger is FALSE
         if not trigger:
             instructionPointer = quad[ 3 ] - 1
-    elif quad[ 0 ] == tokenToCode.get("GOTOT"):
+    elif quad[ 0 ] == "GOTOT":
         # GOTOT, trigger, -1, destination
         # Get trigger (result of condition)
         trigger = getValueFromAddress(quad[ 1 ])

@@ -209,13 +209,8 @@ def p_ACUMULATE_R(p):
 	# varWithDimensions = variable leída 
 	# p[ -1 ] = tamaño de la dimensión
 
-	#print("iCounterDimensions")
-	#print(iCounterDimensions)
-
-	# Conseguir el valor de R acumulada, es 0 para la primera vez
+	# Conseguir el valor de R acumulada, es 1 para la primera vez
 	rAcum = 1
-	print( "a" )
-	print( varWithDimensions )
 	length = len( dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ varWithDimensions ][ "Dimensiones" ] )
 	if length > 0:
 		rAcum = dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ varWithDimensions ][ "Dimensiones" ][ length - 1 ][ "R" ]
@@ -223,8 +218,6 @@ def p_ACUMULATE_R(p):
 	# ( LsDim - LiDim + 1 ) * R acumulada
 	rAcum = ( p[ -1 ] - 0  + 1 ) * rAcum
 
-	print("rAcum")
-	print(rAcum)
 	dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ varWithDimensions ][ "Dimensiones" ].append( { "LiDim" : 0, "LsDim" : p[ -1 ], "R" : rAcum } )
 
 	iCounterDimensions = iCounterDimensions + 1
@@ -243,42 +236,129 @@ def p_CALCULATE_ARRAY(p):
 	global iCounterDimensions
 	global iQuadCounter
 	global qQuads
-
-	# falta manejar direcciones de memoria, tengo que hacer otro setAdress para pasarle el acumulado de R
+	global dicConstants
+	global dicConstantsInverted
+	global lastReadType
 
 	# p[ -7 ] = nombre de arreglo leído
 
-	aux = 0
-	# Calcular m's para cada dimensión
-	while iCounterDimensions > 0:
+	aux = 1
+	sumaK = 0
+	for dimension in dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[ -7 ] ][ "Dimensiones" ]:
 
-		R = dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[ -7 ] ][ "Dimensiones" ][ aux ][ "R" ]
-		LsDim = dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[ -7 ] ][ "Dimensiones" ][ aux ][ "LsDim" ]
-		LiDim = dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[ -7 ] ][ "Dimensiones" ][ aux ][ "LiDim" ]
-
-		mDim = R / ( LsDim - LiDim + 1 ) * R
-
-		print("mDim")
-		print(mDim)
-
-		dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[ -7 ] ][ "Dimensiones" ][ aux ][ "mDim" ] = mDim
-
-		iCounterDimensions = iCounterDimensions - 1
+		mPrevious = -1
+		if aux == 1:
+			mPrevious = dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[ -7 ] ][ "Dimensiones" ][ iCounterDimensions - 1 ][ "R" ] # m0
+		else:
+			mPrevious = dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[ -7 ] ][ "Dimensiones" ][ aux - 2 ][ "mDim" ]
 
 
-	# Definir espacio de memoria y scope de variable
-	# Esto tiene que ir despues de insertar la variable en dicDirectorioFunciones porque se hace una consulta a su tipo de dato
-	varAddress = setAddress( p[ -7 ] )
+		LsDim = dimension[ "LsDim" ]
+		LiDim = dimension[ "LiDim" ]
+		mDim = mPrevious / ( LsDim - LiDim + 1 )
+		sumaK = sumaK + LiDim * mDim
+
+		if aux == iCounterDimensions:
+			dimension[ "mDim" ] = -sumaK
+		else:
+			dimension[ "mDim" ] = mDim
+
+		aux = aux + 1
+
+	iCounterDimensions = 0
+
+	
+	# Definir espacio de memoria y scope de arreglo
+
+	# numero de direcciones de memoria que ocupa la variable dimensionada
+	m0 = dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[ -7 ] ][ "Dimensiones" ][ iCounterDimensions - 1 ][ "R" ] 
+	varAddress = setAddressVarWithDimensions( p[ -7 ], m0 )
 
 	# Actualizar campo de memory address en la variable
 	dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[ -7 ] ][ "Address" ] = varAddress
 
-	# Quadruplo de asignación para que la maquina virtual primero haga la asignación y luego la consulta sobre sus valores
-	#quad = [ "=", dicConstants[ constValue ][ "Address" ], "", varAddress ]
-	#iQuadCounter = iQuadCounter + 1
-	#qQuads.append( quad )
+	# Quadruplos de asignación para que la maquina virtual primero haga la asignación y luego la consulta sobre sus valores
+	aux = 0
+	while aux < m0:
+
+		constAddress = -1 # valor default
+		if 0 not in dicConstants:
+			# Consigues una dirección de memoria para la constante y la insertas en los diccionarios de constantes globales
+			constAddress = setConstAddress( lastReadType )
+			dicConstants[ 0 ] = { "Address" : constAddress, "Type": lastReadType }
+			dicConstantsInverted[ constAddress ] = { "Value" : 0, "Type": lastReadType }
+		else:
+			constAddress = dicConstants[ 0 ][ "Address" ]
+
+		quad = [ "=", constAddress, "", varAddress ]
+		varAddress = varAddress + 1
+		iQuadCounter = iQuadCounter + 1
+		qQuads.append( quad )
+		aux = aux + 1
 
 
+def setAddressVarWithDimensions( varName, totalMemoryAddresses ):
+
+	global currentFunction
+
+	if varName in dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ] and currentFunction != "globalFunc": # Es una variable local
+		return setLocalAddressVarWithDimensions( dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ varName ][ "Type" ], totalMemoryAddresses ) # Le pasamos el tipo de la variable
+	else: # Es una variable global
+		return setGlobalAddressVarWithDimensions( dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ varName ][ "Type" ], totalMemoryAddresses ) # Le pasamos el tipo de la variable
+
+
+# Asignar memoria a variable global
+# Incrementa el contador del rango para la memoria global
+def setGlobalAddressVarWithDimensions( varType, totalMemoryAddresses ):
+
+	global gIntIndex
+	global gFloatIndex
+	global gBoolIndex
+	global gStringIndex
+
+	addressAsigned = None
+
+	if varType == "int":
+		addressAsigned = gIntIndex
+		gIntIndex += totalMemoryAddresses
+	elif varType == "float":
+		addressAsigned = gFloatIndex
+		gFloatIndex += totalMemoryAddresses
+	elif varType == "bool":
+		addressAsigned = gBoolIndex
+		gBoolIndex += totalMemoryAddresses
+	elif varType == "string":
+		addressAsigned = gStringIndex
+		gStringIndex += totalMemoryAddresses
+
+	return addressAsigned
+
+
+# Asignar memoria a variable local
+# Incrementa el contador del rango para la memoria local
+def setLocalAddressVarWithDimensions( varType, totalMemoryAddresses ):
+
+	global lIntIndex
+	global lFloatIndex
+	global lBoolIndex
+	global lStringIndex
+
+	addressAsigned = None
+
+	if varType == "int":
+		addressAsigned = lIntIndex
+		lIntIndex += totalMemoryAddresses
+	elif varType == "float":
+		addressAsigned = lFloatIndex
+		lFloatIndex += totalMemoryAddresses
+	elif varType == "bool":
+		addressAsigned = lBoolIndex
+		lBoolIndex += totalMemoryAddresses
+	elif varType == "string":
+		addressAsigned = lStringIndex
+		lStringIndex += totalMemoryAddresses
+
+	return addressAsigned
 
 # TODO ARRAY
 
@@ -1053,9 +1133,9 @@ def p_PUSH_STACK_OPERANDS(p):
 		sOperands.push( address )
 		sTypes.push( dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ p[-1] ][ "Type" ] )
 	else:
-		print(currentFunction)
-		print(dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ])
-		print(p[-1])
+		#print(currentFunction)
+		#print(dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ])
+		#print(p[-1])
 		imprimirError(3)
 
 
@@ -1452,17 +1532,6 @@ def setAddress( varName ):
 		return setLocalAddress( dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ varName ][ "Type" ] ) # Le pasamos el tipo de la variable
 	else: # Es una variable global
 		return setGlobalAddress( dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ varName ][ "Type" ] ) # Le pasamos el tipo de la variable
-
-
-# 
-#def setAddressArray( varName, lengthArray ):
-
-#	global currentFunction
-
-#	if varName in dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ] and currentFunction != "globalFunc": # Es una variable local
-#		return setLocalAddress( dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ varName ][ "Type" ] ) # Le pasamos el tipo de la variable
-#	else: # Es una variable global
-#		return setGlobalAddress( dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ varName ][ "Type" ] ) # Le pasamos el tipo de la variable
 
 
 # Asignar memoria a variable global

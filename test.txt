@@ -1,6 +1,6 @@
 program void globalFunc;
 
-var int : A = 2, B = 2, C, D[5,6];
+var int : A = 2, B = 2, D[1,2], C, F[2];
 
 void start{
 	
