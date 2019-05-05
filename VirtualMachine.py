@@ -23,17 +23,12 @@ def getValueFromAddress( memoryAddress ):
     print("memoryAddress")
     print(memoryAddress)
     if memoryAddress >= gMemory.gIntStart and memoryAddress <= gMemory.gStringEnd: # Rango global
-        return memory.getValueFromAddressHelper( memoryAddress )
-    elif memoryAddress >= memory.lIntStart and memoryAddress <= memory.lStringEnd: # Rango local
-        return l_memory.getValueFromAddressHelper(memoryAddress)  # TODO: current memory context?
-    elif memoryAddress >= memory.tIntStart and memoryAddress <= memory.tStringEnd: 
-        print("temporal")
-        #return getValueFromAddressHelper(
-        #    memoryAddress
-        #)  # TODO: how to know if temp from local vs global
+        return gMemory.getValueFromAddressHelper( memoryAddress )
+    elif memoryAddress >= sMemories.top().lIntStart and memoryAddress <= sMemories.top().lStringEnd: # Rango local
+        return sMemories.top().getValueFromAddressHelper( memoryAddress ) 
+    elif memoryAddress >= sMemories.top().tIntStart and memoryAddress <= sMemories.top().tStringEnd: 
+        return sMemories.top().getValueFromAddressHelper( memoryAddress )  
     else:  # Rango de constantes
-        #print( "getValueFromAddress")
-        #print( dicGlobalConstMemory[ memoryAddress ][ "Value" ]  )
         return dicGlobalConstMemory[ memoryAddress ][ "Value" ] 
 
 
@@ -44,10 +39,10 @@ def setValueToAddress( value, memoryAddress ):
 
     if memoryAddress >= gMemory.gIntStart and memoryAddress <= gMemory.gStringEnd:
         gMemory.setValueToAddressHelper( value, memoryAddress )
-    elif memoryAddress >= sMemories.top().lIntStart and memoryAddress <= sMemories.top().lStringEnd:
-        sMemories.top().setValueToAddressHelper(value, memoryAddress)
-    else:  
-        sMemories.top().setValueToAddressHelper( value, memoryAddress )  
+    elif memoryAddress >= sMemories.top().lIntStart and memoryAddress <= sMemories.top().lStringEnd: 
+        sMemories.top().setValueToAddressHelper( value, memoryAddress ) 
+    elif memoryAddress >= sMemories.top().tIntStart and memoryAddress <= sMemories.top().tStringEnd:
+        sMemories.top().setValueToAddressHelper( value, memoryAddress )
 
 
 #############################
@@ -66,22 +61,23 @@ def readQuads( qQuads, globalConstMemory ):
 
     # Resolver quad por quad
     while instructionPointer < len( qQuads ):
-        solveQuad( qQuads[ instructionPointer ] )
+        solveQuad( qQuads[ instructionPointer ], qQuads )
         instructionPointer = instructionPointer + 1
 
-    print(memory.intMemory)
-    print(memory.floatMemory)
-    print(memory.boolMemory)
-    print(memory.strMemory)
-    print(memory.tempMemory)
+    print(gMemory.intMemory)
+    print(gMemory.floatMemory)
+    print(gMemory.boolMemory)
+    print(gMemory.strMemory)
+    print(gMemory.tempMemory)
 
 
 # Determinar cómo resolver el quad dependiendo de su operador
-def solveQuad( quad ):
+def solveQuad( quad, qQuads):
 
     global instructionPointer, currentFunctionName
 
-    
+    #print("instructionPointer")
+    #print(instructionPointer)
     print( quad[ 0 ] )
 
 
@@ -92,7 +88,6 @@ def solveQuad( quad ):
             # Guardar resultado en memoria
             setValueToAddress( currentFunctionName, quad[ 3 ] )
             return
-
         # Conseguir valor desde la memoria
         resultVal = getValueFromAddress( quad[ 1 ] )
         # Guardar resultado en memoria
@@ -102,14 +97,18 @@ def solveQuad( quad ):
     elif quad[ 0 ] == "GOTO":
         # GOTO, "", "", destination
         # Hacer que instructionPointer apunte a un nuevo cuadruplo
-        instructionPointer = quad[ 3 ]
+        instructionPointer = quad[ 3 ] - 1
         return
     elif quad[ 0 ] == "GOTOF":
         # GOTOF, trigger, -1, destination
         # Get trigger (result of condition)
         trigger = getValueFromAddress( quad[ 1 ] )
+        print("trigger")
+        print(trigger)
         if not trigger:
             instructionPointer = quad[ 3 ] - 1
+            print("instructionPointer")
+            print(instructionPointer)
         return
     elif quad[ 0 ] == "GOTOT":
         # GOTOT, trigger, -1, destination
@@ -123,23 +122,32 @@ def solveQuad( quad ):
         sMemories.push( memory )
         return
     elif quad[ 0 ] == "RET":
+        if sMemories.top().scope == "global":
+            instructionPointer = len( qQuads ) - 1
+            return
         currentFunctionName = quad[ 3 ]
+        instructionPointer = sMemories.top().returnQuad - 1
+        sMemories.pop()
         return
     elif quad[ 0 ] == "ENDPROC":
-        instructionPointer = sMemories.top().returnQuad
-        sMemories.pop()
+        if( sMemories.top().scope != "global" ):
+            instructionPointer = sMemories.top().returnQuad - 1
+            sMemories.pop()
         return
     elif quad[ 0 ] == "GOSUB":
         sMemories.top().returnQuad = instructionPointer + 1
-        instructionPointer = quad[ 3 ]
+        instructionPointer = quad[ 3 ] - 1
         return 
     elif quad[ 0 ] == "PARAMETER":
         return
+    elif quad[ 0 ] == "PRINT":
+        # Conseguir valor desde la memoria
+        resultVal = getValueFromAddress( quad[ 3 ] )
+        print("PRINT THIS")
+        print( resultVal )
+        return
 
     
-
-
-
 
     # Conseguir valores de la memoria
     leftOperand = getValueFromAddress( quad[ 1 ] )
@@ -170,7 +178,7 @@ def solveQuad( quad ):
     elif quad[ 0 ] == "<": 
         resultVal = leftOperand < rightOperand
     # Resolver operación lógica
-    if quad[ 0 ] == "==": 
+    elif quad[ 0 ] == "==": 
         resultVal = leftOperand == rightOperand
     elif quad[ 0 ] == "!=": 
         resultVal = leftOperand != rightOperand

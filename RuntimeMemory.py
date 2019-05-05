@@ -75,16 +75,16 @@ class RuntimeMemory( object ):
 	# Asigna un valor a una dirección de memoria dependiendo del tipo al que pertenezca
 	def setValueToAddressHelper( self, value, memoryAddress ):
 
-	    if self.validateAddress( memoryAddress, self.gIntStart, self.gIntEnd, self.lIntStart, self.lIntEnd ):
-	        self.intMemory[ memoryAddress ] = value
-	    elif self.validateAddress( memoryAddress, self.gFloatStart, self.gFloatEnd, self.lFloatStart, self.lFloatEnd ): 
-	        self.floatMemory[ memoryAddress ] = value
-	    elif self.validateAddress( memoryAddress, self.gBoolStart, self.gBoolEnd, self.lBoolStart, self.lBoolEnd ): 
-	        self.boolMemory[ memoryAddress ] = value
-	    elif self.validateAddress( memoryAddress, self.gStringStart, self.gStringEnd, self.lStringStart, self.lStringEnd ):
-	        self.strMemory[ memoryAddress ] = value
-	    else: 
-	        self.tempMemory[ memoryAddress ] = value
+		if self.validateAddress( memoryAddress, self.gIntStart, self.gIntEnd, self.lIntStart, self.lIntEnd ):
+			self.intMemory[ memoryAddress ] = value
+		elif self.validateAddress( memoryAddress, self.gFloatStart, self.gFloatEnd, self.lFloatStart, self.lFloatEnd ): 
+			self.floatMemory[ memoryAddress ] = value
+		elif self.validateAddress( memoryAddress, self.gBoolStart, self.gBoolEnd, self.lBoolStart, self.lBoolEnd ):
+			self.boolMemory[ memoryAddress ] = value
+		elif self.validateAddress( memoryAddress, self.gStringStart, self.gStringEnd, self.lStringStart, self.lStringEnd ):
+			self.strMemory[ memoryAddress ] = value
+		else: 
+			self.tempMemory[ memoryAddress ] = value
 
 
 	# Valida si una dirección de memoria pertenece a un cierto rango especificado como parametro

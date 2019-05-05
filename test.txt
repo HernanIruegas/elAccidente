@@ -1,13 +1,12 @@
 program void globalFunc;
 
-var int : i,j;
-
-func int uno(){
-	i = 2;
-	return 2;
-} 
+var int : A = 2, D = 3;
 
 void start{
-	uno(j);
-	return 2;
+	
+	if( A + 1 == D ){
+		print(A + A);
+	}else{
+		print(D);
+	}
 }

@@ -96,7 +96,7 @@ cStringEnd = 16999
 
 def p_PROGRAM(p):
 	"""
-	PROGRAM : program void SAVE_TYPE globalFunc START_FUNCTION semicolon GENERATE_GOTO_MAIN PROGRAM_A void SAVE_TYPE start FILL_GOTO_MAIN START_FUNCTION BLOCK PRINTQUADS
+	PROGRAM : program void SAVE_TYPE globalFunc START_FUNCTION semicolon PROGRAM_A GENERATE_GOTO_MAIN void SAVE_TYPE start FILL_GOTO_MAIN START_FUNCTION BLOCK END_PROCEDURE PRINTQUADS
 	"""
 
 
@@ -402,7 +402,13 @@ def p_STATEMENT(p):
 
 def p_ASSIGNMENT(p):
 	"""
-	ASSIGNMENT : id PUSH_STACK_OPERANDS ISLIST assign PUSH_STACK_OPERATORS EXPLOG SOLVE_OPERATION_ASSIGNMENT semicolon 
+	ASSIGNMENT : id PUSH_STACK_OPERANDS ISLIST assign PUSH_STACK_OPERATORS ASSIGNMENT_A
+	"""
+
+def p_ASSIGNMENT_A(p):
+	"""
+	ASSIGNMENT_A : EXPLOG SOLVE_OPERATION_ASSIGNMENT semicolon
+				| METHODCALL p_SOLVE_OPERATION_ASSIGNMENT_AUX
 	"""
 
 def p_READ(p):
@@ -416,6 +422,43 @@ def p_READ_A(p):
 		| empty
 	"""
 
+# Genera cuadruplo para la asignación
+def solveOperationHelperAssignment_AUX():
+
+	global sOperands, sOperators, sTypes, qQuads, iQuadCounter
+
+
+	rightOperand = sOperands.pop()
+	rightType = sTypes.pop()
+
+	leftOperand = sOperands.pop()
+	leftType = sTypes.pop()
+
+	operator = sOperators.pop()
+
+	resultType = semanticCube[ dicOperandIndexCube[ leftType ] ][ dicOperandIndexCube[ rightType ] ][ dicOperatorIndexCube[ operator ] ]
+
+	if resultType != 0: # 0 = error en subo semantico
+
+		quad = [ operator, leftOperand, '', rightOperand ]
+		iQuadCounter = iQuadCounter + 1
+		qQuads.append( quad )
+	else:
+		imprimirError(2)
+
+
+# Indica que se tiene que generar cuadruplo para una asignación
+# Utiliza otra función helper porque su cuadruplo es distinto al que genera la función de SOLVE_OPERATION
+# El cuadruplo de la asignación solo debe tener 2 espacios llenos, no 4 como el de las operaciones
+def p_SOLVE_OPERATION_ASSIGNMENT_AUX(p):
+	"""
+	p_SOLVE_OPERATION_ASSIGNMENT_AUX : empty
+	"""
+	global sOperators
+
+	if sOperators.size() > 0:
+		if sOperators.top() == '=':
+			solveOperationHelperAssignment_AUX()
 
 
 
@@ -629,12 +672,18 @@ def p_POST_CONDITIONAL_LOOP(p):
 
 def p_METHODCALL(p):
 	"""
-	METHODCALL : id VALIDATE_FUNCTION_NAME ERA lParenthesis EXP VALIDATE_PARAMETER METHODCALL_A rParenthesis semicolon VALIDATE_METHOD_CALL
+	METHODCALL : id VALIDATE_FUNCTION_NAME ERA lParenthesis METHODCALL_A METHODCALL_B rParenthesis semicolon VALIDATE_METHOD_CALL
 	"""
 
 def p_METHODCALL_A(p):
 	"""
-	METHODCALL_A : comma EXP
+	METHODCALL_A : EXP VALIDATE_PARAMETER 
+					| empty
+	"""
+
+def p_METHODCALL_B(p):
+	"""
+	METHODCALL_B : comma EXP VALIDATE_PARAMETER METHODCALL_B
 				| empty
 	"""
 
@@ -1116,26 +1165,26 @@ def p_ERA(p):
 
 # Se lee el argumento y se valida contra la lista de tipos de parametros de la función a la que se quiere llamar
 def p_VALIDATE_PARAMETER(p):
-    """
-    VALIDATE_PARAMETER : empty
-    """
-    global sOperands, sTypes, iParametersCounter, qQuads, iQuadCounter, dicDirectorioFunciones, methodCall
-    
-    if iParametersCounter == 0:
-    	return
+	"""
+	VALIDATE_PARAMETER : empty
+	"""
+	global sOperands, sTypes, iParametersCounter, qQuads, iQuadCounter, dicDirectorioFunciones, methodCall
 
-    argument = sOperands.pop()
-    argumentType = sTypes.pop()
+	argument = sOperands.pop()
+	argumentType = sTypes.pop()
 
-    # ParamTypes es una lista de tipos de los parametros de la función
-    if argumentType != dicDirectorioFunciones[ methodCall ][ "ParamTypes" ][ iParametersCounter ]:
-    	imprimirError( 4 )
-    else:
-    	paramName = dicDirectorioFunciones[ methodCall ][ "Parameters" ][ iParametersCounter ]
-    	quad = [ "PARAMETER", argument, '', dicDirectorioFunciones[ methodCall ][ "dicDirectorioVariables" ][ paramName ][ "Address" ] ]
-    	iParametersCounter = iParametersCounter + 1
-    	iQuadCounter = iQuadCounter + 1
-    	qQuads.append( quad )
+	if iParametersCounter < len( dicDirectorioFunciones[ methodCall ][ "Parameters" ] ):
+		# ParamTypes es una lista de tipos de los parametros de la función
+		if argumentType != dicDirectorioFunciones[ methodCall ][ "ParamTypes" ][ iParametersCounter ]:
+			imprimirError( 4 )
+		else:
+			paramName = dicDirectorioFunciones[ methodCall ][ "Parameters" ][ iParametersCounter ]
+			quad = [ "PARAMETER", argument, '', dicDirectorioFunciones[ methodCall ][ "dicDirectorioVariables" ][ paramName ][ "Address" ] ]
+			iParametersCounter = iParametersCounter + 1
+			iQuadCounter = iQuadCounter + 1
+			qQuads.append( quad )
+	else:
+		imprimirError( 7 )
 
 
 # Se valida que el número de argumentos coincida con el número de parametros de la función
@@ -1214,8 +1263,7 @@ def p_PUSH_STACK_OPERANDS_CONSTANT(p):
 	"""
 
 	global sOperands, sTypes, dicConstants, dicConstantsInverted
-	print("aaaaa")
-	print(p[ -1 ])
+
 
 	constantType = ""
 	# Si la constante no existe, se debe asignar una dirección de memoria
