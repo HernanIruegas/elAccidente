@@ -1,9 +1,13 @@
 program void globalFunc;
 
-var int : A[3][5];
+var int : i,j;
+
+func int uno(){
+	i = 2;
+	return 2;
+} 
 
 void start{
-
-	A[0][1] = 2;
-	
+	uno(j);
+	return 2;
 }

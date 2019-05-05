@@ -96,8 +96,32 @@ cStringEnd = 16999
 
 def p_PROGRAM(p):
 	"""
-	PROGRAM : program void SAVE_TYPE globalFunc START_FUNCTION semicolon PROGRAM_A void SAVE_TYPE start START_FUNCTION BLOCK PRINTQUADS
+	PROGRAM : program void SAVE_TYPE globalFunc START_FUNCTION semicolon GENERATE_GOTO_MAIN PROGRAM_A void SAVE_TYPE start FILL_GOTO_MAIN START_FUNCTION BLOCK PRINTQUADS
 	"""
+
+
+def p_GENERATE_GOTO_MAIN(p):
+	"""
+	GENERATE_GOTO_MAIN : empty
+	"""
+	global qQuads, iQuadCounter, sJumps
+
+	quad = [ 'GOTO', '', '', '' ]
+	iQuadCounter = iQuadCounter + 1
+	qQuads.append( quad )
+	sJumps.push( iQuadCounter - 1 )
+
+# Hace lo mismo que p_SOLVE_OPERATION_CONDITIONAL (solo para mantener lógica separada)
+def p_FILL_GOTO_MAIN(p):
+	"""
+	FILL_GOTO_MAIN : empty
+	"""
+	global sJumps
+
+	end = sJumps.pop()
+	fill( end )
+	
+
 
 def p_PROGRAM_A(p):
 	"""
@@ -149,7 +173,6 @@ def p_LIST_A(p):
 		| empty
 	"""
 
-
 # Funcion auxiliar para la declaración de variables
 def p_VARCTE_AUX_VARS(p):
 	"""
@@ -174,19 +197,14 @@ def p_BOOLEAN_AUX_VARS(p):
 
 iCounterDimensions = 0
 
-
 # Validar nombre del arreglo
 def p_VALIDATE_NAME_ARRAY(p):
 	"""
 	VALIDATE_NAME_ARRAY : empty	
 	"""
-
-	global dicDirectorioFunciones
-	global currentFunction
-	global lastReadType
-	global varWithDimensions
-
+	global dicDirectorioFunciones, currentFunction, lastReadType, varWithDimensions
 	# p[ -1 ] = variable leída
+
 
 	varWithDimensions = p[ -1 ]
 	currentScope = getScope()
@@ -203,24 +221,13 @@ def p_ACUMULATE_R(p):
 	"""
 	ACUMULATE_R : empty
 	"""
-
-	global dicDirectorioFunciones
-	global currentFunction
-	global lastReadType
-	global iCounterDimensions
-	global varWithDimensions
-	global dicConstantsInverted
-	global dicConstants
-
+	global dicDirectorioFunciones, currentFunction, lastReadType, iCounterDimensions, varWithDimensions, dicConstantsInverted, dicConstants
 	# varWithDimensions = variable leída 
 	# p[ -1 ] = tamaño de la dimensión
 
+
 	# Validar si la constante ya había sido leída previamente
-	if p[ -1 ] not in dicConstants:
-		# Consigues una dirección de memoria para la constante y la insertas en los diccionarios de constantes globales
-		constAddress = setConstAddress( lastReadType )
-		dicConstants[ p[ -1 ] ] = { "Address" : constAddress, "Type": lastReadType }
-		dicConstantsInverted[ constAddress ] = { "Value" : p[ -1 ], "Type": lastReadType }
+	validateConstant( p[ -1 ] )
 
 	# Conseguir el valor de R acumulada, es 1 para la primera vez
 	rAcum = 1
@@ -242,18 +249,9 @@ def p_CALCULATE_ARRAY(p):
 	"""
 	CALCULATE_ARRAY : empty
 	"""
-
-	global dicDirectorioFunciones
-	global currentFunction
-	global lastReadType
-	global iCounterDimensions
-	global iQuadCounter
-	global qQuads
-	global dicConstants
-	global dicConstantsInverted
-	global lastReadType
-
+	global dicDirectorioFunciones, currentFunction, lastReadType, iCounterDimensions, iQuadCounter, qQuads, dicConstants, dicConstantsInverted
 	# p[ -7 ] = nombre de arreglo leído
+
 
 	aux = 1
 	sumaK = 0
@@ -294,21 +292,14 @@ def p_CALCULATE_ARRAY(p):
 	aux = 0
 	while aux < m0:
 
-		constAddress = -1 # valor default
-		if 0 not in dicConstants:
-			# Consigues una dirección de memoria para la constante y la insertas en los diccionarios de constantes globales
-			constAddress = setConstAddress( lastReadType )
-			dicConstants[ 0 ] = { "Address" : constAddress, "Type": lastReadType }
-			dicConstantsInverted[ constAddress ] = { "Value" : 0, "Type": lastReadType }
-		else:
-			constAddress = dicConstants[ 0 ][ "Address" ]
+		constAddress = validateConstant( 0 )
 
 		quad = [ "=", constAddress, "", varAddress ]
 		varAddress = varAddress + 1
 		iQuadCounter = iQuadCounter + 1
 		qQuads.append( quad )
 		aux = aux + 1
-		
+
 
 def p_EXPLOG(p):
 	"""
@@ -428,7 +419,9 @@ def p_READ_A(p):
 
 
 
-
+#############################
+# ACCIONES SEMANTICAS PARA ACCEDER VARIABLES DIMENSIONADAS
+#############################
 
 def p_ISLIST(p):
 	"""
@@ -447,18 +440,9 @@ def p_VALIDATE_INDEX(p):
 	"""
 	VALIDATE_INDEX : empty
 	"""
-
-	global sOperands
-	global iQuadCounter
-	global qQuads
-	global currentFunction
-	global dicDirectorioFunciones
-	global varDimensionadaLastRead
-	global iDimensionCounter
-	global lastReadIndex
-	global dicConstants
-
+	global sOperands, iQuadCounter, qQuads, currentFunction, dicDirectorioFunciones, varDimensionadaLastRead, iDimensionCounter, lastReadIndex, dicConstants
 	# p[ -4 ] = nombre de arreglo
+
 
 	# Esta variable ayuda a la función p_SOLVE_OFFSETS a recordar el último índice leído
 	lastReadIndex = sOperands.top()
@@ -517,15 +501,8 @@ def p_SOLVE_OFFSETS(p):
 	"""
 	SOLVE_OFFSETS : empty
 	"""
+	global iQuadCounter, qQuads, sOperands, dicDirectorioFunciones, varDimensionadaLastRead, currentFunction, iDimensionCounter, lastReadIndex
 
-	global iQuadCounter
-	global qQuads
-	global sOperands
-	global dicDirectorioFunciones
-	global varDimensionadaLastRead
-	global currentFunction
-	global iDimensionCounter
-	global lastReadIndex
 
 	# TODO arreglar esto con reglas gramaticales
 	# Nacada para poder asignar variables
@@ -663,8 +640,20 @@ def p_METHODCALL_A(p):
 
 def p_RETURN(p):
 	"""
-	RETURN : return EXPLOG semicolon
+	RETURN : return EXPLOG GENERATE_QUAD_RETURN semicolon
 	"""
+
+def p_GENERATE_QUAD_RETURN(p):
+	"""
+	GENERATE_QUAD_RETURN : empty
+	"""
+	global iQuadCounter, qQuads, sOperands 
+
+	# Quadruplo de asignación para que la maquina virtual primero haga la asignación y luego la consulta sobre sus valores
+	quad = [ "RET", "", "", sOperands.top() ]
+	iQuadCounter = iQuadCounter + 1
+	qQuads.append( quad )
+
 
 def p_BOOLEAN(p):
 	"""
@@ -869,6 +858,8 @@ def imprimirError(error):
 		print( "Error: Número de argumentos no equivale a número de parametros" )
 	elif error == 8:
 		print( "Error: Se quiere asignar una constante de diferente tipo de dato a la variable" )
+	elif error == 9:
+		print( "Error: No se puede dividir entre 0" )
 
 
 	exit(1)
@@ -883,10 +874,10 @@ def p_START_FUNCTION(p):
 	"""
 	START_FUNCTION : empty
 	"""
-	global currentFunction 
-	global dicDirectorioFunciones
+	global currentFunction, dicDirectorioFunciones, iTemporalVariableCounter
 
 	currentFunction = p[ -1 ]
+	iTemporalVariableCounter = 0
 
 	# Validar que la función no esté previamente declarada
 	if currentFunction not in dicDirectorioFunciones:
@@ -910,11 +901,9 @@ def p_SAVE_VAR(p):
 	"""
 	SAVE_VAR : empty
 	"""
-	global dicDirectorioFunciones
-	global currentFunction
-	global lastReadType
-
+	global dicDirectorioFunciones, currentFunction, lastReadType
 	# p[ -1 ] = variable leída
+
 
 	# Validar que variable leida no esté previamente declarada
 	if p[ -1 ] in dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ]:
@@ -933,13 +922,10 @@ def p_SAVE_ASSIGNED_VAR(p):
 	"""
 	SAVE_ASSIGNED_VAR : empty
 	"""
-
-	global dicDirectorioFunciones
-	global currentFunction
-	global lastReadType
-
+	global dicDirectorioFunciones, currentFunction, lastReadType
 	# p[ -2 ] = constante leida
 	# p[ -4 ] = variable a la cual se le asigna la constante
+
 
 	# Validar que variable leida no esté previamente declarada
 	if p[ -4 ] in dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ]:
@@ -974,17 +960,15 @@ def p_SAVE_PARAM(p):
 	"""
 	SAVE_PARAM : empty
 	"""
-
-	global dicDirectorioFunciones
-	global currentFunction
-	global lastReadType
+	global dicDirectorioFunciones, currentFunction, lastReadType
+	
 
 	currentScope = getScope()
 
 	# Se agrega el parametro a la lista de parametros de la función
 	dicDirectorioFunciones[ currentFunction ][ "Parameters" ].append( p[ -1 ] )
 
-	dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[ -1 ] ] = { "Type": lastReadType, "Value": "", "Scope": currentScope, "Address": "" }
+	dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[ -1 ] ] = { "Type": lastReadType, "Value": "", "Scope": currentScope, "Address": "",  "Dimensionada": 0 }
 
 	varAddress = setAddress( p[ -1 ], 1 )
 
@@ -1001,14 +985,8 @@ def p_SAVE_PARAM(p):
 # Se genera cuadruplo de asignación en ambos casos para que la máquina virtual primero asigne y luego lea
 def saveVarHelper( varRead, constantValue ):
 
-	global initialValuesForVars
-	global lastReadType
-	global dicConstants
-	global dicConstantsInverted
-	global dicDirectorioFunciones
-	global currentFunction
-	global qQuads
-	global iQuadCounter
+	global initialValuesForVars, lastReadType, dicConstants, dicConstantsInverted, dicDirectorioFunciones, currentFunction, qQuads, iQuadCounter
+	
 
 	currentScope = getScope()
 	constValue = -1 # Guarda el valor de la constante (puede ser el valor default generado o bien el que recibe como parametro)
@@ -1020,13 +998,7 @@ def saveVarHelper( varRead, constantValue ):
 	else: # El valor de la constante se recibe como parametro 
 		constValue = constantValue
 
-	# Se valida si el valor default o bien el asignado ya existen en el diccionario de constantes
-	if constValue not in dicConstants:
-
-		# Consigues una dirección de memoria para la constante y la insertas en los diccionarios de constantes globales
-		constAddress = setConstAddress( lastReadType )
-		dicConstants[ constValue ] = { "Address" : constAddress, "Type": lastReadType }
-		dicConstantsInverted[ constAddress ] = { "Value" : constValue, "Type": lastReadType }
+	validateConstant( constValue )
 
 	dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ varRead ] = {"Type": lastReadType, "Value": constValue, "Scope": currentScope, "Address": "", "Dimensionada": 0 }
 
@@ -1055,7 +1027,6 @@ def p_INCREMENT_PARAM_COUNTER(p):
 	INCREMENT_PARAM_COUNTER : empty
 	"""
 	global iParametersCounter
-
 	iParametersCounter =  iParametersCounter + 1
 
 
@@ -1066,7 +1037,6 @@ def p_SAVE_COUNTER_PARAM(p):
 	SAVE_COUNTER_PARAM : empty
 	"""
 	global iParametersCounter
-
 	dicDirectorioFunciones[currentFunction][ "ParamCounter" ] = iParametersCounter
 	iParametersCounter = 0
 
@@ -1077,11 +1047,7 @@ def p_SAVE_COUNTER_QUAD(p):
 	"""
 	SAVE_COUNTER_QUAD : empty
 	"""
-
-	global iQuadCounter
-	global currentFunction
-	global dicDirectorioFunciones
-
+	global iQuadCounter, currentFunction, dicDirectorioFunciones
 	dicDirectorioFunciones[ currentFunction ][ "QuadCounter" ] = iQuadCounter
 
 
@@ -1091,14 +1057,17 @@ def p_END_PROCEDURE(p):
 	"""
 	END_PROCEDURE : empty
 	"""
-	global qQuads
-	global iQuadCounter
+	global qQuads, iQuadCounter, iTemporalVariableCounter, dicDirectorioFunciones, currentFunction
+
 
 	quad = [ "ENDPROC", "", "", "" ]
 	qQuads.append( quad )
 	iQuadCounter = iQuadCounter + 1
 
+	dicDirectorioFunciones[ currentFunction ][ "TempCounter" ] = iTemporalVariableCounter
+
 	resetTempAndLocalVars()
+	iTemporalVariableCounter = 0
 
 
 # Guardar el tipo de dato del parametro leido de la función
@@ -1106,10 +1075,7 @@ def p_SAVE_PARAM_TYPE(p):
 	"""
 	SAVE_PARAM_TYPE : empty
 	"""
-	global dicDirectorioFunciones
-	global currentFunction
-	global lastReadType
-
+	global dicDirectorioFunciones, currentFunction, lastReadType
 	dicDirectorioFunciones[ currentFunction ][ "ParamTypes" ].append( lastReadType )
 
 
@@ -1118,10 +1084,10 @@ def p_VALIDATE_FUNCTION_NAME(p):
 	"""
 	VALIDATE_FUNCTION_NAME : empty
 	"""
-	global dicDirectorioFunciones
-	global methodCall
-
+	global dicDirectorioFunciones, methodCall
 	# p[ -1 ] = function name
+
+
 	if p[ -1 ] not in dicDirectorioFunciones:
 		imprimirError( 6 )
 	else:
@@ -1134,11 +1100,8 @@ def p_ERA(p):
     """
     ERA : empty
     """
-    global qQuads;
-    global iQuadCounter;
-    global currentFunction;
-    global qQuadRecursiveCalls;
-    global dicDirectorioFunciones
+    global qQuads, iQuadCounter, currentFunction, qQuadRecursiveCalls, dicDirectorioFunciones
+
 
     # p[ -2 ] =  nombre de la función a la que se está llamando
     quad = [ "ERA", p[ -2 ], dicDirectorioFunciones[ p[ -2 ] ][ "ParamCounter" ], dicDirectorioFunciones[ p[ -2 ] ][ "TempCounter" ] ]
@@ -1156,13 +1119,10 @@ def p_VALIDATE_PARAMETER(p):
     """
     VALIDATE_PARAMETER : empty
     """
-    global sOperands
-    global sTypes
-    global iParametersCounter
-    global qQuads
-    global iQuadCounter
-    global dicDirectorioFunciones
-    global methodCall
+    global sOperands, sTypes, iParametersCounter, qQuads, iQuadCounter, dicDirectorioFunciones, methodCall
+    
+    if iParametersCounter == 0:
+    	return
 
     argument = sOperands.pop()
     argumentType = sTypes.pop()
@@ -1171,7 +1131,8 @@ def p_VALIDATE_PARAMETER(p):
     if argumentType != dicDirectorioFunciones[ methodCall ][ "ParamTypes" ][ iParametersCounter ]:
     	imprimirError( 4 )
     else:
-    	quad = [ "PARAMETER", argument, '', dicDirectorioFunciones[ methodCall ][ "Parameters" ][ iParametersCounter ] ]
+    	paramName = dicDirectorioFunciones[ methodCall ][ "Parameters" ][ iParametersCounter ]
+    	quad = [ "PARAMETER", argument, '', dicDirectorioFunciones[ methodCall ][ "dicDirectorioVariables" ][ paramName ][ "Address" ] ]
     	iParametersCounter = iParametersCounter + 1
     	iQuadCounter = iQuadCounter + 1
     	qQuads.append( quad )
@@ -1183,22 +1144,27 @@ def p_VALIDATE_METHOD_CALL(p):
 	"""
 	VALIDATE_METHOD_CALL : empty
 	"""
-	global iParametersCounter
-	global dicDirectorioFunciones
-	global qQuads
-	global iQuadCounter
+	global iParametersCounter, dicDirectorioFunciones, qQuads, iQuadCounter, methodCall, iTemporalVariableCounter
+
 
 	if iParametersCounter != dicDirectorioFunciones[ methodCall ][ "ParamCounter" ]:
 		imprimirError( 7 )
 	else:
-		quad = [ "GOSUB", currentFunction, '', "dirección de memoria pendiente" ]
+		quad = [ "GOSUB", methodCall, '', dicDirectorioFunciones[ methodCall ][ "QuadCounter" ] ]
 		qQuads.append( quad )
 		iQuadCounter = iQuadCounter + 1
 
-	iParametersCounter = 0
+	if dicDirectorioFunciones[ methodCall ][ "Type" ] != "void":
 
-	# Falta manejar cosas para cuando la función tiene valor de retorno
-	# empieza en línea 1711 en apollo
+		# Definir espacio de memoria de variable temporal
+		address = setTempAddress( dicDirectorioFunciones[ methodCall ][ "Type" ] )
+		quad = [ "=", methodCall, '',  address ]
+		qQuads.append( quad )
+		iQuadCounter = iQuadCounter + 1
+
+		iTemporalVariableCounter = iTemporalVariableCounter + 1
+
+	iParametersCounter = 0
 
 
 #############################
@@ -1212,13 +1178,11 @@ def p_PUSH_STACK_OPERANDS(p):
 	"""
 	PUSH_STACK_OPERANDS : empty
 	"""
-	global sOperands
-	global dicDirectorioFunciones
-	global varDimensionadaLastRead
+	global sOperands, dicDirectorioFunciones, varDimensionadaLastRead, dicConstants, dicConstantsInverted
+
 
 	# Validar que la variable leida haya sido previamente declarada, que exista en el diccionario de variables de la función
 	if p[ -1 ] in dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ]:
-
 		# Validar si es una variable dimensionada o no
 		if dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[ -1 ] ][ "Dimensionada" ] == 1:
 			varDimensionadaLastRead = p[ -1 ]
@@ -1249,10 +1213,9 @@ def p_PUSH_STACK_OPERANDS_CONSTANT(p):
 	PUSH_STACK_OPERANDS_CONSTANT : empty
 	"""
 
-	global sOperands
-	global sTypes
-	global dicConstants
-	global dicConstantsInverted
+	global sOperands, sTypes, dicConstants, dicConstantsInverted
+	print("aaaaa")
+	print(p[ -1 ])
 
 	constantType = ""
 	# Si la constante no existe, se debe asignar una dirección de memoria
@@ -1306,14 +1269,8 @@ def p_POP_STACK_OPERATORS(p):
 # Código compartido para función de SOLVE_OPERATION
 def solveOperationHelper():
 
-	global sOperands
-	global sOperators
-	global sTypes
-	global qQuads
-	global iQuadCounter
-	global iTemporalVariableCounter # para contar vars temporales creadas (solucion por mientras)
-	global dicDirectorioFunciones
-	global currentFunction
+	global sOperands, sOperators, sTypes, qQuads, iQuadCounter, iTemporalVariableCounter, dicDirectorioFunciones, currentFunction
+	
 
 	rightOperand = sOperands.pop()
 	rightType = sTypes.pop()
@@ -1414,11 +1371,9 @@ def p_SOLVE_OPERATION_LOGIC(p):
 
 # Genera cuadruplo para la asignación
 def solveOperationHelperAssignment():
-	global sOperands
-	global sOperators
-	global sTypes
-	global qQuads
-	global iQuadCounter
+
+	global sOperands, sOperators, sTypes, qQuads, iQuadCounter
+
 
 	rightOperand = sOperands.pop()
 	rightType = sTypes.pop()
@@ -1435,10 +1390,6 @@ def solveOperationHelperAssignment():
 		quad = [ operator, rightOperand, '', leftOperand]
 		iQuadCounter = iQuadCounter + 1
 		qQuads.append( quad )
-		#sOperands.push( result + str(iQuadCounter) )
-		#print(str(sOperands.top())+ " solveOperationHelper")
-		#print("sTypes: " + str(resultType) )
-		#sTypes.push( dicReturnValuesCube[ resultType ] )
 	else:
 		imprimirError(2)
 
@@ -1459,8 +1410,8 @@ def p_SOLVE_OPERATION_ASSIGNMENT(p):
 
 # Resuelve cuadruplo con salto pendiente
 def fill( end ):
-	global iQuadCounter
-	global qQuads
+
+	global iQuadCounter, qQuads
 
 	aux = qQuads[ end ] # Cuadruplo con salto pendiente
 	aux[ 3 ] = iQuadCounter # Llenar cuadruplo con el siguiente cuadruplo a ejecutar
@@ -1476,12 +1427,8 @@ def p_GENERATE_GOTOF_CONDITIONAL(p):
 	"""
 	GENERATE_GOTOF_CONDITIONAL : empty
 	"""
+	global sTypes, sOperands, sJumps, iQuadCounter, qQuads
 
-	global sTypes
-	global sOperands
-	global sJumps
-	global iQuadCounter
-	global qQuads
 
 	expType = sTypes.pop()
 
@@ -1513,10 +1460,7 @@ def p_GENERATE_GOTO_CONDITIONAL(p):
 	"""
 	GENERATE_GOTO_CONDITIONAL : empty
 	"""
-
-	global sJumps
-	global iQuadCounter
-	global qQuads
+	global sJumps, iQuadCounter, qQuads
 
 	quad = [ 'GOTO', '', '', '' ]
 	iQuadCounter = iQuadCounter + 1
@@ -1534,9 +1478,7 @@ def p_PUSH_STACK_JUMPS(p):
 	"""
 	PUSH_STACK_JUMPS : empty
 	"""
-	global sJumps
-	global iQuadCounter
-
+	global sJumps, iQuadCounter
 	sJumps.push( iQuadCounter )
 
 
@@ -1550,10 +1492,7 @@ def p_SOLVE_OPERATION_PRE_CONDITIONAL_LOOP(p):
 	"""
 	SOLVE_OPERATION_PRE_CONDITIONAL_LOOP : empty
 	"""
-
-	global sJumps
-	global iQuadCounter
-	global qQuads
+	global sJumps, iQuadCounter, qQuads
 
 	end = sJumps.pop()
 	returnTo = sJumps.pop()
@@ -1571,10 +1510,8 @@ def p_SOLVE_OPERATION_POST_CONDITIONAL_LOOP(p):
 	"""
 	SOLVE_OPERATION_POST_CONDITIONAL_LOOP : empty
 	"""
-	global sJumps
-	global sOperands
-	global iQuadCounter
-	global qQuads
+	global sJumps, sOperands, iQuadCounter, qQuads
+
 
 	result = sOperands.pop()
 	returnTo = sJumps.pop()
@@ -1594,10 +1531,8 @@ def p_GENERATE_QUAD_PRINT(p):
 	"""
 	GENERATE_QUAD_PRINT : empty
 	"""
+	global qQuads, iQuadCounter, sOperands
 
-	global qQuads
-	global iQuadCounter
-	global sOperands
 
 	result = sOperands.pop()
 
@@ -1611,8 +1546,8 @@ def p_PRINTQUADS(p):
 	"""
 	PRINTQUADS : empty
 	"""
-
 	global qQuads
+
 	cont = 0
 	for i in qQuads:
 		print( str(cont) + ": " + str(i) )
@@ -1629,64 +1564,48 @@ def p_PRINTQUADS(p):
 # Regresa la dirección de memoria asignada a la variable
 def setAddress( varName, totalMemoryAddresses ):
 
-	global currentFunction
+	global currentFunction, gIntIndex, gFloatIndex, gBoolIndex, gStringIndex, lIntIndex, lFloatIndex, lBoolIndex, lStringIndex
 
 	if varName in dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ] and currentFunction != "globalFunc": # Es una variable local
-		return setLocalAddress( dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ varName ][ "Type" ], totalMemoryAddresses ) # Le pasamos el tipo de la variable
+		typeVar = dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ varName ][ "Type" ]
+		return setAddressHelper( typeVar, totalMemoryAddresses, lIntIndex, lFloatIndex, lBoolIndex, lStringIndex, "local" ) 
 	else: # Es una variable global
-		return setGlobalAddress( dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ varName ][ "Type" ], totalMemoryAddresses ) # Le pasamos el tipo de la variable
+		typeVar = dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ varName ][ "Type" ]
+		return setAddressHelper( typeVar, totalMemoryAddresses, gIntIndex, gFloatIndex, gBoolIndex, gStringIndex, "global" ) 
 
 
-# Asignar memoria a variable global
-# Incrementa el contador del rango para la memoria global
-def setGlobalAddress( varType, totalMemoryAddresses ):
+# Asignar memoria a variable global/local
+# Incrementa el contador del rango para la memoria global/local
+def setAddressHelper( varType, totalMemoryAddresses, IntIndex, FloatIndex, BoolIndex, StringIndex, scope ):
 
-	global gIntIndex
-	global gFloatIndex
-	global gBoolIndex
-	global gStringIndex
+	global currentFunction, gIntIndex, gFloatIndex, gBoolIndex, gStringIndex, lIntIndex, lFloatIndex, lBoolIndex, lStringIndex, tIntIndex, tFloatIndex, tBoolIndex, tStringIndex
 
 	addressAsigned = None
 
 	if varType == "int":
-		addressAsigned = gIntIndex
-		gIntIndex += totalMemoryAddresses
+		addressAsigned = IntIndex
+		if scope == "global":
+			gIntIndex += totalMemoryAddresses
+		else:
+			lIntIndex += totalMemoryAddresses
 	elif varType == "float":
-		addressAsigned = gFloatIndex
-		gFloatIndex += totalMemoryAddresses
+		addressAsigned = FloatIndex
+		if scope == "global":
+			gFloatIndex += totalMemoryAddresses
+		else:
+			lFloatIndex += totalMemoryAddresses
 	elif varType == "bool":
-		addressAsigned = gBoolIndex
-		gBoolIndex += totalMemoryAddresses
+		addressAsigned = BoolIndex
+		if scope == "global":
+			gBoolIndex += totalMemoryAddresses
+		else:
+			lBoolIndex += totalMemoryAddresses
 	elif varType == "string":
-		addressAsigned = gStringIndex
-		gStringIndex += totalMemoryAddresses
-
-	return addressAsigned
-
-
-# Asignar memoria a variable local
-# Incrementa el contador del rango para la memoria local
-def setLocalAddress( varType, totalMemoryAddresses ):
-
-	global lIntIndex
-	global lFloatIndex
-	global lBoolIndex
-	global lStringIndex
-
-	addressAsigned = None
-
-	if varType == "int":
-		addressAsigned = lIntIndex
-		lIntIndex += totalMemoryAddresses
-	elif varType == "float":
-		addressAsigned = lFloatIndex
-		lFloatIndex += totalMemoryAddresses
-	elif varType == "bool":
-		addressAsigned = lBoolIndex
-		lBoolIndex += totalMemoryAddresses
-	elif varType == "string":
-		addressAsigned = lStringIndex
-		lStringIndex += totalMemoryAddresses
+		addressAsigned = StringIndex
+		if scope == "global":
+			gStringIndex += totalMemoryAddresses
+		else:
+			lStringIndex += totalMemoryAddresses
 
 	return addressAsigned
 
@@ -1695,10 +1614,7 @@ def setLocalAddress( varType, totalMemoryAddresses ):
 # Incrementa el contador del rango para la memoria temporal
 def setTempAddress( varType ):
 
-	global tIntIndex
-	global tFloatIndex
-	global tBoolIndex
-	global tStringIndex
+	global tIntIndex, tFloatIndex, tBoolIndex, tStringIndex
 
 	addressAsigned = None
 
@@ -1718,14 +1634,30 @@ def setTempAddress( varType ):
 	return addressAsigned
 
 
+# Validar si la constante es nueva para el programa, en dicho caso guardarla en diccionario de constantes
+def validateConstant( constantVal ):
+
+	global dicConstants, dicConstantsInverted, lastReadType
+
+	constAddress = -1 # Valor default
+
+	if constantVal not in dicConstants:
+
+		# Consigues una dirección de memoria para la constante y la insertas en los diccionarios de constantes globales
+		constAddress = setConstAddress( lastReadType )
+		dicConstants[ constantVal ] = { "Address" : constAddress, "Type": lastReadType }
+		dicConstantsInverted[ constAddress ] = { "Value" : constantVal, "Type": lastReadType }
+	else:
+		constAddress = dicConstants[ constantVal ][ "Address" ]
+
+	return constAddress
+
+
 # Asignar memoria a constante
 # Incrementa el contador del rango para la memoria de constantes
 def setConstAddress( varType ):
 
-	global cIntIndex
-	global cFloatIndex
-	global cBoolIndex
-	global cStringIndex
+	global cIntIndex, cFloatIndex, cBoolIndex, cStringIndex
 
 	addressAsigned = None
 
@@ -1749,14 +1681,7 @@ def setConstAddress( varType ):
 # Cada función tiene su propio rango de memoria local
 def resetTempAndLocalVars():
 
-	global lIntIndex
-	global lFloatIndex
-	global lBoolIndex
-	global lStringIndex
-	global tIntIndex
-	global tFloatIndex
-	global tBoolIndex
-	global tStringIndex
+	global lIntIndex, lFloatIndex, lBoolIndex, lStringIndex, tIntIndex, tFloatIndex, tBoolIndex, tStringIndex
 
 	lIntIndex = 5000
 	lFloatIndex = 6000

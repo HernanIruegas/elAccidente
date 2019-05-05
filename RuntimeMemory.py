@@ -6,9 +6,10 @@
 # 3) Métodos para conseguir un valor a partir de una dirección de memoria o bien para asignar un valor a una dirección de memoria
 
 class RuntimeMemory( object ):
-	def __init__( self, scope ):
+	def __init__( self, scope, returnQuad ):
 
 		self.scope = scope
+		self.returnQuad = returnQuad
 
 		# Rangos para variables globales
 		
