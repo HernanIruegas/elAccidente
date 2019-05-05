@@ -4,7 +4,7 @@ var int : A = 2, D = 3;
 
 void start{
 	
-	if( A + 1 == D ){
+	if( A + 1 == D and A > 4 or A < 5){
 		print(A + A);
 	}else{
 		print(D);

@@ -182,9 +182,9 @@ def solveQuad( quad, qQuads):
         resultVal = leftOperand == rightOperand
     elif quad[ 0 ] == "!=": 
         resultVal = leftOperand != rightOperand
-    elif quad[ 0 ] == "&&": 
+    elif quad[ 0 ] == "and": 
         resultVal = leftOperand and rightOperand 
-    elif quad[ 0 ] == "||":  
+    elif quad[ 0 ] == "or":  
         resultVal = leftOperand or rightOperand
     elif quad[ 0 ] == "!": 
         print("!") 
