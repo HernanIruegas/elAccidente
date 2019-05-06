@@ -4,8 +4,8 @@ var int : a[1], aux;
 
 void start{
 
-    a[0] = 60;
+    a[0] = 60; a[1] = 10;
 
-    aux = a[aux];
+    aux = a[aux+1];
     print(aux);
 }

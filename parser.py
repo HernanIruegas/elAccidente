@@ -367,8 +367,8 @@ def p_FACTOR(p):
 def p_VARCONSTAUX(p):
 	"""
 	VARCONSTAUX : id PUSH_STACK_OPERANDS ISLIST 
-		| cte_i PUSH_STACK_OPERANDS_CONSTANT
-		| cte_f PUSH_STACK_OPERANDS_CONSTANT
+				| cte_i PUSH_STACK_OPERANDS_CONSTANT
+				| cte_f PUSH_STACK_OPERANDS_CONSTANT
 	"""
 
 def p_TYPE(p):
@@ -515,7 +515,7 @@ def p_SOLVE_OFFSETS(p):
 	# Nacada para poder asignar variables
 	if p[-2] == None:
 		return
-	
+
 	varDim = ""	
 	if varDimensionadaLastRead in dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ]:
 		varDim = dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ varDimensionadaLastRead ]
@@ -546,11 +546,10 @@ def p_SOLVE_OFFSETS(p):
 			dicConstantsInverted[ constAddress ] = { "Value" : 0, "Type": "int" }
 
 	temporal = setTempAddress( varDim[ "Type" ] )
-	quad = [ "+", sOperands.top(), dicConstants[ 0 ][ "Address" ] , temporal]
+	quad = [ "+", sOperands.pop(), dicConstants[ 0 ][ "Address" ] , temporal]
 	iQuadCounter = iQuadCounter + 1
 	qQuads.append( quad )
 	sOperands.push( temporal )
-
 
 	# Cuadruplo para sumar dirección base 
 	# Se tiene que poner un identificador para indicar que el temporal es un apuntador a un contenido TODO
@@ -559,9 +558,9 @@ def p_SOLVE_OFFSETS(p):
 	# Consigues una dirección de memoria para la constante y la insertas en los diccionarios de constantes globales
 	constAddress = setConstAddress( "int" )
 	dicConstants[ constAddress ] = { "Address" : varDim[ "Address" ], "Type": "int" }
-	dicConstantsInverted[ constAddress ] = { "Value" : varDim[ "Address" ], "Type": "int" }
+	dicConstantsInverted[ constAddress ] = { "Value" : varDim[ "Address" ], "Type": "int" }	
 
-	quad = [ "+", sOperands.top(), constAddress , temporal ]
+	quad = [ "+", sOperands.pop(), constAddress , temporal ]
 	iQuadCounter = iQuadCounter + 1
 	qQuads.append( quad )
 	sOperands.push( temporal + 500000 )
