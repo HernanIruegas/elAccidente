@@ -594,10 +594,16 @@ def p_SOLVE_OFFSETS(p):
 	# Cuadruplo para sumar dirección base 
 	# Se tiene que poner un identificador para indicar que el temporal es un apuntador a un contenido TODO
 	temporal = setTempAddress( varDim[ "Type" ] )
-	quad = [ "+", sOperands.top(), varDim[ "Address" ] , temporal ]
+
+	# Consigues una dirección de memoria para la constante y la insertas en los diccionarios de constantes globales
+	constAddress = setConstAddress( "int" )
+	dicConstants[ constAddress ] = { "Address" : varDim[ "Address" ], "Type": "int" }
+	dicConstantsInverted[ constAddress ] = { "Value" : varDim[ "Address" ], "Type": "int" }
+
+	quad = [ "+", sOperands.top(), constAddress , temporal ]
 	iQuadCounter = iQuadCounter + 1
 	qQuads.append( quad )
-	sOperands.push( temporal )
+	sOperands.push( temporal + 500000 )
 
 	# Reset de variables auxiliares
 	iDimensionCounter = 1

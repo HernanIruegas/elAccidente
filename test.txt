@@ -1,13 +1,10 @@
 program void globalFunc;
 
-var int : i,j;
-
-func int uno( int a ){
-	print( a );
-	return a;
-} 
+var int : i[10][5];
 
 void start{
-	j = uno( 3 );
-	print(j);
+	i[ 2 ][ 2 ] = 3;
+	print(i[ 2 ][2]);
+	print(i[0][0]);
+
 }

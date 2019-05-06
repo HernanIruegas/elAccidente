@@ -21,8 +21,8 @@ def getValueFromAddress( memoryAddress ):
 
     global sMemories
 
-    print("memoryAddress")
-    print(memoryAddress)
+    #print("memoryAddress")
+    #print(memoryAddress)
     if memoryAddress >= gMemory.gIntStart and memoryAddress <= gMemory.gStringEnd: # Rango global
         return gMemory.getValueFromAddressHelper( memoryAddress )
     elif memoryAddress >= sMemories.top().lIntStart and memoryAddress <= sMemories.top().lStringEnd: # Rango local
@@ -78,6 +78,10 @@ def solveQuad( quad, qQuads):
 
     global instructionPointer, currentFunctionName, dicConstants, dicGlobalConstMemory
 
+    if type(quad[ 3 ]) == int:
+        if quad[ 3 ] > 500000:
+            quad[ 3 ] = getValueFromAddress( quad[ 3 ] - 500000 )
+
     #print("instructionPointer")
     #print(instructionPointer)
     print( quad[ 0 ] )
@@ -91,6 +95,25 @@ def solveQuad( quad, qQuads):
             setValueToAddress( currentFunctionName, quad[ 3 ] )
             return
 
+        #resultVal = -1 
+        #if quad[ 3 ] > 500000:
+        #    addressPtr = quad[ 3 ] - 500000
+
+            #print("aa")
+            #print(quad[ 3 ])
+            #print("bb")
+            #print(getValueFromAddress( addressPtr ))
+            #print(getValueFromAddress( getValueFromAddress( addressPtr ) ))
+        #    addressPtr = getValueFromAddress( addressPtr )
+            #resultVal = getValueFromAddress( quad[ 1 ] )
+            #setValueToAddress( resultVal, addressPtr )
+            #print("aa")
+            #print(addressPtr)
+            #print(resultVal)
+            #return
+            
+            #setValueToAddress( resultVal, resultVal )
+        #else:
         # Conseguir valor desde la memoria
         # Para el caso de variables inicializadas por default, se inicializan con constantes ya existentes en el diccionario de constantes
         resultVal = getValueFromAddress( quad[ 1 ] )

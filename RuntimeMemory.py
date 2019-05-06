@@ -67,6 +67,7 @@ class RuntimeMemory( object ):
 		elif self.validateAddress( memoryAddress, self.gStringStart, self.gStringEnd, self.lStringStart, self.lStringEnd ):
 		    return self.strMemory[ memoryAddress ]
 		else:
+			#print( self.tempMemory[ memoryAddress ] )
 			return self.tempMemory[ memoryAddress ]
 
 
