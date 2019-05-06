@@ -2,7 +2,6 @@ import ply.yacc as yacc
 from lexer import lexer, tokens
 from Stack import Stack
 from SemanticCube import dicOperandIndexCube, semanticCube, dicOperatorIndexCube, dicReturnValuesCube
-from tokenAndCodeConverter import initialValuesForVars
 
 #############################
 # VARIABLES GLOBALES
@@ -28,6 +27,8 @@ dicConstantsInverted = {} # { "Value" : p[ -1 ], "Type": constantType } Lo mismo
 methodCall =  "" # Sirve para guardar el nombre de la función a la cual se quiere llamar en METHODCALL
 varWithDimensions = "" # Sirve para guardar el id de la variable dimensionada que se está declarando
 varDimensionadaLastRead = "" # Sirve para guardar el id de la variable dimensionada que se está leyendo (queriendo acceder a una casilla)
+initialValuesForVars = { "int": 0, "float": 0.0, "string": '""', "bool": "False" }
+
 
 #############################
 # RANGOS DE MEMORIA
@@ -96,7 +97,7 @@ cStringEnd = 16999
 
 def p_PROGRAM(p):
 	"""
-	PROGRAM : program void SAVE_TYPE globalFunc START_FUNCTION semicolon PROGRAM_A GENERATE_GOTO_MAIN void SAVE_TYPE start FILL_GOTO_MAIN START_FUNCTION BLOCK END_PROCEDURE PRINTQUADS
+	PROGRAM : program void SAVE_TYPE globalFunc START_FUNCTION semicolon PROGRAM_A void SAVE_TYPE start START_FUNCTION FILL_GOTO_MAIN BLOCK END_PROCEDURE PRINTQUADS
 	"""
 
 
@@ -126,15 +127,17 @@ def p_FILL_GOTO_MAIN(p):
 def p_PROGRAM_A(p):
 	"""
 	PROGRAM_A : VARS PROGRAM_A
-			| METHOD PROGRAM_B
-			| empty
+				| GENERATE_GOTO_MAIN PROGRAM_B
 	"""
 
 def p_PROGRAM_B(p):
 	"""
 	PROGRAM_B : METHOD PROGRAM_B
-			| empty
+				| empty
 	"""
+
+
+
 
 def p_VARS(p):
 	"""
@@ -408,7 +411,7 @@ def p_ASSIGNMENT(p):
 def p_ASSIGNMENT_A(p):
 	"""
 	ASSIGNMENT_A : EXPLOG SOLVE_OPERATION_ASSIGNMENT semicolon
-				| METHODCALL p_SOLVE_OPERATION_ASSIGNMENT_AUX
+				| METHODCALL SOLVE_OPERATION_ASSIGNMENT
 	"""
 
 def p_READ(p):
@@ -423,42 +426,42 @@ def p_READ_A(p):
 	"""
 
 # Genera cuadruplo para la asignación
-def solveOperationHelperAssignment_AUX():
+#def solveOperationHelperAssignment_AUX():
 
-	global sOperands, sOperators, sTypes, qQuads, iQuadCounter
+#	global sOperands, sOperators, sTypes, qQuads, iQuadCounter, dicConstantsInverted, dicDirectorioFunciones, methodCall
 
 
-	rightOperand = sOperands.pop()
-	rightType = sTypes.pop()
+#	rightOperand = sOperands.pop()
+#	rightType = sTypes.pop()
+	
+#	leftOperand = sOperands.pop()
+#	leftType = sTypes.pop()
 
-	leftOperand = sOperands.pop()
-	leftType = sTypes.pop()
+#	operator = sOperators.pop()
 
-	operator = sOperators.pop()
+#	resultType = semanticCube[ dicOperandIndexCube[ leftType ] ][ dicOperandIndexCube[ rightType ] ][ dicOperatorIndexCube[ operator ] ]
 
-	resultType = semanticCube[ dicOperandIndexCube[ leftType ] ][ dicOperandIndexCube[ rightType ] ][ dicOperatorIndexCube[ operator ] ]
+#	if resultType != 0: # 0 = error en subo semantico
 
-	if resultType != 0: # 0 = error en subo semantico
-
-		quad = [ operator, leftOperand, '', rightOperand ]
-		iQuadCounter = iQuadCounter + 1
-		qQuads.append( quad )
-	else:
-		imprimirError(2)
+#		quad = [ operator, leftOperand, '', rightOperand ]
+#		iQuadCounter = iQuadCounter + 1
+#		qQuads.append( quad )
+#	else:
+#		imprimirError(2)
 
 
 # Indica que se tiene que generar cuadruplo para una asignación
 # Utiliza otra función helper porque su cuadruplo es distinto al que genera la función de SOLVE_OPERATION
 # El cuadruplo de la asignación solo debe tener 2 espacios llenos, no 4 como el de las operaciones
-def p_SOLVE_OPERATION_ASSIGNMENT_AUX(p):
-	"""
-	p_SOLVE_OPERATION_ASSIGNMENT_AUX : empty
-	"""
-	global sOperators
-
-	if sOperators.size() > 0:
-		if sOperators.top() == '=':
-			solveOperationHelperAssignment_AUX()
+#def p_SOLVE_OPERATION_ASSIGNMENT_AUX(p):
+#	"""
+#	SOLVE_OPERATION_ASSIGNMENT_AUX : empty
+#	"""
+#	global sOperators
+#
+#	if sOperators.size() > 0:
+#		if sOperators.top() == '=':
+#			solveOperationHelperAssignment_AUX()
 
 
 
@@ -696,7 +699,7 @@ def p_GENERATE_QUAD_RETURN(p):
 	"""
 	GENERATE_QUAD_RETURN : empty
 	"""
-	global iQuadCounter, qQuads, sOperands 
+	global iQuadCounter, qQuads, sOperands
 
 	# Quadruplo de asignación para que la maquina virtual primero haga la asignación y luego la consulta sobre sus valores
 	quad = [ "RET", "", "", sOperands.top() ]
@@ -1193,7 +1196,7 @@ def p_VALIDATE_METHOD_CALL(p):
 	"""
 	VALIDATE_METHOD_CALL : empty
 	"""
-	global iParametersCounter, dicDirectorioFunciones, qQuads, iQuadCounter, methodCall, iTemporalVariableCounter
+	global iParametersCounter, dicDirectorioFunciones, qQuads, iQuadCounter, methodCall, iTemporalVariableCounter, sOperands
 
 
 	if iParametersCounter != dicDirectorioFunciones[ methodCall ][ "ParamCounter" ]:
@@ -1210,7 +1213,7 @@ def p_VALIDATE_METHOD_CALL(p):
 		quad = [ "=", methodCall, '',  address ]
 		qQuads.append( quad )
 		iQuadCounter = iQuadCounter + 1
-
+		sOperands.push(address)
 		iTemporalVariableCounter = iTemporalVariableCounter + 1
 
 	iParametersCounter = 0

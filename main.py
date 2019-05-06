@@ -16,7 +16,7 @@ if __name__ == "__main__":
             print("dicDirectorioFunciones")
             print( dicDirectorioFunciones )
             # Se pasa el queue de quads y el diccionario de todas las constantes encontradas en el codigo fuente
-            readQuads( qQuads, dicConstantsInverted ) 
+            readQuads( qQuads, dicConstantsInverted, dicConstants ) 
         except EOFError:
             print("EOFError")
     else:

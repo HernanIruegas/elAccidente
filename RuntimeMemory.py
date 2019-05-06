@@ -57,7 +57,7 @@ class RuntimeMemory( object ):
 	# Determina a que tipo de dato pertenece dentro del rango conocido
 	# Regresa el valor almacenado que representa la dirección de memoria
 	def getValueFromAddressHelper( self, memoryAddress ):
-
+		#print(f"memoryAddress: {memoryAddress} {self.validateAddress( memoryAddress, self.gIntStart, self.gIntEnd, self.lIntStart, self.lIntEnd )}")
 		if self.validateAddress( memoryAddress, self.gIntStart, self.gIntEnd, self.lIntStart, self.lIntEnd ):
 		    return self.intMemory[ memoryAddress ]
 		elif self.validateAddress( memoryAddress, self.gFloatStart, self.gFloatEnd, self.lFloatStart, self.lFloatEnd ): 
@@ -67,7 +67,7 @@ class RuntimeMemory( object ):
 		elif self.validateAddress( memoryAddress, self.gStringStart, self.gStringEnd, self.lStringStart, self.lStringEnd ):
 		    return self.strMemory[ memoryAddress ]
 		else:
-		    return self.tempMemory[ memoryAddress ]
+			return self.tempMemory[ memoryAddress ]
 
 
 	# Recibe una dirección de memoria de un rango conocido, pero se desconoce el tipo al que pertenece dentro de ese rango
@@ -99,13 +99,13 @@ class RuntimeMemory( object ):
 
 	# Helper para validar que una dirección de memoria esté dentro de un rango en específico
 	def validateRange( self, memoryAddress, startRange, endRange):
-
-	    if memoryAddress >= startRange and memoryAddress <= endRange:
-	        return True
-	    return False
+		#print(f"memoryAddress {memoryAddress},{startRange},{endRange}")
+		if memoryAddress >= startRange and memoryAddress <= endRange:
+			return True
+		return False
 
 
 	# Valida si una dirección de memoria pertenece al rango de los temporales
-	def is_temp_addr( self, memoryAddress, startTempRange, endTempRange ):
+	def ValidateTempAddress( self, memoryAddress, startTempRange, endTempRange ):
 
 	    return self.validateRange( memoryAddress, startTempRange, endTempRange )
