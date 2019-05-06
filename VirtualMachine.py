@@ -78,13 +78,18 @@ def solveQuad( quad, qQuads):
 
     global instructionPointer, currentFunctionName, dicConstants, dicGlobalConstMemory
 
-    if type(quad[ 3 ]) == int or type(quad[ 1 ]) or type(quad[ 2 ]):
+    if type(quad[ 3 ]) == int:
         if quad[ 3 ] > 500000:
             quad[ 3 ] = getValueFromAddress( quad[ 3 ] - 500000 )
-        elif quad[ 2 ] > 500000:
+        
+    if type(quad[ 2 ]) == int:
+        if quad[ 2 ] > 500000:
             quad[ 2 ] = getValueFromAddress( quad[ 2 ] - 500000 )
+
+    if type(quad[ 1 ]) == int:
         if quad[ 1 ] > 500000:
             quad[ 1 ] = getValueFromAddress( quad[ 1 ] - 500000 )
+
 
     #print("instructionPointer")
     #print(instructionPointer)
@@ -164,8 +169,11 @@ def solveQuad( quad, qQuads):
         return
     elif quad[ 0 ] == "PRINT":
         resultVal = getValueFromAddress( quad[ 3 ] )
+        print(quad[ 3 ])
         print("PRINT THIS")
         print( resultVal )
+        return
+    elif quad[ 0 ] == "VER":
         return
 
     

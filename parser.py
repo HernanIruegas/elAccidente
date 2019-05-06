@@ -425,45 +425,6 @@ def p_READ_A(p):
 		| empty
 	"""
 
-# Genera cuadruplo para la asignación
-#def solveOperationHelperAssignment_AUX():
-
-#	global sOperands, sOperators, sTypes, qQuads, iQuadCounter, dicConstantsInverted, dicDirectorioFunciones, methodCall
-
-
-#	rightOperand = sOperands.pop()
-#	rightType = sTypes.pop()
-	
-#	leftOperand = sOperands.pop()
-#	leftType = sTypes.pop()
-
-#	operator = sOperators.pop()
-
-#	resultType = semanticCube[ dicOperandIndexCube[ leftType ] ][ dicOperandIndexCube[ rightType ] ][ dicOperatorIndexCube[ operator ] ]
-
-#	if resultType != 0: # 0 = error en subo semantico
-
-#		quad = [ operator, leftOperand, '', rightOperand ]
-#		iQuadCounter = iQuadCounter + 1
-#		qQuads.append( quad )
-#	else:
-#		imprimirError(2)
-
-
-# Indica que se tiene que generar cuadruplo para una asignación
-# Utiliza otra función helper porque su cuadruplo es distinto al que genera la función de SOLVE_OPERATION
-# El cuadruplo de la asignación solo debe tener 2 espacios llenos, no 4 como el de las operaciones
-#def p_SOLVE_OPERATION_ASSIGNMENT_AUX(p):
-#	"""
-#	SOLVE_OPERATION_ASSIGNMENT_AUX : empty
-#	"""
-#	global sOperators
-#
-#	if sOperators.size() > 0:
-#		if sOperators.top() == '=':
-#			solveOperationHelperAssignment_AUX()
-
-
 
 #############################
 # ACCIONES SEMANTICAS PARA ACCEDER VARIABLES DIMENSIONADAS
