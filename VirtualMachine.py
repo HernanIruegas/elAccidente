@@ -78,9 +78,13 @@ def solveQuad( quad, qQuads):
 
     global instructionPointer, currentFunctionName, dicConstants, dicGlobalConstMemory
 
-    if type(quad[ 3 ]) == int:
+    if type(quad[ 3 ]) == int or type(quad[ 1 ]) or type(quad[ 2 ]):
         if quad[ 3 ] > 500000:
             quad[ 3 ] = getValueFromAddress( quad[ 3 ] - 500000 )
+        elif quad[ 2 ] > 500000:
+            quad[ 2 ] = getValueFromAddress( quad[ 2 ] - 500000 )
+        if quad[ 1 ] > 500000:
+            quad[ 1 ] = getValueFromAddress( quad[ 1 ] - 500000 )
 
     #print("instructionPointer")
     #print(instructionPointer)
@@ -94,26 +98,6 @@ def solveQuad( quad, qQuads):
         if type( quad[ 1 ] ) is not int:
             setValueToAddress( currentFunctionName, quad[ 3 ] )
             return
-
-        #resultVal = -1 
-        #if quad[ 3 ] > 500000:
-        #    addressPtr = quad[ 3 ] - 500000
-
-            #print("aa")
-            #print(quad[ 3 ])
-            #print("bb")
-            #print(getValueFromAddress( addressPtr ))
-            #print(getValueFromAddress( getValueFromAddress( addressPtr ) ))
-        #    addressPtr = getValueFromAddress( addressPtr )
-            #resultVal = getValueFromAddress( quad[ 1 ] )
-            #setValueToAddress( resultVal, addressPtr )
-            #print("aa")
-            #print(addressPtr)
-            #print(resultVal)
-            #return
-            
-            #setValueToAddress( resultVal, resultVal )
-        #else:
         # Conseguir valor desde la memoria
         # Para el caso de variables inicializadas por default, se inicializan con constantes ya existentes en el diccionario de constantes
         resultVal = getValueFromAddress( quad[ 1 ] )
