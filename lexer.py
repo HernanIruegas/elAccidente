@@ -26,8 +26,8 @@ reserved = {
     'float' : 'float',
     'string' : 'string',
     'bool' : 'bool',
-    'TRUE' : 'TRUE',
-    'FALSE' : 'FALSE',
+    'True' : 'True',
+    'False' : 'False',
 
     #Special Functions
     'ols' : 'ols',

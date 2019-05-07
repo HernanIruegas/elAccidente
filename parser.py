@@ -28,7 +28,7 @@ methodCall =  "" # Sirve para guardar el nombre de la función a la cual se qui
 varWithDimensions = "" # Sirve para guardar el id de la variable dimensionada que se está declarando
 varDimensionadaLastRead = "" # Sirve para guardar el id de la variable dimensionada que se está leyendo (queriendo acceder a una casilla)
 initialValuesForVars = { "int": 0, "float": 0.0, "string": '""', "bool": "False" }
-
+dicArrayBaseAddressHelper = {} # { baseMemoryAddressArray : memoryAddressConstant }
 
 #############################
 # RANGOS DE MEMORIA
@@ -189,8 +189,8 @@ def p_VARCTE_AUX_VARS(p):
 # Funcion auxiliar para la declaración de variables
 def p_BOOLEAN_AUX_VARS(p):
 	"""
-	BOOLEAN_AUX_VARS : FALSE SAVE_ASSIGNED_VAR
-					| TRUE SAVE_ASSIGNED_VAR
+	BOOLEAN_AUX_VARS : False SAVE_ASSIGNED_VAR_BOOL
+					| True SAVE_ASSIGNED_VAR_BOOL
 	"""
 
 
@@ -228,9 +228,8 @@ def p_ACUMULATE_R(p):
 	# varWithDimensions = variable leída 
 	# p[ -1 ] = tamaño de la dimensión
 
-
 	# Validar si la constante ya había sido leída previamente
-	validateConstant( p[ -1 ] )
+	validateConstant( p[ -1 ] - 1)
 
 	# Conseguir el valor de R acumulada, es 1 para la primera vez
 	rAcum = 1
@@ -239,9 +238,11 @@ def p_ACUMULATE_R(p):
 		rAcum = dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ varWithDimensions ][ "Dimensiones" ][ length - 1 ][ "R" ]
 
 	# ( LsDim - LiDim + 1 ) * R acumulada
-	rAcum = ( p[ -1 ] - 0  + 1 ) * rAcum
+	rAcum = ( p[ -1 ] - 1 - 0  + 1 ) * rAcum
+	print("rAcum")
+	print(rAcum)
 
-	dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ varWithDimensions ][ "Dimensiones" ].append( { "LiDim" : 0, "LsDim" : p[ -1 ], "R" : rAcum } )
+	dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ varWithDimensions ][ "Dimensiones" ].append( { "LiDim" : 0, "LsDim" : p[ -1 ] - 1, "R" : rAcum } )
 
 	iCounterDimensions = iCounterDimensions + 1
 
@@ -257,7 +258,6 @@ def p_CALCULATE_ARRAY(p):
 
 
 	aux = 1
-	sumaK = 0
 	for dimension in dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[ -7 ] ][ "Dimensiones" ]:
 
 		mPrevious = -1
@@ -270,10 +270,9 @@ def p_CALCULATE_ARRAY(p):
 		LsDim = dimension[ "LsDim" ]
 		LiDim = dimension[ "LiDim" ]
 		mDim = mPrevious / ( LsDim - LiDim + 1 )
-		sumaK = sumaK + LiDim * mDim
 
 		if aux == iCounterDimensions:
-			dimension[ "mDim" ] = -sumaK
+			dimension[ "mDim" ] = 0
 		else:
 			dimension[ "mDim" ] = mDim
 
@@ -285,17 +284,19 @@ def p_CALCULATE_ARRAY(p):
 	# Definir espacio de memoria y scope de arreglo
 
 	# numero de direcciones de memoria que ocupa la variable dimensionada
+	#if len( dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[ -7 ] ][ "Dimensiones" ] ) > 1: # arrays
+	#	m0 = dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[ -7 ] ][ "Dimensiones" ][ iCounterDimensions - 1 ][ "R" ] - 1
+	#else: # matrices
 	m0 = dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[ -7 ] ][ "Dimensiones" ][ iCounterDimensions - 1 ][ "R" ] 
-	varAddress = setAddress( p[ -7 ], m0 )
+	varAddress = setAddress( p[ -7 ], m0 - 1 )
 
 	# Actualizar campo de memory address en la variable
 	dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[ -7 ] ][ "Address" ] = varAddress
 
 	# Quadruplos de asignación para que la maquina virtual primero haga la asignación y luego la consulta sobre sus valores
 	aux = 0
+	constAddress = validateConstant( 0 )
 	while aux < m0:
-
-		constAddress = validateConstant( 0 )
 
 		quad = [ "=", constAddress, "", varAddress ]
 		varAddress = varAddress + 1
@@ -369,6 +370,7 @@ def p_VARCONSTAUX(p):
 	VARCONSTAUX : id PUSH_STACK_OPERANDS ISLIST 
 				| cte_i PUSH_STACK_OPERANDS_CONSTANT
 				| cte_f PUSH_STACK_OPERANDS_CONSTANT
+				| BOOLEAN
 	"""
 
 def p_TYPE(p):
@@ -508,14 +510,14 @@ def p_SOLVE_OFFSETS(p):
 	"""
 	SOLVE_OFFSETS : empty
 	"""
-	global iQuadCounter, qQuads, sOperands, dicDirectorioFunciones, varDimensionadaLastRead, currentFunction, iDimensionCounter, lastReadIndex
+	global iQuadCounter, qQuads, sOperands, dicDirectorioFunciones, varDimensionadaLastRead, currentFunction, iDimensionCounter, lastReadIndex, dicArrayBaseAddressHelper
 
 
 	# TODO arreglar esto con reglas gramaticales
 	# Nacada para poder asignar variables
 	if p[-2] == None:
 		return
-
+	
 	varDim = ""	
 	if varDimensionadaLastRead in dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ]:
 		varDim = dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ varDimensionadaLastRead ]
@@ -534,31 +536,21 @@ def p_SOLVE_OFFSETS(p):
 		qQuads.append( quad )
 		sOperands.push( temporal )
 
-
 	length = len( varDim[ "Dimensiones" ] )
-	# Cuadruplo para sumar -K
-	#K = varDim[ "Dimensiones" ][ length - 1 ][ "mDim" ] # K siempre va a ser 0
-	# Conseguir/Asignar dirección de memoria a constante 0
-	if 0 not in dicConstants:
-			# Consigues una dirección de memoria para la constante y la insertas en los diccionarios de constantes globales
-			constAddress = setConstAddress( "int" )
-			dicConstants[ 0 ] = { "Address" : constAddress, "Type": "int" }
-			dicConstantsInverted[ constAddress ] = { "Value" : 0, "Type": "int" }
-
-	temporal = setTempAddress( varDim[ "Type" ] )
-	quad = [ "+", sOperands.pop(), dicConstants[ 0 ][ "Address" ] , temporal]
-	iQuadCounter = iQuadCounter + 1
-	qQuads.append( quad )
-	sOperands.push( temporal )
 
 	# Cuadruplo para sumar dirección base 
 	# Se tiene que poner un identificador para indicar que el temporal es un apuntador a un contenido TODO
 	temporal = setTempAddress( varDim[ "Type" ] )
 
-	# Consigues una dirección de memoria para la constante y la insertas en los diccionarios de constantes globales
-	constAddress = setConstAddress( "int" )
-	dicConstants[ constAddress ] = { "Address" : varDim[ "Address" ], "Type": "int" }
-	dicConstantsInverted[ constAddress ] = { "Value" : varDim[ "Address" ], "Type": "int" }	
+	constAddress = -1
+	if varDim[ "Address" ] not in dicArrayBaseAddressHelper:
+		# Consigues una dirección de memoria para la constante y la insertas en los diccionarios de constantes globales
+		constAddress = setConstAddress( "int" )
+		dicConstants[ constAddress ] = { "Address" : varDim[ "Address" ], "Type": "int" }
+		dicConstantsInverted[ constAddress ] = { "Value" : varDim[ "Address" ], "Type": "int" }
+		dicArrayBaseAddressHelper[ varDim[ "Address" ] ] = constAddress
+	else:
+		constAddress = dicArrayBaseAddressHelper[ varDim[ "Address" ] ]	
 
 	quad = [ "+", sOperands.pop(), constAddress , temporal ]
 	iQuadCounter = iQuadCounter + 1
@@ -675,8 +667,8 @@ def p_GENERATE_QUAD_RETURN(p):
 
 def p_BOOLEAN(p):
 	"""
-	BOOLEAN : FALSE PUSH_STACK_OPERANDS_CONSTANT
-			| TRUE PUSH_STACK_OPERANDS_CONSTANT
+	BOOLEAN : False PUSH_STACK_OPERANDS_CONSTANT
+			| True PUSH_STACK_OPERANDS_CONSTANT
 	"""
 
 def p_STATMETHODS(p):
@@ -878,6 +870,8 @@ def imprimirError(error):
 		print( "Error: Se quiere asignar una constante de diferente tipo de dato a la variable" )
 	elif error == 9:
 		print( "Error: No se puede dividir entre 0" )
+	elif error == 10:
+		print( "Error de rangos en arreglo" )
 
 
 	exit(1)
@@ -950,8 +944,6 @@ def p_SAVE_ASSIGNED_VAR(p):
 		imprimirError( 0 )
 	else:
 		# Validar que el valor de la constante coincida con el tipo de dato de la variable
-
-		constantType = ""
 		# conseguir el tipo de dato de la constante
 		if type( p[ -2 ] ) is int:
 			constantType = 'int'
@@ -959,14 +951,51 @@ def p_SAVE_ASSIGNED_VAR(p):
 			constantType = 'float'
 		elif type( p[ -2 ] ) is str:
 			constantType = 'string'
-		elif type( p[ -2 ] ) is bool:
-			constantType = 'bool'
 
 		if constantType != lastReadType:
 			imprimirError( 8 )
 		else:
 			# Le mando la variable leida y el valor de la constante, lo cual indica que la variable si fue inicializada
 			saveVarHelper( p[ -4 ], p[ -2 ] )
+
+
+def p_SAVE_ASSIGNED_VAR_BOOL(p):
+	"""
+	SAVE_ASSIGNED_VAR_BOOL : empty
+	"""
+	global dicDirectorioFunciones, currentFunction, lastReadType
+	# p[ -1 ] = constante leida
+	# p[ -3 ] = variable a la cual se le asigna la constante
+
+
+	# Validar que variable leida no esté previamente declarada
+	if p[ -3 ] in dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ]:
+		imprimirError( 0 )
+	else:
+		# Validar que el valor de la constante coincida con el tipo de dato de la variable
+
+		constantType = ""
+		print("aaaaa")
+		print(p[ -1 ])
+		print(p[ -3 ])
+		# conseguir el tipo de dato de la constante
+		if type( p[ -1 ] ) is int:
+			constantType = 'int'
+		elif type( p[ -1 ] ) is float:
+			constantType = 'float'
+		elif type( p[ -1 ] ) is str:
+			aux = p[ -1 ]
+			if aux == "True" or aux == "False":
+				constantType = 'bool'
+			else:
+				constantType = 'string'
+			print("string")
+
+		if constantType != lastReadType:
+			imprimirError( 8 )
+		else:
+			# Le mando la variable leida y el valor de la constante, lo cual indica que la variable si fue inicializada
+			saveVarHelper( p[ -3 ], p[ -1 ] )
 
 
 # Sirve para guardar los parametros de una función
@@ -1204,10 +1233,10 @@ def p_PUSH_STACK_OPERANDS(p):
 		# Validar si es una variable dimensionada o no
 		if dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[ -1 ] ][ "Dimensionada" ] == 1:
 			varDimensionadaLastRead = p[ -1 ]
-
+			return
+		
 		# Conseguir la dirección de memoria de variable previamente guardada en directorio
-		address = dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[ -1 ] ][ "Address" ] 
-
+		address = dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[ -1 ] ][ "Address" ]
 		sOperands.push( address )
 		sTypes.push( dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[ -1 ] ][ "Type" ] )
 	elif p[-1] in dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ]:
@@ -1215,9 +1244,10 @@ def p_PUSH_STACK_OPERANDS(p):
 		# Validar si es una variable dimensionada o no
 		if dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ p[ -1 ] ][ "Dimensionada" ] == 1:
 			varDimensionadaLastRead = p[ -1 ]
+			return
 
 		# Conseguir la dirección de memoria de variable previamente guardada en directorio
-		address = dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ p[ -1 ] ][ "Address" ] 
+		address = dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ p[ -1 ] ][ "Address" ]
 		sOperands.push( address )
 		sTypes.push( dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ p[-1] ][ "Type" ] )
 	else:
@@ -1238,6 +1268,8 @@ def p_PUSH_STACK_OPERANDS_CONSTANT(p):
 	# Si la constante no existe, se debe asignar una dirección de memoria
 	# También se debe agregar a la pila de operandos y a la pila de tipos la info correspondiente
 	if p[ -1 ] not in dicConstants:
+		print("yujhuuuu")
+		print(p[ -1 ])
 
 		# conseguir el tipo de dato de la constante
 		if type( p[ -1 ] ) is int:
@@ -1245,11 +1277,15 @@ def p_PUSH_STACK_OPERANDS_CONSTANT(p):
 		elif type( p[ -1 ] ) is float:
 			constantType = 'float'
 		elif type( p[ -1 ] ) is str:
+			print("string")
 			constantType = 'string'
 		elif type( p[ -1 ] ) is bool:
+			print("bool")
 			constantType = 'bool'
 
+		
 		address = setConstAddress( constantType )
+		print(address)
 		dicConstants[ p[ -1 ] ] = { "Address" : address, "Type": constantType }
 		dicConstantsInverted[ address ] = { "Value" : p[ -1 ], "Type": constantType }
 		sOperands.push( address )
@@ -1449,6 +1485,11 @@ def p_GENERATE_GOTOF_CONDITIONAL(p):
 
 	expType = sTypes.pop()
 
+	print("exptypes")
+	print(expType)
+	print("sOperands")
+	print(sOperands.top())
+
 	if expType == 'bool':
 		result = sOperands.pop()
 
@@ -1458,7 +1499,7 @@ def p_GENERATE_GOTOF_CONDITIONAL(p):
 		sOperands.push( result )
 		sJumps.push( iQuadCounter - 1 )
 	else:
-		imprimirError(4)
+		imprimirError( 4 )
 
 
 # Indica el fin de un if condicional y resuelve su cuadruplo con el salto pendiente
@@ -1503,14 +1544,29 @@ def p_PUSH_STACK_JUMPS(p):
 # ACCIONES SEMANTICAS DE CICLOS
 #############################
 
+# Resuelve cuadruplo con salto pendiente para whiles anidados
+def fillAux( end ):
+
+	global iQuadCounter, qQuads
+
+	aux = qQuads[ end ] # Cuadruplo con salto pendiente
+	aux[ 3 ] = iQuadCounter + 1 # Llenar cuadruplo con el siguiente cuadruplo a ejecutar
+	qQuads[ end ] = aux # Reemplazar breadcrumb por cuadruplo con salto a fin de ciclo
+
+lastJumpAux = -1
 # Resuelve cuadruplos con saltos pendientes para el while
 # Resuelve los saltos de regreso a la expresión y el salto que indica el final del loop
 def p_SOLVE_OPERATION_PRE_CONDITIONAL_LOOP(p):
 	"""
 	SOLVE_OPERATION_PRE_CONDITIONAL_LOOP : empty
 	"""
-	global sJumps, iQuadCounter, qQuads
+	global sJumps, iQuadCounter, qQuads, lastJumpAux
 
+	#if qQuads[ len( qQuads ) - 1 ][ 0 ] == 'GOTO':
+	#	print("AAHAHHAHAHAHAHAHAH")
+	#	fillAux( lastJumpAux )
+
+	lastJumpAux = sJumps.top()
 	end = sJumps.pop()
 	returnTo = sJumps.pop()
 

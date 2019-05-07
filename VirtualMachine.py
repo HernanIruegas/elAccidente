@@ -28,7 +28,9 @@ def getValueFromAddress( memoryAddress ):
     elif memoryAddress >= sMemories.top().lIntStart and memoryAddress <= sMemories.top().lStringEnd: # Rango local
         return sMemories.top().getValueFromAddressHelper( memoryAddress ) 
     elif memoryAddress >= sMemories.top().tIntStart and memoryAddress <= sMemories.top().tStringEnd:
-        return sMemories.top().getValueFromAddressHelper( memoryAddress )  
+        return sMemories.top().getValueFromAddressHelper( memoryAddress )
+    elif memoryAddress >= 500000:
+        return sMemories.top().getValueFromAddressHelper( sMemories.top().getValueFromAddressHelper( memoryAddress - 500000 ) )
     else:  # Rango de constantes
         return dicGlobalConstMemory[ memoryAddress ][ "Value" ] 
 
@@ -44,6 +46,10 @@ def setValueToAddress( value, memoryAddress ):
         sMemories.top().setValueToAddressHelper( value, memoryAddress ) 
     elif memoryAddress >= sMemories.top().tIntStart and memoryAddress <= sMemories.top().tStringEnd:
         sMemories.top().setValueToAddressHelper( value, memoryAddress )
+    elif memoryAddress >= 500000:
+        aux = sMemories.top().getValueFromAddressHelper( memoryAddress - 500000 )
+        sMemories.top().setValueToAddressHelper( value, aux )
+
 
 
 #############################
@@ -77,24 +83,7 @@ def readQuads( qQuads, globalConstMemory, dicConstantsAux ):
 def solveQuad( quad, qQuads):
 
     global instructionPointer, currentFunctionName, dicConstants, dicGlobalConstMemory
-
-    if type(quad[ 3 ]) == int:
-        if quad[ 3 ] > 500000:
-            quad[ 3 ] = getValueFromAddress( quad[ 3 ] - 500000 )
-        
-    if type(quad[ 2 ]) == int:
-        if quad[ 2 ] > 500000:
-            quad[ 2 ] = getValueFromAddress( quad[ 2 ] - 500000 )
-
-    if type(quad[ 1 ]) == int:
-        if quad[ 1 ] > 500000:
-            quad[ 1 ] = getValueFromAddress( quad[ 1 ] - 500000 )
-
-
-    #print("instructionPointer")
-    #print(instructionPointer)
     print( quad[ 0 ] )
-
 
     # Se hace el assign primero para que cualquier variable esté inicializada antes de ir a conseguir su valor (para cuestiones de operaciones de expresiones)
     if quad[ 0 ] == "=":
@@ -106,6 +95,8 @@ def solveQuad( quad, qQuads):
         # Conseguir valor desde la memoria
         # Para el caso de variables inicializadas por default, se inicializan con constantes ya existentes en el diccionario de constantes
         resultVal = getValueFromAddress( quad[ 1 ] )
+        #print("assign")
+        #print(resultVal)
         # Asignar la constante default a la variable inicializada por default
         setValueToAddress( resultVal, quad[ 3 ] )
         return
@@ -169,14 +160,23 @@ def solveQuad( quad, qQuads):
         return
     elif quad[ 0 ] == "PRINT":
         resultVal = getValueFromAddress( quad[ 3 ] )
-        print(quad[ 3 ])
+        #print(quad[ 3 ])
         print("PRINT THIS")
         print( resultVal )
         return
     elif quad[ 0 ] == "VER":
-        return
+        # Validar que indice esté dentro de rangos de arreglo
+        upperLimit = getValueFromAddress( quad[ 3 ] )
+        index = getValueFromAddress( quad[ 1 ] )
+        if index >= 0 and index <= upperLimit:
+            return True
+        imprimirError( 10 )
 
     
+    #print("quad[ 1 ]")
+    #print(quad[ 1 ])
+    #print("quad[ 2 ]")
+    #print(quad[ 2 ])
 
     # Conseguir valores de la memoria
     leftOperand = getValueFromAddress( quad[ 1 ] )
@@ -189,6 +189,12 @@ def solveQuad( quad, qQuads):
     # Resolver operación aritmética
     if quad[ 0 ] == "+":    
         resultVal = leftOperand + rightOperand
+        #print("leftOperand")
+        #print(leftOperand)
+        #print("rightOperand")
+        #print(rightOperand)
+        #print(resultVal)        
+
     elif quad[ 0 ] == "-":  
         resultVal = leftOperand - rightOperand
     elif quad[ 0 ] == "*":  
@@ -204,6 +210,12 @@ def solveQuad( quad, qQuads):
         resultVal = leftOperand <= rightOperand
     elif quad[ 0 ] == ">": 
         resultVal = leftOperand > rightOperand
+        print("leftOperand")
+        print(leftOperand)
+        print("rightOperand")
+        print(rightOperand)
+        print("resultVal")
+        print(resultVal)  
     elif quad[ 0 ] == "<": 
         resultVal = leftOperand < rightOperand
     # Resolver operación lógica
@@ -224,5 +236,7 @@ def solveQuad( quad, qQuads):
     # Guardar resultado en memoria
     setValueToAddress( resultVal, quad[ 3 ] )
 
-
-
+    #if quad[ 0 ] == "+":
+        #print("after")
+        #print(quad[ 3 ] )
+        #print( getValueFromAddress( quad[ 3 ] ) )
