@@ -178,12 +178,6 @@ def solveQuad( quad, qQuads):
         countAddress = int( quad[ 1 ] ) 
         print("lasso")
         
-        #c = 1
-        #for i in range(len(matrix)): 
-            # iterating by coloum by B  
-        #    for j in range(len(matrix[0])):
-        #        print(c)
-        #        c = c + 1
         for i in range(len(matrix)):
             for j in range(len(matrix[0])):
                 matrix[i][j] = getValueFromAddress( countAddress );  
