@@ -240,8 +240,6 @@ def p_ACUMULATE_R(p):
 
 	# ( LsDim - LiDim + 1 ) * R acumulada
 	rAcum = ( p[ -1 ] - 1 - 0  + 1 ) * rAcum
-	# print("rAcum")
-	# print(rAcum)
 
 	dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ varWithDimensions ][ "Dimensiones" ].append( { "LiDim" : 0, "LsDim" : p[ -1 ] - 1, "R" : rAcum } )
 
@@ -692,17 +690,14 @@ def p_STATMETHODS(p):
 
 def p_LASSO(p):
 	"""
-	LASSO : lasso lParenthesis id GENERATE_QUAD_EXTRA_FUNCTION rParenthesis semicolon
+	LASSO : lasso lParenthesis id GENERATE_QUAD_LASSO rParenthesis semicolon
 	"""
 
-def p_GENERATE_QUAD_EXTRA_FUNCTION(p):
+def p_GENERATE_QUAD_LASSO(p):
 	"""
-	GENERATE_QUAD_EXTRA_FUNCTION : empty
+	GENERATE_QUAD_LASSO : empty
 	"""
 	global iQuadCounter, qQuads, dicDirectorioFunciones
-
-	#dicDirectorioFunciones = {} # "nombreFuncion" : { "Type": void/TYPE, "dicDirectorioVariables": {}, "ParamCounter": ..., "QuadCounter": ..., "TempCounter": ..., "ParamTypes": [], "Parameters": [] }
-	# dicDirectorioVariables = "VarName" : { "Type": ..., "Value": ..., "Scope": ..., "Address": ..., "Dimensiones": [ {}, ... ] }
 
 	dim1 = dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ p[ - 1 ] ][ "Dimensiones" ][ 0 ][ "LsDim" ] + 1
 	dim2 = dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ p[ - 1 ] ][ "Dimensiones" ][ 1 ][ "LsDim" ] + 1
@@ -714,82 +709,170 @@ def p_GENERATE_QUAD_EXTRA_FUNCTION(p):
 
 def p_RIDGE(p):
 	"""
-	RIDGE : ridge lParenthesis id comma VARCONSTAUX rParenthesis semicolon
+	RIDGE : ridge lParenthesis id comma cte_i GENERATE_QUAD_RIDGE rParenthesis semicolon
 	"""
+
+def p_GENERATE_QUAD_RIDGE(p):
+	"""
+	GENERATE_QUAD_RIDGE : empty
+	"""
+	global iQuadCounter, qQuads, dicDirectorioFunciones
+
+	dim1 = dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ p[ - 3 ] ][ "Dimensiones" ][ 0 ][ "LsDim" ] + 1
+	dim2 = dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ p[ - 3 ] ][ "Dimensiones" ][ 1 ][ "LsDim" ] + 1
+	initialAddress = dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ p[ - 3 ] ][ "Address" ]
+	
+	quad = [ p[ -5 ], initialAddress, dim1, dim2, p[ -1 ] ]
+	iQuadCounter = iQuadCounter + 1
+	qQuads.append( quad )
+
 
 def p_K_MEANS(p):
 	"""
-	K_MEANS : k_means lParenthesis id comma VARCONSTAUX rParenthesis semicolon
+	K_MEANS : k_means lParenthesis id comma cte_i GENERATE_QUAD_RIDGE rParenthesis semicolon
 	"""
 
 def p_MINI_BATCH_MEANS(p):
 	"""
-	MINI_BATCH_MEANS : mini_batch lParenthesis id comma VARCONSTAUX rParenthesis semicolon
+	MINI_BATCH_MEANS : mini_batch lParenthesis id comma cte_i GENERATE_QUAD_RIDGE rParenthesis semicolon
 	"""
 
 def p_LINEAR_REGRESSION(p):
 	"""
-	LINEAR_REGRESSION : linear_regression lParenthesis id comma VARCONSTAUX rParenthesis semicolon
+	LINEAR_REGRESSION : linear_regression lParenthesis id comma cte_i GENERATE_QUAD_RIDGE rParenthesis semicolon
 	"""
 
 def p_TIME_SERIES_SPLIT(p):
 	"""
-	TIME_SERIES_SPLIT : t_series lParenthesis id comma id comma VARCONSTAUX rParenthesis semicolon
+	TIME_SERIES_SPLIT : t_series lParenthesis id comma id comma cte_i GENERATE_QUAD_TIME_SERIES rParenthesis semicolon
 	"""
+
+
+def p_GENERATE_QUAD_TIME_SERIES(p):
+	"""
+	GENERATE_QUAD_TIME_SERIES : empty
+	"""
+	global iQuadCounter, qQuads, dicDirectorioFunciones
+
+
+	# Dimensiones matrix
+	dim1M = dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ p[ - 5 ] ][ "Dimensiones" ][ 0 ][ "LsDim" ] + 1
+	dim2M = dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ p[ - 5 ] ][ "Dimensiones" ][ 1 ][ "LsDim" ] + 1
+	initialAddressM = dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ p[ - 5 ] ][ "Address" ]
+	
+	# Dimensiones arreglos
+	dim1A = dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ p[ - 3 ] ][ "Dimensiones" ][ 0 ][ "LsDim" ] + 1
+	initialAddressA = dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ p[ - 3 ] ][ "Address" ]
+
+	quad = [ p[ -7 ], initialAddressM, dim1M, dim2M, initialAddressA, dim1A, p[ -1 ] ]
+	iQuadCounter = iQuadCounter + 1
+	qQuads.append( quad )
+
 
 def p_MEAN_ABSOLUTE_ERROR(p):
 	"""
-	MEAN_ABSOLUTE_ERROR : mean_abs_err lParenthesis id comma id rParenthesis semicolon
+	MEAN_ABSOLUTE_ERROR : mean_abs_err lParenthesis id comma id GENERATE_QUAD_ABSOLUTE_ERROR rParenthesis semicolon
 	"""
+
+def p_GENERATE_QUAD_ABSOLUTE_ERROR(p):
+	"""
+	GENERATE_QUAD_ABSOLUTE_ERROR : empty
+	"""
+	global iQuadCounter, qQuads, dicDirectorioFunciones
+
+	dim1M1 = dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ p[ - 3 ] ][ "Dimensiones" ][ 0 ][ "LsDim" ] + 1
+	dim2M1 = dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ p[ - 3 ] ][ "Dimensiones" ][ 1 ][ "LsDim" ] + 1
+	initialAddressM1 = dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ p[ - 3 ] ][ "Address" ]
+
+	dim1M2 = dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ p[ - 1 ] ][ "Dimensiones" ][ 0 ][ "LsDim" ] + 1
+	dim2M2 = dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ p[ - 1 ] ][ "Dimensiones" ][ 1 ][ "LsDim" ] + 1
+	initialAddressM2 = dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ p[ - 1 ] ][ "Address" ]
+	
+	quad = [ p[ -5 ], initialAddressM1, dim1M1, dim2M1, initialAddressM2, dim1M2, dim2M2 ]
+	iQuadCounter = iQuadCounter + 1
+	qQuads.append( quad )
+
 
 def p_MEAN_SQUARED_ERROR(p):
 	"""
-	MEAN_SQUARED_ERROR : mean_sqr_err lParenthesis id comma id rParenthesis semicolon
+	MEAN_SQUARED_ERROR : mean_sqr_err lParenthesis id comma id GENERATE_QUAD_ABSOLUTE_ERROR rParenthesis semicolon
 	"""
 
 def p_MEDIAN_ABSOLUTE_ERROR(p):
 	"""
-	MEDIAN_ABSOLUTE_ERROR : median_abs_err lParenthesis id comma id rParenthesis semicolon
+	MEDIAN_ABSOLUTE_ERROR : median_abs_err lParenthesis id comma id GENERATE_QUAD_MEDIAN_ERROR rParenthesis semicolon
 	"""
+
+
+def p_GENERATE_QUAD_MEDIAN_ERROR(p):
+	"""
+	GENERATE_QUAD_MEDIAN_ERROR : empty
+	"""
+	global iQuadCounter, qQuads, dicDirectorioFunciones
+
+	dim1A1 = dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ p[ - 3 ] ][ "Dimensiones" ][ 0 ][ "LsDim" ] + 1
+	initialAddressA1 = dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ p[ - 3 ] ][ "Address" ]
+
+	dim1A2 = dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ p[ - 1 ] ][ "Dimensiones" ][ 0 ][ "LsDim" ] + 1
+	initialAddressA2 = dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ p[ - 1 ] ][ "Address" ]
+	
+	quad = [ p[ -5 ], initialAddressA1, dim1A1, initialAddressA2, dim1A2 ]
+	iQuadCounter = iQuadCounter + 1
+	qQuads.append( quad )
+
 
 def p_MEAN(p):
 	"""
-	MEAN : mean lParenthesis id rParenthesis semicolon
+	MEAN : mean lParenthesis id GENERATE_QUAD_MEAN rParenthesis semicolon
 	"""
+
+def p_GENERATE_QUAD_MEAN(p):
+	"""
+	GENERATE_QUAD_MEAN : empty
+	"""
+	global iQuadCounter, qQuads, dicDirectorioFunciones
+
+	dim1 = dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ p[ - 1 ] ][ "Dimensiones" ][ 0 ][ "LsDim" ] + 1
+	initialAddress = dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ p[ - 1 ] ][ "Address" ]
+	
+	quad = [ p[ -3 ], initialAddress, dim1 ]
+	iQuadCounter = iQuadCounter + 1
+	qQuads.append( quad )
+
 
 def p_MODE(p):
 	"""
-	MODE : mode lParenthesis id rParenthesis semicolon
+	MODE : mode lParenthesis id GENERATE_QUAD_MEAN rParenthesis semicolon
 	"""
 
 def p_MEDIAN(p):
 	"""
-	MEDIAN : median lParenthesis id rParenthesis semicolon
+	MEDIAN : median lParenthesis id GENERATE_QUAD_MEAN rParenthesis semicolon
 	"""
 
 def p_FREQUENCY(p):
 	"""
-	FREQUENCY : freq lParenthesis id rParenthesis semicolon
+	FREQUENCY : freq lParenthesis id GENERATE_QUAD_MEAN rParenthesis semicolon
 	"""
 
 def p_VARIANCE(p):
 	"""
-	VARIANCE : variance lParenthesis id rParenthesis semicolon
+	VARIANCE : variance lParenthesis id GENERATE_QUAD_MEAN rParenthesis semicolon
 	"""
 
 def p_STANDARD_DEVIATION(p):
 	"""
-	STANDARD_DEVIATION : stddev lParenthesis id rParenthesis semicolon
+	STANDARD_DEVIATION : stddev lParenthesis id GENERATE_QUAD_MEAN rParenthesis semicolon
 	"""
 
 def p_SKEWNESS(p):
 	"""
-	SKEWNESS : skew lParenthesis id rParenthesis semicolon
+	SKEWNESS : skew lParenthesis id GENERATE_QUAD_MEAN rParenthesis semicolon
 	"""
 
 def p_KURTOSI(p):
 	"""
-	KURTOSI : kurt  lParenthesis id rParenthesis semicolon
+	KURTOSI : kurt  lParenthesis id GENERATE_QUAD_MEAN rParenthesis semicolon
 	"""
 
 def p_empty(p):
@@ -930,9 +1013,6 @@ def p_SAVE_ASSIGNED_VAR_BOOL(p):
 		# Validar que el valor de la constante coincida con el tipo de dato de la variable
 
 		constantType = ""
-		print("aaaaa")
-		print(p[ -1 ])
-		print(p[ -3 ])
 		# conseguir el tipo de dato de la constante
 		if type( p[ -1 ] ) is int:
 			constantType = 'int'
@@ -944,7 +1024,6 @@ def p_SAVE_ASSIGNED_VAR_BOOL(p):
 				constantType = 'bool'
 			else:
 				constantType = 'string'
-			print("string")
 
 		if constantType != lastReadType:
 			imprimirError( 8 )
@@ -1223,8 +1302,6 @@ def p_PUSH_STACK_OPERANDS_CONSTANT(p):
 	# Si la constante no existe, se debe asignar una dirección de memoria
 	# También se debe agregar a la pila de operandos y a la pila de tipos la info correspondiente
 	if p[ -1 ] not in dicConstants:
-		# print("yujhuuuu")
-		# print(p[ -1 ])
 
 		# conseguir el tipo de dato de la constante
 		if type( p[ -1 ] ) is int:
@@ -1232,15 +1309,12 @@ def p_PUSH_STACK_OPERANDS_CONSTANT(p):
 		elif type( p[ -1 ] ) is float:
 			constantType = 'float'
 		elif type( p[ -1 ] ) is str:
-			print("string")
 			constantType = 'string'
 		elif type( p[ -1 ] ) is bool:
-			print("bool")
 			constantType = 'bool'
 
 		
 		address = setConstAddress( constantType )
-		print(address)
 		dicConstants[ p[ -1 ] ] = { "Address" : address, "Type": constantType }
 		dicConstantsInverted[ address ] = { "Value" : p[ -1 ], "Type": constantType }
 		sOperands.push( address )
@@ -1440,11 +1514,6 @@ def p_GENERATE_GOTOF_CONDITIONAL(p):
 
 	expType = sTypes.pop()
 
-	# print("exptypes")
-	# print(expType)
-	# print("sOperands")
-	# print(sOperands.top())
-
 	if expType == 'bool':
 		result = sOperands.pop()
 
@@ -1516,10 +1585,6 @@ def p_SOLVE_OPERATION_PRE_CONDITIONAL_LOOP(p):
 	SOLVE_OPERATION_PRE_CONDITIONAL_LOOP : empty
 	"""
 	global sJumps, iQuadCounter, qQuads, lastJumpAux
-
-	#if qQuads[ len( qQuads ) - 1 ][ 0 ] == 'GOTO':
-	#	print("AAHAHHAHAHAHAHAHAH")
-	#	fillAux( lastJumpAux )
 
 	lastJumpAux = sJumps.top()
 	end = sJumps.pop()
@@ -1722,3 +1787,10 @@ def resetTempAndLocalVars():
 
 
 parser = yacc.yacc()
+
+
+
+
+
+
+

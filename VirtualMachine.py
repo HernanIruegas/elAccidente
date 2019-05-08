@@ -1,7 +1,7 @@
 from RuntimeMemory import RuntimeMemory
 from Stack import Stack
 from parser import imprimirError
-from extra_functions import lasso 
+from extra_functions import lasso, ridge, k_means, miniBatch, linear_regression, time_series_split, mean_abs_error, mean_sqrt_error, median_abs_error, mean, median, mode, freq, variance, stddev, kurt
 
 instructionPointer = 0 # Apunta al siguiente quad a resolver
 dicGlobalConstMemory = {} # Recibe el diccionario de constantes invertidas resultado de cuando se compila el código fuente
@@ -11,6 +11,7 @@ gMemory = RuntimeMemory( "global", -1 )
 sMemories.push( gMemory )
 currentFunctionName = "default"
 
+
 #############################
 # COMIENZO LOGICA PARA MANEJO DE DIRECCIONES DE MEMORIA
 #############################
@@ -19,11 +20,9 @@ currentFunctionName = "default"
 # No importa el tipo de dato de la dirección, solo con que esté dentro de los rangos anteriormente mencionados
 # Regresa el valor almacenado que representa la dirección de memoria
 def getValueFromAddress( memoryAddress ):
-
+    
     global sMemories
 
-    #print("memoryAddress")
-    #print(memoryAddress)
     if memoryAddress >= gMemory.gIntStart and memoryAddress <= gMemory.gStringEnd: # Rango global
         return gMemory.getValueFromAddressHelper( memoryAddress )
     elif memoryAddress >= sMemories.top().lIntStart and memoryAddress <= sMemories.top().lStringEnd: # Rango local
@@ -39,6 +38,7 @@ def getValueFromAddress( memoryAddress ):
 # Determinar si una dirección de memoria pertenece a un rango global, local, temporal o constante
 # Asignar un valor a esa dirección de memoria
 def setValueToAddress( value, memoryAddress ):
+    
     global sMemories
 
     if memoryAddress >= gMemory.gIntStart and memoryAddress <= gMemory.gStringEnd: # Rango global
@@ -52,11 +52,9 @@ def setValueToAddress( value, memoryAddress ):
         sMemories.top().setValueToAddressHelper( value, aux )
 
 
-
 #############################
 # FIN LOGICA PARA MANEJO DE DIRECCIONES DE MEMORIA
 #############################
-
 
 # Empezar proceso de leer quads del queue
 # Esta es la función que se ejcuta primero en el main.py
@@ -73,12 +71,33 @@ def readQuads( qQuads, globalConstMemory, dicConstantsAux ):
         solveQuad( qQuads[ instructionPointer ], qQuads )
         instructionPointer = instructionPointer + 1
 
-    print(gMemory.intMemory)
-    print(gMemory.floatMemory)
-    print(gMemory.boolMemory)
-    print(gMemory.strMemory)
-    print(gMemory.tempMemory)
 
+# Sirve para rellenar una matriz con los elementos guardados en el directorio
+# Se recibe la dirección base de la matriz y sus dimensiones
+def helperSimpleStatisticsMatrix( baseAddress, dim1, dim2 ):
+    
+    matrix = [ [ 0 for i in range( dim1 ) ] for j in range( dim2 ) ]
+    countAddress = baseAddress
+    
+    for i in range(len(matrix)):
+        for j in range(len(matrix[0])):
+            matrix[i][j] = getValueFromAddress( countAddress );  
+            countAddress = countAddress + 1
+
+    return matrix
+
+
+# Sirve para rellenar un arreglo con los elementos guardados en el directorio
+# Se recibe la dirección base del arreglo y su dimensión
+def helperSimpleStatisticsArray( baseAddress, dim ):
+
+    countAddress = baseAddress
+    arrayAux = [ 0 for i in range( dim ) ]
+    for i in range( len(arrayAux) ):
+       arrayAux[ i ] = getValueFromAddress( countAddress )
+       countAddress = countAddress + 1
+
+    return arrayAux
 
 # Determinar cómo resolver el quad dependiendo de su operador
 def solveQuad( quad, qQuads):
@@ -96,8 +115,6 @@ def solveQuad( quad, qQuads):
         # Conseguir valor desde la memoria
         # Para el caso de variables inicializadas por default, se inicializan con constantes ya existentes en el diccionario de constantes
         resultVal = getValueFromAddress( quad[ 1 ] )
-        #print("assign")
-        #print(resultVal)
         # Asignar la constante default a la variable inicializada por default
         setValueToAddress( resultVal, quad[ 3 ] )
         return
@@ -173,73 +190,74 @@ def solveQuad( quad, qQuads):
             return True
         imprimirError( 10 )
     elif quad[ 0 ] == "lasso":
-        
-        matrix = [ [ 0 for i in range( int( quad[2] ) ) ] for j in range( int( quad[3] ) ) ]
-        countAddress = int( quad[ 1 ] ) 
-        print("lasso")
-        
-        for i in range(len(matrix)):
-            for j in range(len(matrix[0])):
-                matrix[i][j] = getValueFromAddress( countAddress );  
-                countAddress = countAddress + 1   
-
-        for i in range(len(matrix)): 
-            # iterating by coloum by B  
-            for j in range(len(matrix[0])):
-                print( matrix[i][j] )   
-        
-        lasso( matrix )
+        matrix = helperSimpleStatisticsMatrix( int( quad[1] ), int( quad[2] ), int( quad[3] ) )
+        lasso(matrix)  
         return
     elif quad[ 0 ] == "ridge":
-        lasso( matrix )
+        matrix = helperSimpleStatisticsMatrix( int( quad[1] ), int( quad[2] ), int( quad[3] ) )
+        ridge( matrix, int( quad[4] ) )
         return
     elif quad[ 0 ] == "k_means":
-        lasso( matrix )
+        matrix = helperSimpleStatisticsMatrix( int( quad[1] ), int( quad[2] ), int( quad[3] ) )
+        k_means( matrix, int( quad[4] ) )
         return
     elif quad[ 0 ] == "mini_batch":
-        lasso( matrix )
+        matrix = helperSimpleStatisticsMatrix( int( quad[1] ), int( quad[2] ), int( quad[3] ) )
+        miniBatch( matrix, int( quad[4] ) )
         return
     elif quad[ 0 ] == "linear_regression":
-        lasso( matrix )
+        matrix = helperSimpleStatisticsMatrix( int( quad[1] ), int( quad[2] ), int( quad[3] ) )
+        linear_regression( matrix, int( quad[4] ) )
         return
     elif quad[ 0 ] == "t_series":
-        lasso( matrix )
+        matrix = helperSimpleStatisticsMatrix( int( quad[1] ), int( quad[2] ), int( quad[3] ) )
+        arrayAux = helperSimpleStatisticsArray( int( quad[ 4 ] ), int( quad[5] ) )
+        time_series_split( matrix, arrayAux, int( quad[6] ) )
         return
     elif quad[ 0 ] == "mean_abs_err":
-        lasso( matrix )
+        matrix = helperSimpleStatisticsMatrix( int( quad[1] ), int( quad[2] ), int( quad[3] ) )
+        matrix2 = helperSimpleStatisticsMatrix( int( quad[4] ), int( quad[5] ), int( quad[6] ) )
+        mean_abs_error( matrix, matrix2 )
         return
     elif quad[ 0 ] == "mean_sqr_err":
-        lasso( matrix )
+        matrix = helperSimpleStatisticsMatrix( int( quad[1] ), int( quad[2] ), int( quad[3] ) )
+        matrix2 = helperSimpleStatisticsMatrix( int( quad[4] ), int( quad[5] ), int( quad[6] ) )
+        mean_sqrt_error( matrix, matrix2 )
         return
     elif quad[ 0 ] == "median_abs_err":
-        lasso( matrix )
+        arrayAux = helperSimpleStatisticsArray( int( quad[ 1 ] ), int( quad[2] ) )
+        arrayAux2 = helperSimpleStatisticsArray( int( quad[ 3 ] ), int( quad[4] ) )
+        median_abs_error( arrayAux, arrayAux2 )
         return
     elif quad[ 0 ] == "mean":
-        lasso( matrix )
+        arrayAux = helperSimpleStatisticsArray( int( quad[ 1 ] ), int( quad[2] ) )
+        mean( arrayAux )
         return
     elif quad[ 0 ] == "mode":
-        lasso( matrix )
+        arrayAux = helperSimpleStatisticsArray( int( quad[ 1 ] ), int( quad[2] ) )
+        mode( arrayAux )
         return
     elif quad[ 0 ] == "median":
-        lasso( matrix )
+        arrayAux = helperSimpleStatisticsArray( int( quad[ 1 ] ), int( quad[2] ) )
+        median( arrayAux )
         return
     elif quad[ 0 ] == "freq":
-        lasso( matrix )
+        arrayAux = helperSimpleStatisticsArray( int( quad[ 1 ] ), int( quad[2] ) )
+        freq( arrayAux )
         return
     elif quad[ 0 ] == "variance":
-        lasso( matrix )
+        arrayAux = helperSimpleStatisticsArray( int( quad[ 1 ] ), int( quad[2] ) )
+        variance( arrayAux )
         return
     elif quad[ 0 ] == "stddev":
-        lasso( matrix )
+        arrayAux = helperSimpleStatisticsArray( int( quad[ 1 ] ), int( quad[2] ) )
+        stddev( arrayAux )
         return
     elif quad[ 0 ] == "kurt":
-        lasso( matrix )
+        arrayAux = helperSimpleStatisticsArray( int( quad[ 1 ] ), int( quad[2] ) )
+        kurt( arrayAux )
         return
     
-    #print("quad[ 1 ]")
-    #print(quad[ 1 ])
-    #print("quad[ 2 ]")
-    #print(quad[ 2 ])
 
     # Conseguir valores de la memoria
     leftOperand = getValueFromAddress( quad[ 1 ] )
