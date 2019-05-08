@@ -1,6 +1,7 @@
 from RuntimeMemory import RuntimeMemory
 from Stack import Stack
 from parser import imprimirError
+from extra_functions import lasso 
 
 instructionPointer = 0 # Apunta al siguiente quad a resolver
 dicGlobalConstMemory = {} # Recibe el diccionario de constantes invertidas resultado de cuando se compila el código fuente
@@ -171,7 +172,75 @@ def solveQuad( quad, qQuads):
         if index >= 0 and index <= upperLimit:
             return True
         imprimirError( 10 )
+    elif quad[ 0 ] == "lasso":
+        
+        matrix = [ [ 0 for i in range( int( quad[2] ) ) ] for j in range( int( quad[3] ) ) ]
+        countAddress = int( quad[ 1 ] ) 
+        print("lasso")
+        
+        #c = 1
+        #for i in range(len(matrix)): 
+            # iterating by coloum by B  
+        #    for j in range(len(matrix[0])):
+        #        print(c)
+        #        c = c + 1
+        for i in range(len(matrix)):
+            for j in range(len(matrix[0])):
+                matrix[i][j] = getValueFromAddress( countAddress );  
+                countAddress = countAddress + 1   
 
+        for i in range(len(matrix)): 
+            # iterating by coloum by B  
+            for j in range(len(matrix[0])):
+                print( matrix[i][j] )   
+        
+        lasso( matrix )
+        return
+    elif quad[ 0 ] == "ridge":
+        lasso( matrix )
+        return
+    elif quad[ 0 ] == "k_means":
+        lasso( matrix )
+        return
+    elif quad[ 0 ] == "mini_batch":
+        lasso( matrix )
+        return
+    elif quad[ 0 ] == "linear_regression":
+        lasso( matrix )
+        return
+    elif quad[ 0 ] == "t_series":
+        lasso( matrix )
+        return
+    elif quad[ 0 ] == "mean_abs_err":
+        lasso( matrix )
+        return
+    elif quad[ 0 ] == "mean_sqr_err":
+        lasso( matrix )
+        return
+    elif quad[ 0 ] == "median_abs_err":
+        lasso( matrix )
+        return
+    elif quad[ 0 ] == "mean":
+        lasso( matrix )
+        return
+    elif quad[ 0 ] == "mode":
+        lasso( matrix )
+        return
+    elif quad[ 0 ] == "median":
+        lasso( matrix )
+        return
+    elif quad[ 0 ] == "freq":
+        lasso( matrix )
+        return
+    elif quad[ 0 ] == "variance":
+        lasso( matrix )
+        return
+    elif quad[ 0 ] == "stddev":
+        lasso( matrix )
+        return
+    elif quad[ 0 ] == "kurt":
+        lasso( matrix )
+        return
     
     #print("quad[ 1 ]")
     #print(quad[ 1 ])
@@ -189,12 +258,6 @@ def solveQuad( quad, qQuads):
     # Resolver operación aritmética
     if quad[ 0 ] == "+":    
         resultVal = leftOperand + rightOperand
-        #print("leftOperand")
-        #print(leftOperand)
-        #print("rightOperand")
-        #print(rightOperand)
-        #print(resultVal)        
-
     elif quad[ 0 ] == "-":  
         resultVal = leftOperand - rightOperand
     elif quad[ 0 ] == "*":  
@@ -210,12 +273,6 @@ def solveQuad( quad, qQuads):
         resultVal = leftOperand <= rightOperand
     elif quad[ 0 ] == ">": 
         resultVal = leftOperand > rightOperand
-        # print("leftOperand")
-        # print(leftOperand)
-        # print("rightOperand")
-        # print(rightOperand)
-        # print("resultVal")
-        # print(resultVal)  
     elif quad[ 0 ] == "<": 
         resultVal = leftOperand < rightOperand
     # Resolver operación lógica
@@ -235,8 +292,3 @@ def solveQuad( quad, qQuads):
 
     # Guardar resultado en memoria
     setValueToAddress( resultVal, quad[ 3 ] )
-
-    #if quad[ 0 ] == "+":
-        #print("after")
-        #print(quad[ 3 ] )
-        #print( getValueFromAddress( quad[ 3 ] ) )

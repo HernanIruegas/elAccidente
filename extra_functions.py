@@ -232,7 +232,7 @@ def lasso(matrix):
 
     print("\n Lasso Regression\nΣ_interception_coefitient")
     print(ret)
-    #return(ret)
+    return(ret)
 
 """
     ----------------------

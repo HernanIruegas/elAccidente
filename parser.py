@@ -2,7 +2,7 @@ import ply.yacc as yacc
 from lexer import lexer, tokens
 from Stack import Stack
 from SemanticCube import dicOperandIndexCube, semanticCube, dicOperatorIndexCube, dicReturnValuesCube
-import extra_functions  
+
 
 #############################
 # VARIABLES GLOBALES
@@ -692,9 +692,25 @@ def p_STATMETHODS(p):
 
 def p_LASSO(p):
 	"""
-	LASSO : lasso lParenthesis id rParenthesis semicolon
+	LASSO : lasso lParenthesis id GENERATE_QUAD_EXTRA_FUNCTION rParenthesis semicolon
 	"""
-	print("Lasso")
+
+def p_GENERATE_QUAD_EXTRA_FUNCTION(p):
+	"""
+	GENERATE_QUAD_EXTRA_FUNCTION : empty
+	"""
+	global iQuadCounter, qQuads, dicDirectorioFunciones
+
+	#dicDirectorioFunciones = {} # "nombreFuncion" : { "Type": void/TYPE, "dicDirectorioVariables": {}, "ParamCounter": ..., "QuadCounter": ..., "TempCounter": ..., "ParamTypes": [], "Parameters": [] }
+	# dicDirectorioVariables = "VarName" : { "Type": ..., "Value": ..., "Scope": ..., "Address": ..., "Dimensiones": [ {}, ... ] }
+
+	dim1 = dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ p[ - 1 ] ][ "Dimensiones" ][ 0 ][ "LsDim" ] + 1
+	dim2 = dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ p[ - 1 ] ][ "Dimensiones" ][ 1 ][ "LsDim" ] + 1
+	initialAddress = dicDirectorioFunciones[ "globalFunc" ][ "dicDirectorioVariables" ][ p[ - 1 ] ][ "Address" ]
+	
+	quad = [ p[ -3 ], initialAddress, dim1, dim2 ]
+	iQuadCounter = iQuadCounter + 1
+	qQuads.append( quad )
 
 def p_RIDGE(p):
 	"""
