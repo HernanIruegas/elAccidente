@@ -284,11 +284,8 @@ def p_CALCULATE_ARRAY(p):
 	# Definir espacio de memoria y scope de arreglo
 
 	# numero de direcciones de memoria que ocupa la variable dimensionada
-	#if len( dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[ -7 ] ][ "Dimensiones" ] ) > 1: # arrays
-	#	m0 = dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[ -7 ] ][ "Dimensiones" ][ iCounterDimensions - 1 ][ "R" ] - 1
-	#else: # matrices
 	m0 = dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[ -7 ] ][ "Dimensiones" ][ iCounterDimensions - 1 ][ "R" ] 
-	varAddress = setAddress( p[ -7 ], m0 - 1 )
+	varAddress = setAddress( p[ -7 ], m0 )
 
 	# Actualizar campo de memory address en la variable
 	dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ p[ -7 ] ][ "Address" ] = varAddress

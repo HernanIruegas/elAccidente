@@ -153,7 +153,7 @@ void start{
 
 
 ##########################
-# 5 ) factorial iterativo que si jala
+# 6 ) factorial iterativo que si jala
 ##########################
 
 program void globalFunc;
@@ -173,7 +173,7 @@ void start{
 
 
 ##########################
-# 7 ) multiplicación de matrices que falta de hacer jalar
+# 7 ) multiplicación de matrices que si jala
 ##########################
 
 program void globalFunc;
@@ -182,23 +182,29 @@ var int : i, j, k, a[2][2], b[2][2], c[2][2], aDim = 2, bDim = 2, cDim = 2, aux1
 
 void start{
     
-    a[0][0] = 1; a[0][1] = 2; a[1][0] = 3; a[1][1] = 4; b[0][0] = 1; b[0][1] = 2; b[1][0] = 3; b[1][1] = 4; c[0][0] = 0; c[0][1] = 1; c[1][0] = 2; c[1][1] = 3;
+    a[0][0] = 1; 
+    a[0][1] = 2; 
+    a[1][0] = 3; 
+    a[1][1] = 4; 
+
+    b[0][0] = 1; 
+    b[0][1] = 2; 
+    b[1][0] = 3; 
+    b[1][1] = 4; 
 
     while( i < aDim ){
         while( j < bDim ){
             while( k < cDim  ){
-                
-                print(a[i][k]);
-                print(b[k][j]);
                 aux1 = c[i][j];
                 aux2 = a[i][k];
                 aux3 = b[k][j];
                 c[i][j] = aux1 + aux2 * aux3;
-                print( c[i][j] );
                 k = k +1;
             }
+            k = 0;
             j = j + 1;
         }
+        j = 0;
         i = i + 1;
     }
 
@@ -210,6 +216,7 @@ void start{
             print( c[i][j]);
             j = j + 1;
         }
+        j = 0;
         i = i + 1;
     }
 
