@@ -83,7 +83,7 @@ def readQuads( qQuads, globalConstMemory, dicConstantsAux ):
 def solveQuad( quad, qQuads):
 
     global instructionPointer, currentFunctionName, dicConstants, dicGlobalConstMemory
-    print( quad[ 0 ] )
+    # print( quad[ 0 ] )
 
     # Se hace el assign primero para que cualquier variable esté inicializada antes de ir a conseguir su valor (para cuestiones de operaciones de expresiones)
     if quad[ 0 ] == "=":
@@ -210,12 +210,12 @@ def solveQuad( quad, qQuads):
         resultVal = leftOperand <= rightOperand
     elif quad[ 0 ] == ">": 
         resultVal = leftOperand > rightOperand
-        print("leftOperand")
-        print(leftOperand)
-        print("rightOperand")
-        print(rightOperand)
-        print("resultVal")
-        print(resultVal)  
+        # print("leftOperand")
+        # print(leftOperand)
+        # print("rightOperand")
+        # print(rightOperand)
+        # print("resultVal")
+        # print(resultVal)  
     elif quad[ 0 ] == "<": 
         resultVal = leftOperand < rightOperand
     # Resolver operación lógica

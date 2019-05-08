@@ -48,13 +48,13 @@ def k_means(k_list, cluster=2):
     kmeans = KMeans(n_clusters=cluster).fit(x)
 
     # display the clusters and the clasification
-    print("\ncluster_centers_")
-    print(kmeans.cluster_centers_)
+    #print("\ncluster_centers_")
+    #print(kmeans.cluster_centers_)
 
-    print("\nkmeans.labels_")
+    #print("\nkmeans.labels_")
     km = kmeans.labels_
     print(km)
-    # return(km)
+    #return(km)
 
 
 """
@@ -87,7 +87,7 @@ def k_means(k_list, cluster=2):
 from sklearn.linear_model import LinearRegression
 import numpy as np
 
-def linear_regression(matrix, predict)
+def linear_regression(matrix, predict):
     # convert the matrix into numpy array in order to get the values
     n_matrix = np.array(matrix[0:], dtype = np.int16)
 
@@ -102,11 +102,11 @@ def linear_regression(matrix, predict)
     # set the data into lineal modelRidge
     lineal = LinearRegression().fit(m_x, m_y)
 
-    print("\n Prediction")
+    #print("\n Prediction")
     # here comes the input given
     fp = lineal.predict(np.reshape(predict,(1,-1)))
     print(fp)
-    # return(fp)
+    #return(fp)
 
 
 """
@@ -170,7 +170,7 @@ def ridge(matrix, alpha):
 
     print("\n Ridge\nΣ_interception_coefitient")
     print(ret)
-    # return(ret)
+    #return(ret)
 
 """
     ----------------------
@@ -232,7 +232,7 @@ def lasso(matrix):
 
     print("\n Lasso Regression\nΣ_interception_coefitient")
     print(ret)
-    # return(ret)
+    #return(ret)
 
 """
     ----------------------
@@ -268,7 +268,7 @@ def lasso(matrix):
 from sklearn.model_selection import TimeSeriesSplit
 import numpy as np
 
-def time_series_split(matrix, array, splits);
+def time_series_split(matrix, array, splits):
     # convert into the format required
     X = np.array(matrix)
     y = np.array(array)
@@ -282,7 +282,7 @@ def time_series_split(matrix, array, splits);
     #     X_train, X_test = X[train_index], X[test_index]
     #     y_train, y_test = y[train_index], y[test_index]
     print("Time Series Split")
-    return("this…")
+    #return("this…")
 
 
 """
@@ -337,7 +337,7 @@ def miniBatch(matrix, cluster=8):
 
     # display
     print(mini.labels_)
-    # return(mini.labels_)
+    #return(mini.labels_)
 
 """
     ------------------------
@@ -378,7 +378,7 @@ def mean_sqrt_error(y_true, y_pred):
     print("\n\t Mean Squared Error")
     mse = mean_squared_error(y_true, y_pred)
     print(mse)
-    # return(mse)
+    #return(mse)
 
 """
     ------------------------
@@ -489,7 +489,7 @@ import numpy as np
 
 
 def mean(a1):
-    # return(st.mean(a1))
+    return(st.mean(a1))
 
 
 """
@@ -520,7 +520,8 @@ def mean(a1):
 
 """
 def median(a1):
-    # return(st.mean(a1))
+    print(st.mean(a1))
+    #return(st.mean(a1))
 
 
 """
@@ -552,7 +553,8 @@ def median(a1):
 
 """
 def mode(a1):
-    # return(st.mode(a1))
+    print(st.mode(a1))
+    #return(st.mode(a1))
 
 
 """
@@ -584,7 +586,8 @@ def mode(a1):
 
 """
 def stddev(a1):
-    # return(st.stdev(a1))
+    print(st.stdev(a1))
+    #return(st.stdev(a1))
 
 
 """
@@ -616,7 +619,8 @@ def stddev(a1):
 
 """
 def variance(a1):
-    # return(st.variance(a1))
+    print(st.variance(a1))
+    #return(st.variance(a1))
 
 
 """
@@ -650,7 +654,8 @@ def variance(a1):
 def skew(a1):
     x = np.array(a1)
     sk = stats.skew(x)
-    # return(st.skew(sk))
+    print(st.skew(sk))
+    #return(st.skew(sk))
 
 
 """
@@ -684,7 +689,8 @@ def skew(a1):
 def kurt(a1):
     x = np.array(a1)
     kr = stats.skew(x)
-    # return(st.skew(kr))
+    print(st.skew(kr))
+    #return(st.skew(kr))
 
 
 """
@@ -718,5 +724,6 @@ def kurt(a1):
 def freq(a1):
     unique_elements, counts_elements = np.unique(a1, return_counts=True)
     f = np.column_stack([unique_elements,counts_elements])
-    # return(f)
+    print(f)
+    #return(f)
 

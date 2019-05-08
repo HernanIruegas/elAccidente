@@ -11,10 +11,10 @@ if __name__ == "__main__":
             data = f.read()
             f.close()
             yacc.parse(data, tracking=True)
-            print("dicConstantsInverted")
-            print( dicConstantsInverted )
-            print("dicDirectorioFunciones")
-            print( dicDirectorioFunciones )
+            # print("dicConstantsInverted")
+            # print( dicConstantsInverted )
+            # print("dicDirectorioFunciones")
+            # print( dicDirectorioFunciones )
             # Se pasa el queue de quads y el diccionario de todas las constantes encontradas en el codigo fuente
             readQuads( qQuads, dicConstantsInverted, dicConstants ) 
         except EOFError:

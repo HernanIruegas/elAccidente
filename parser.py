@@ -2,6 +2,7 @@ import ply.yacc as yacc
 from lexer import lexer, tokens
 from Stack import Stack
 from SemanticCube import dicOperandIndexCube, semanticCube, dicOperatorIndexCube, dicReturnValuesCube
+import extra_functions  
 
 #############################
 # VARIABLES GLOBALES
@@ -239,8 +240,8 @@ def p_ACUMULATE_R(p):
 
 	# ( LsDim - LiDim + 1 ) * R acumulada
 	rAcum = ( p[ -1 ] - 1 - 0  + 1 ) * rAcum
-	print("rAcum")
-	print(rAcum)
+	# print("rAcum")
+	# print(rAcum)
 
 	dicDirectorioFunciones[ currentFunction ][ "dicDirectorioVariables" ][ varWithDimensions ][ "Dimensiones" ].append( { "LiDim" : 0, "LsDim" : p[ -1 ] - 1, "R" : rAcum } )
 
@@ -670,11 +671,11 @@ def p_BOOLEAN(p):
 
 def p_STATMETHODS(p):
 	"""
-	STATMETHODS : ORDINARY_LEAST_SQUARES
-				| LASSO
+	STATMETHODS : LASSO
 				| RIDGE
 				| K_MEANS
 				| MINI_BATCH_MEANS
+				| LINEAR_REGRESSION
 				| TIME_SERIES_SPLIT
 				| MEAN_ABSOLUTE_ERROR
 				| MEAN_SQUARED_ERROR
@@ -682,7 +683,6 @@ def p_STATMETHODS(p):
 				| MEAN
 				| MODE
 				| MEDIAN
-				| PROBABILITY
 				| FREQUENCY
 				| VARIANCE
 				| STANDARD_DEVIATION
@@ -690,34 +690,35 @@ def p_STATMETHODS(p):
 				| KURTOSI
 	"""
 
-def p_ORDINARY_LEAST_SQUARES(p):
-	"""
-	ORDINARY_LEAST_SQUARES : ols lParenthesis id comma id comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma BOOLEAN rParenthesis semicolon
-	"""
-
 def p_LASSO(p):
 	"""
-	LASSO : las lParenthesis id comma id comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma string comma float comma BOOLEAN rParenthesis semicolon
+	LASSO : lasso lParenthesis id rParenthesis semicolon
 	"""
+	print("Lasso")
 
 def p_RIDGE(p):
 	"""
-	RIDGE : rid lParenthesis id comma id comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma VARCONSTAUX comma string comma VARCONSTAUX rParenthesis semicolon
+	RIDGE : ridge lParenthesis id comma VARCONSTAUX rParenthesis semicolon
 	"""
 
 def p_K_MEANS(p):
 	"""
-	K_MEANS : kmeans lParenthesis VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma VARCONSTAUX comma string rParenthesis semicolon
+	K_MEANS : k_means lParenthesis id comma VARCONSTAUX rParenthesis semicolon
 	"""
 
 def p_MINI_BATCH_MEANS(p):
 	"""
-	MINI_BATCH_MEANS : mbm lParenthesis VARCONSTAUX comma string comma VARCONSTAUX comma VARCONSTAUX comma BOOLEAN comma BOOLEAN comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX comma VARCONSTAUX rParenthesis semicolon 
+	MINI_BATCH_MEANS : mini_batch lParenthesis id comma VARCONSTAUX rParenthesis semicolon
+	"""
+
+def p_LINEAR_REGRESSION(p):
+	"""
+	LINEAR_REGRESSION : linear_regression lParenthesis id comma VARCONSTAUX rParenthesis semicolon
 	"""
 
 def p_TIME_SERIES_SPLIT(p):
 	"""
-	TIME_SERIES_SPLIT : tseries lParenthesis VARCONSTAUX comma VARCONSTAUX rParenthesis semicolon 
+	TIME_SERIES_SPLIT : t_series lParenthesis id comma id comma VARCONSTAUX rParenthesis semicolon
 	"""
 
 def p_MEAN_ABSOLUTE_ERROR(p):
@@ -727,111 +728,52 @@ def p_MEAN_ABSOLUTE_ERROR(p):
 
 def p_MEAN_SQUARED_ERROR(p):
 	"""
-	MEAN_SQUARED_ERROR : mean_sqr_err lParenthesis id comma id rParenthesis semicolon 
+	MEAN_SQUARED_ERROR : mean_sqr_err lParenthesis id comma id rParenthesis semicolon
 	"""
 
 def p_MEDIAN_ABSOLUTE_ERROR(p):
 	"""
-	MEDIAN_ABSOLUTE_ERROR : median_abs_err lParenthesis id comma id rParenthesis semicolon 
+	MEDIAN_ABSOLUTE_ERROR : median_abs_err lParenthesis id comma id rParenthesis semicolon
 	"""
 
 def p_MEAN(p):
 	"""
-	MEAN : mean lParenthesis id MEAN_A rParenthesis semicolon
-	"""
-
-def p_MEAN_A(p):
-	"""
-	MEAN_A : comma id MEAN_A
-		| empty
+	MEAN : mean lParenthesis id rParenthesis semicolon
 	"""
 
 def p_MODE(p):
 	"""
-	MODE : mode lParenthesis id MODE_A rParenthesis semicolon
-	"""
-
-def p_MODE_A(p):
-	"""
-	MODE_A : comma id MODE_A
-		| empty
+	MODE : mode lParenthesis id rParenthesis semicolon
 	"""
 
 def p_MEDIAN(p):
 	"""
-	MEDIAN : median lParenthesis id MEDIAN_A rParenthesis semicolon
-	"""
-
-def p_MEDIAN_A(p):
-	"""
-	MEDIAN_A : comma id MEDIAN_A
-		| empty
-	"""
-
-def p_PROBABILITY(p):
-	"""
-	PROBABILITY : prob lParenthesis id PROBABILITY_A rParenthesis semicolon
-	"""
-
-def p_PROBABILITY_A(p):
-	"""
-	PROBABILITY_A : comma id PROBABILITY_A
-		| empty
+	MEDIAN : median lParenthesis id rParenthesis semicolon
 	"""
 
 def p_FREQUENCY(p):
 	"""
-	FREQUENCY : freq lParenthesis id FREQUENCY_A rParenthesis semicolon
-	"""
-
-def p_FREQUENCY_A(p):
-	"""
-	FREQUENCY_A : comma id FREQUENCY_A
-		| empty
+	FREQUENCY : freq lParenthesis id rParenthesis semicolon
 	"""
 
 def p_VARIANCE(p):
 	"""
-	VARIANCE : variance lParenthesis id VARIANCE_A rParenthesis semicolon
-	"""
-
-def p_VARIANCE_A(p):
-	"""
-	VARIANCE_A : comma id VARIANCE_A
-		| empty
+	VARIANCE : variance lParenthesis id rParenthesis semicolon
 	"""
 
 def p_STANDARD_DEVIATION(p):
 	"""
-	STANDARD_DEVIATION : stddev lParenthesis id STANDARD_DEVIATION_A rParenthesis semicolon
-	"""
-
-def p_STANDARD_DEVIATION_A(p):
-	"""
-	STANDARD_DEVIATION_A : comma id STANDARD_DEVIATION_A
-		| empty
+	STANDARD_DEVIATION : stddev lParenthesis id rParenthesis semicolon
 	"""
 
 def p_SKEWNESS(p):
 	"""
-	SKEWNESS : skew lParenthesis id SKEWNESS_A rParenthesis semicolon
-	"""
-
-def p_SKEWNESS_A(p):
-	"""
-	SKEWNESS_A : comma id SKEWNESS_A
-		| empty
+	SKEWNESS : skew lParenthesis id rParenthesis semicolon
 	"""
 
 def p_KURTOSI(p):
 	"""
-	KURTOSI : kurt  lParenthesis id KURTOSI_A rParenthesis semicolon
-	"""
-
-def p_KURTOSI_A(p):
-	"""
-	KURTOSI_A : comma id KURTOSI_A
-		| empty
+	KURTOSI : kurt  lParenthesis id rParenthesis semicolon
 	"""
 
 def p_empty(p):
@@ -1265,8 +1207,8 @@ def p_PUSH_STACK_OPERANDS_CONSTANT(p):
 	# Si la constante no existe, se debe asignar una dirección de memoria
 	# También se debe agregar a la pila de operandos y a la pila de tipos la info correspondiente
 	if p[ -1 ] not in dicConstants:
-		print("yujhuuuu")
-		print(p[ -1 ])
+		# print("yujhuuuu")
+		# print(p[ -1 ])
 
 		# conseguir el tipo de dato de la constante
 		if type( p[ -1 ] ) is int:
@@ -1482,10 +1424,10 @@ def p_GENERATE_GOTOF_CONDITIONAL(p):
 
 	expType = sTypes.pop()
 
-	print("exptypes")
-	print(expType)
-	print("sOperands")
-	print(sOperands.top())
+	# print("exptypes")
+	# print(expType)
+	# print("sOperands")
+	# print(sOperands.top())
 
 	if expType == 'bool':
 		result = sOperands.pop()
